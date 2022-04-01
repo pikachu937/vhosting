@@ -1,7 +1,7 @@
 package vhs
 
 type User struct {
-	Id    int    `json:"-" db:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Id       int    `json:"-" db:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }

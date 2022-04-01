@@ -9,12 +9,15 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
-	"github.com/mikerumy/vhservice/pkg/handler"
-	"github.com/mikerumy/vhservice/pkg/repository"
-	"github.com/mikerumy/vhservice/pkg/service"
+	handler "github.com/mikerumy/vhservice/pkg/handler/userinterface"
+	repositorydb "github.com/mikerumy/vhservice/pkg/repository/db"
+	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
+	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+
+var conf repositorydb.Config
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
@@ -27,17 +30,16 @@ func main() {
 		logrus.Fatalf("failed to loading env variables: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{
+	conf = repositorydb.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 		Password: os.Getenv("DB_PASSWORD"),
-	})
-	if err != nil {
-		logrus.Fatalf("failed to initializing db: %s", err.Error())
 	}
+
+	db := repositorydb.NewPostgresConnection(conf)
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
@@ -45,26 +47,28 @@ func main() {
 
 	srv := new(vhs.Server)
 	go func() {
-		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		host := viper.GetString("host")
+		port := viper.GetString("port")
+		if err := srv.Run(host, port, handlers.InitRoutes()); err != nil {
 			logrus.Fatalf("failed to running server: %s", err.Error())
 		}
 	}()
-
-	logrus.Print("Video Hosting server started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Print("Video Hosting server shutting down")
-
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
 
-	if err := db.Close(); err != nil {
-		logrus.Errorf("error occured on db connection close: %s", err.Error())
-	}
+	logrus.Printf("server shut down\n")
+
+	// if err := db.Close(); err != nil {
+	// 	logrus.Errorf("error occured on db connection close: %s", err.Error())
+	// }
+
+	// logrus.Printf("closed connection to db\n")
 }
 
 func initConfig() error {

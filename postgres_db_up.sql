@@ -2,6 +2,6 @@ DROP TABLE users CASCADE;
 
 CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
-	name VARCHAR(30) NOT NULL,
-	email TEXT NOT NULL
+	username TEXT NOT NULL,
+	password TEXT NOT NULL
 );
