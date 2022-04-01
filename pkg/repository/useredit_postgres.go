@@ -53,6 +53,17 @@ func (r *UserEditPostgres) UpdateUser(id int, user vhs.User) (int, error) {
 	return id, nil
 }
 
+func (r *UserEditPostgres) PartiallyUpdateUser(id int, user vhs.User) (int, error) {
+	query := fmt.Sprintf("UPDATE %s SET name=CASE WHEN $1 <> '' THEN $1 ELSE name END, email=CASE WHEN $2 <> '' THEN $2 ELSE email END WHERE id=$3", usersTable)
+
+	_, err := r.db.Query(query, user.Name, user.Email, id)
+	if err != nil {
+		return -1, err
+	}
+
+	return id, nil
+}
+
 func (r *UserEditPostgres) DeleteUser(id int) (int, error) {
 	var name string
 

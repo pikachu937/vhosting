@@ -59,32 +59,24 @@ func (h *Handler) GetUser(c *gin.Context) {
 }
 
 func (h *Handler) UpdateUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		logrus.Printf("converting id param to int error: %s\n", err.Error())
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Message: err.Error(),
-		})
-		return
-	}
-
-	var user vhs.User
-
-	if err := c.BindJSON(&user); err != nil {
-		logrus.Printf("binding user error: %s\n", err.Error())
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Message: err.Error(),
-		})
-		return
-	}
-
-	id, err = h.services.UpdateUser(id, user)
+	id, err := h.services.UpdateUser(updateUserCommon(c))
 	if err != nil {
 		logrus.Printf("can not update user error: %s", err.Error())
 	}
 
 	c.JSON(http.StatusBadRequest, ErrorResponse{
 		Message: fmt.Sprintf("user with id %d updated", id),
+	})
+}
+
+func (h *Handler) PartiallyUpdateUser(c *gin.Context) {
+	id, err := h.services.PartiallyUpdateUser(updateUserCommon(c))
+	if err != nil {
+		logrus.Printf("can not partially update user error: %s", err.Error())
+	}
+
+	c.JSON(http.StatusBadRequest, ErrorResponse{
+		Message: fmt.Sprintf("user with id %d partially updated", id),
 	})
 }
 
@@ -109,4 +101,27 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 			Message: fmt.Sprintf("user with id %d deleted", id),
 		})
 	}
+}
+
+func updateUserCommon(c *gin.Context) (int, vhs.User) {
+	var user vhs.User
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logrus.Printf("converting id param to int error: %s\n", err.Error())
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Message: err.Error(),
+		})
+		return -1, user
+	}
+
+	if err := c.BindJSON(&user); err != nil {
+		logrus.Printf("binding user error: %s\n", err.Error())
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Message: err.Error(),
+		})
+		return -1, user
+	}
+
+	return id, user
 }

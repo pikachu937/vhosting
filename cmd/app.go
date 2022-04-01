@@ -33,7 +33,7 @@ func main() {
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
-		Password: os.Getenv("DB_PASSWORD"), // create file "./.env" and write line: DB_PASSWORD=passwd
+		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
 		logrus.Fatalf("failed to initializing db: %s", err.Error())

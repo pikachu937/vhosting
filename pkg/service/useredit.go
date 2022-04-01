@@ -25,6 +25,10 @@ func (s *UserEditService) UpdateUser(id int, user vhs.User) (int, error) {
 	return s.repo.UpdateUser(id, user)
 }
 
+func (s *UserEditService) PartiallyUpdateUser(id int, user vhs.User) (int, error) {
+	return s.repo.PartiallyUpdateUser(id, user)
+}
+
 func (s *UserEditService) DeleteUser(id int) (int, error) {
 	return s.repo.DeleteUser(id)
 }

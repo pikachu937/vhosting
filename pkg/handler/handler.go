@@ -21,6 +21,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		editUsers.POST("/", h.CreateUser)
 		editUsers.GET("/:id", h.GetUser)
 		editUsers.PUT("/:id", h.UpdateUser)
+		editUsers.PATCH("/:id", h.PartiallyUpdateUser)
 		editUsers.DELETE("/:id", h.DeleteUser)
 	}
 
