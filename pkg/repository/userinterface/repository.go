@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/jmoiron/sqlx"
 	vhs "github.com/mikerumy/vhservice"
 )
 
@@ -17,8 +16,8 @@ type Repository struct {
 	UserInterface
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(cfg vhs.DBConfig) *Repository {
 	return &Repository{
-		UserInterface: NewUserInterfacePostgres(db),
+		UserInterface: NewUserInterfaceRepo(cfg),
 	}
 }

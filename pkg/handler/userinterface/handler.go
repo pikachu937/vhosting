@@ -5,24 +5,34 @@ import (
 	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
 )
 
+type UserInterface interface {
+	POSTUser(c *gin.Context)
+	GETUser(c *gin.Context)
+	PUTUser(c *gin.Context)
+	PATCHUser(c *gin.Context)
+	DELETEUser(c *gin.Context)
+}
+
 type Handler struct {
-	services *service.Service
+	UserInterface
 }
 
 func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+	return &Handler{
+		UserInterface: NewUserInterfaceHandler(services),
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	editUsers := router.Group("/userinterface")
+	userInterface := router.Group("/userinterface")
 	{
-		editUsers.POST("/", h.POSTUser)
-		editUsers.GET("/:id", h.GETUser)
-		editUsers.PUT("/:id", h.PUTUser)
-		editUsers.PATCH("/:id", h.PATCHUser)
-		editUsers.DELETE("/:id", h.DELETEUser)
+		userInterface.POST("/", h.POSTUser)
+		userInterface.GET("/:id", h.GETUser)
+		userInterface.PUT("/:id", h.PUTUser)
+		userInterface.PATCH("/:id", h.PATCHUser)
+		userInterface.DELETE("/:id", h.DELETEUser)
 	}
 
 	return router

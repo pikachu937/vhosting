@@ -1,4 +1,4 @@
-package repository
+package vhs
 
 import (
 	"fmt"
@@ -8,21 +8,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Config struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
 const (
 	dbDriver    = "postgres"
 	connTimeOut = 5
 )
 
-func NewDBConnection(cfg Config) *sqlx.DB {
+func NewDBConnection(cfg DBConfig) *sqlx.DB {
 	timeAtStarting := time.Now()
 
 	var db *sqlx.DB
@@ -44,7 +35,7 @@ func NewDBConnection(cfg Config) *sqlx.DB {
 
 	for t := connTimeOut; t > 0; t-- {
 		if db != nil {
-			logrus.Printf("successfully connected to db in %s", time.Since(timeAtStarting))
+			logrus.Printf("successfully connected to db in %s\n", time.Since(timeAtStarting))
 			return db
 		}
 
@@ -53,4 +44,12 @@ func NewDBConnection(cfg Config) *sqlx.DB {
 
 	logrus.Panicf("time waiting of connection to db exceeded limit (%d)\n", connTimeOut)
 	return nil
+}
+
+func CloseDBConnection(db *sqlx.DB) {
+	if err := db.Close(); err != nil {
+		logrus.Panicf("error occured on db connection close: %s\n", err.Error())
+	}
+
+	logrus.Printf("closed connection to db\n")
 }

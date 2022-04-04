@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vhs "github.com/mikerumy/vhservice"
+	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +15,15 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *Handler) POSTUser(c *gin.Context) {
+type UserInterfaceHandler struct {
+	services *service.Service
+}
+
+func NewUserInterfaceHandler(services *service.Service) *UserInterfaceHandler {
+	return &UserInterfaceHandler{services: services}
+}
+
+func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 	var user vhs.User
 	var id int
 
@@ -28,15 +37,15 @@ func (h *Handler) POSTUser(c *gin.Context) {
 
 	id, err := h.services.POSTUser(user)
 	if err != nil {
-		logrus.Printf("can not create user error: %s", err.Error())
+		logrus.Printf("can not create user error: %s\n", err.Error())
 	}
 
 	c.JSON(http.StatusBadRequest, ErrorResponse{
-		Message: fmt.Sprintf("created user with id %d", id),
+		Message: fmt.Sprintf("created user with id %d\n", id),
 	})
 }
 
-func (h *Handler) GETUser(c *gin.Context) {
+func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Printf("converting id param to int error: %s\n", err.Error())
@@ -58,29 +67,29 @@ func (h *Handler) GETUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (h *Handler) PUTUser(c *gin.Context) {
+func (h *UserInterfaceHandler) PUTUser(c *gin.Context) {
 	id, err := h.services.PUTUser(putPatchCommon(c))
 	if err != nil {
-		logrus.Printf("can not update user error: %s", err.Error())
+		logrus.Printf("can not update user error: %s\n", err.Error())
 	}
 
 	c.JSON(http.StatusBadRequest, ErrorResponse{
-		Message: fmt.Sprintf("updated user with id %d", id),
+		Message: fmt.Sprintf("updated user with id %d\n", id),
 	})
 }
 
-func (h *Handler) PATCHUser(c *gin.Context) {
+func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 	id, err := h.services.PATCHUser(putPatchCommon(c))
 	if err != nil {
-		logrus.Printf("can not partially update user error: %s", err.Error())
+		logrus.Printf("can not partially update user error: %s\n", err.Error())
 	}
 
 	c.JSON(http.StatusBadRequest, ErrorResponse{
-		Message: fmt.Sprintf("partially updated user with id %d", id),
+		Message: fmt.Sprintf("partially updated user with id %d\n", id),
 	})
 }
 
-func (h *Handler) DELETEUser(c *gin.Context) {
+func (h *UserInterfaceHandler) DELETEUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Printf("converting id param to int error: %s\n", err.Error())
@@ -98,7 +107,7 @@ func (h *Handler) DELETEUser(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Message: fmt.Sprintf("deleted user with id %d", id),
+			Message: fmt.Sprintf("deleted user with id %d\n", id),
 		})
 	}
 }

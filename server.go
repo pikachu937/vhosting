@@ -8,23 +8,30 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	maxHeaderBytes = 1 << 20 // 1 MB
+	readTimeOut    = 15
+	writeTimeOut   = 15
+)
+
 type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(host, port string, handler http.Handler) error {
+func (s *Server) Run(cfg SVConfig, handler http.Handler) error {
 	s.httpServer = &http.Server{
-		Addr:           ":" + port,
+		Addr:           ":" + cfg.Port,
 		Handler:        handler,
-		MaxHeaderBytes: 1 << 20, // 1 MB
-		ReadTimeout:    15 * time.Second,
-		WriteTimeout:   15 * time.Second,
+		MaxHeaderBytes: maxHeaderBytes,
+		ReadTimeout:    readTimeOut * time.Second,
+		WriteTimeout:   writeTimeOut * time.Second,
 	}
 
-	logrus.Printf("server host (%s) has started at port %s", host, port)
+	logrus.Printf("server host (%s) has started at port %s\n", cfg.Host, cfg.Port)
 	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
+	logrus.Printf("server shut down\n")
 	return s.httpServer.Shutdown(ctx)
 }

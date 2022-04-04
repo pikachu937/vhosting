@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -17,17 +18,26 @@ import (
 )
 
 func main() {
+	// Setting up logger
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
+	// Reading config file
 	if err := initConfig(); err != nil {
-		logrus.Fatalf("failed to initializing config: %s", err.Error())
+		logrus.Fatalf("failed to initializing config: %s\n", err.Error())
 	}
 
+	// Reading covert parameters from .env file e.g. DB Password, ...
 	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("failed to loading env variables: %s", err.Error())
+		logrus.Fatalf("failed to loading env variables: %s\n", err.Error())
 	}
 
-	cfg := repository.Config{
+	/* ======== Applying config settings ======= */
+	svCfg := vhs.SVConfig{
+		Host: viper.GetString("host"),
+		Port: viper.GetString("port"),
+	}
+
+	dbCfg := vhs.DBConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -36,36 +46,27 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
-	db := repository.NewDBConnection(cfg)
-
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(dbCfg)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
+	/* ========================================= */
 
+	// Starting Server
 	srv := new(vhs.Server)
 	go func() {
-		host := viper.GetString("host")
-		port := viper.GetString("port")
-		if err := srv.Run(host, port, handlers.InitRoutes()); err != nil {
-			logrus.Fatalf("failed to running server: %s", err.Error())
-		}
+		srv.Run(svCfg, handlers.InitRoutes())
 	}()
 
+	// Shutting Down Server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
+	time.Sleep(2 * time.Second)
+
 	if err := srv.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("error occured on server shutting down: %s", err.Error())
+		logrus.Errorf("error occured on server shutting down: %s\n", err.Error())
 	}
-
-	logrus.Printf("server shut down\n")
-
-	// if err := db.Close(); err != nil {
-	// 	logrus.Errorf("error occured on db connection close: %s", err.Error())
-	// }
-
-	// logrus.Printf("closed connection to db\n")
 }
 
 func initConfig() error {
