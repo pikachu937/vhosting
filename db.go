@@ -31,11 +31,11 @@ func NewDBConnection(cfg DBConfig) *sqlx.DB {
 		}
 	}()
 
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 
 	for t := connTimeOut; t > 0; t-- {
 		if db != nil {
-			logrus.Printf("successfully connected to db in %s\n", time.Since(timeAtStarting))
+			logrus.Printf("opened connection to db (in %s)\n", time.Since(timeAtStarting))
 			return db
 		}
 

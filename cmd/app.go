@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
 	handler "github.com/mikerumy/vhservice/pkg/handler/userinterface"
+	"github.com/mikerumy/vhservice/pkg/logger"
 	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
 	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
 	"github.com/sirupsen/logrus"
@@ -19,7 +20,7 @@ import (
 
 func main() {
 	// Setting up logger
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	logger.InitLogger()
 
 	// Reading config file
 	if err := initConfig(); err != nil {
