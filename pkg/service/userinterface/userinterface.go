@@ -14,7 +14,6 @@ func NewUserInterfaceService(repo repository.UserInterface) *UserInterfaceServic
 }
 
 func (s *UserInterfaceService) POSTUser(user vhs.User) (int, error) {
-	s.repo.NewPostgresConnection(main.conf)
 	return s.repo.POSTUser(user)
 }
 

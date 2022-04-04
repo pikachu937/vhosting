@@ -67,7 +67,7 @@ func (r *UserInterfacePostgres) PATCHUser(id int, user vhs.User) (int, error) {
 func (r *UserInterfacePostgres) DELETEUser(id int) (int, error) {
 	var name string
 
-	query := "SELECT username FROM users WHERE id=$1"
+	query := "SELECT id FROM users WHERE id=$1"
 
 	row, err := r.db.Query(query, id)
 	if err != nil {

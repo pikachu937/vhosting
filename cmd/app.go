@@ -10,14 +10,11 @@ import (
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
 	handler "github.com/mikerumy/vhservice/pkg/handler/userinterface"
-	repositorydb "github.com/mikerumy/vhservice/pkg/repository/db"
 	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
 	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
-
-var conf repositorydb.Config
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
@@ -30,7 +27,7 @@ func main() {
 		logrus.Fatalf("failed to loading env variables: %s", err.Error())
 	}
 
-	conf = repositorydb.Config{
+	cfg := repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -39,7 +36,7 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
-	db := repositorydb.NewPostgresConnection(conf)
+	db := repository.NewDBConnection(cfg)
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
