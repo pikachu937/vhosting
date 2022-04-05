@@ -2,7 +2,7 @@ package service
 
 import (
 	vhs "github.com/mikerumy/vhservice"
-	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
+	repository "github.com/mikerumy/vhservice/pkg/repository/interfaces"
 )
 
 type UserInterfaceService struct {

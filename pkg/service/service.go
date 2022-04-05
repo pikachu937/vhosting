@@ -2,15 +2,18 @@ package service
 
 import (
 	"github.com/mikerumy/vhservice/pkg/repository"
-	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
+	interfaces "github.com/mikerumy/vhservice/pkg/service/interfaces"
+	methods "github.com/mikerumy/vhservice/pkg/service/methods"
 )
 
 type Service struct {
-	service.UserInterface
+	interfaces.UserInterface
+	interfaces.Authorization
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		UserInterface: service.NewUserInterfaceService(repos.UserInterface),
+		UserInterface: methods.NewUserInterfaceService(repos.UserInterface),
+		Authorization: methods.NewAuthService(repos.Authorization),
 	}
 }

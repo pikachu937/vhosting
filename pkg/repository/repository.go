@@ -2,15 +2,18 @@ package repository
 
 import (
 	vhs "github.com/mikerumy/vhservice"
-	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
+	interfaces "github.com/mikerumy/vhservice/pkg/repository/interfaces"
+	methods "github.com/mikerumy/vhservice/pkg/repository/methods"
 )
 
 type Repository struct {
-	repository.UserInterface
+	interfaces.UserInterface
+	interfaces.Authorization
 }
 
 func NewRepository(cfg vhs.DBConfig) *Repository {
 	return &Repository{
-		UserInterface: repository.NewUserInterfaceRepo(cfg),
+		UserInterface: methods.NewUserInterfaceRepo(cfg),
+		Authorization: methods.NewAuthorizationRepo(cfg),
 	}
 }

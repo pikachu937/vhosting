@@ -12,7 +12,6 @@ import (
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
 	"github.com/mikerumy/vhservice/pkg/handler"
-	"github.com/mikerumy/vhservice/pkg/logger"
 	"github.com/mikerumy/vhservice/pkg/repository"
 	"github.com/mikerumy/vhservice/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -20,25 +19,26 @@ import (
 )
 
 func main() {
-	// Setting up logger
-	logger.InitLogger()
+	// Set up logger
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	// Reading config file
+	// Set up reader of config file
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("failed to initializing config: %s\n", err.Error())
 	}
 
-	// Reading covert parameters from .env file e.g. DB Password, ...
+	// Set up reader of environment variables from .env file (DB Password)
 	if err := godotenv.Load(); err != nil {
 		logrus.Fatalf("failed to loading env variables: %s\n", err.Error())
 	}
 
-	/* ======== Applying config settings ======= */
+	// Read server part of config settings
 	svCfg := vhs.SVConfig{
 		Host: viper.GetString("host"),
 		Port: viper.GetString("port"),
 	}
 
+	// Read DB part of config settings
 	dbCfg := vhs.DBConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
@@ -48,12 +48,14 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
+	// Apply DB part of config
 	repos := repository.NewRepository(dbCfg)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
+	// Init Routes
 	router := gin.New()
-	userInterface := router.Group("/userinterface")
+	userInterface := router.Group("/user-interface")
 	{
 		userInterface.POST("/", handlers.POSTUser)
 		userInterface.GET("/:id", handlers.GETUser)
@@ -62,15 +64,20 @@ func main() {
 		userInterface.PATCH("/:id", handlers.PATCHUser)
 		userInterface.DELETE("/:id", handlers.DELETEUser)
 	}
-	/* ========================================= */
 
-	// Starting Server
+	auth := router.Group("/auth")
+	{
+		auth.POST("/sign-up", handlers.SignUp)
+		auth.POST("/sign-in", handlers.SignIn)
+	}
+
+	// Start Server and init server part of config
 	srv := new(vhs.Server)
 	go func() {
 		srv.Run(svCfg, router)
 	}()
 
-	// Shutting Down Server
+	// Shut Down Server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit

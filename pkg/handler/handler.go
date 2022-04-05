@@ -1,16 +1,19 @@
 package handler
 
 import (
-	handler "github.com/mikerumy/vhservice/pkg/handler/userinterface"
+	interfaces "github.com/mikerumy/vhservice/pkg/handler/interfaces"
+	methods "github.com/mikerumy/vhservice/pkg/handler/methods"
 	"github.com/mikerumy/vhservice/pkg/service"
 )
 
 type Handler struct {
-	handler.UserInterface
+	interfaces.UserInterface
+	interfaces.Authorization
 }
 
 func NewHandler(services *service.Service) *Handler {
 	return &Handler{
-		UserInterface: handler.NewUserInterfaceHandler(services),
+		UserInterface: methods.NewUserInterfaceHandler(services),
+		Authorization: methods.NewAuthorizationHandler(services),
 	}
 }
