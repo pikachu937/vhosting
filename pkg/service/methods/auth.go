@@ -8,11 +8,11 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	vhs "github.com/mikerumy/vhservice"
-	repository "github.com/mikerumy/vhservice/pkg/repository/interfaces"
+	storage "github.com/mikerumy/vhservice/pkg/storage/interfaces"
 )
 
 const (
-	salt       = "hjqrhjqw124617ajfhajs"
+	salt       = "jK@s13DvU3o3H#e0N7j9G@h9K7r#Ps"
 	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
 	tokenTTL   = 12 * time.Hour
 )
@@ -23,20 +23,20 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	repo repository.Authorization
+	stor storage.Authorization
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(stor storage.Authorization) *AuthService {
+	return &AuthService{stor: stor}
 }
 
 func (s *AuthService) POSTUser(user vhs.User) (int, error) {
-	user.Password = generatePasswordHash(user.Password)
-	return s.repo.POSTUser(user)
+	user.PasswordHash = GeneratePasswordHash(user.PasswordHash)
+	return s.stor.POSTUser(user)
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GETUser(username, generatePasswordHash(password))
+	user, err := s.stor.GETUser(username, GeneratePasswordHash(password))
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +72,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	return claims.UserId, nil
 }
 
-func generatePasswordHash(password string) string {
+func GeneratePasswordHash(password string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
 

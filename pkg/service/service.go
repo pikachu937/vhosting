@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/mikerumy/vhservice/pkg/repository"
 	interfaces "github.com/mikerumy/vhservice/pkg/service/interfaces"
 	methods "github.com/mikerumy/vhservice/pkg/service/methods"
+	"github.com/mikerumy/vhservice/pkg/storage"
 )
 
 type Service struct {
@@ -11,9 +11,9 @@ type Service struct {
 	interfaces.Authorization
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(stor *storage.Storage) *Service {
 	return &Service{
-		UserInterface: methods.NewUserInterfaceService(repos.UserInterface),
-		Authorization: methods.NewAuthService(repos.Authorization),
+		UserInterface: methods.NewUserInterfaceService(stor.UserInterface),
+		Authorization: methods.NewAuthService(stor.Authorization),
 	}
 }

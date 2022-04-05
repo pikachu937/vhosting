@@ -1,30 +1,31 @@
-package repository
+package storage
 
 import (
 	"database/sql"
 	"errors"
 
 	vhs "github.com/mikerumy/vhservice"
+	auth "github.com/mikerumy/vhservice/pkg/service/methods"
 )
 
-type UserInterfaceRepo struct {
+type UserInterfaceStorage struct {
 	cfg vhs.DBConfig
 }
 
-func NewUserInterfaceRepo(cfg vhs.DBConfig) *UserInterfaceRepo {
-	return &UserInterfaceRepo{cfg: cfg}
+func NewUserInterfaceStorage(cfg vhs.DBConfig) *UserInterfaceStorage {
+	return &UserInterfaceStorage{cfg: cfg}
 }
 
-func (r *UserInterfaceRepo) POSTUser(user vhs.User) (int, error) {
+func (r *UserInterfaceStorage) POSTUser(user vhs.User) (int, error) {
 	db := vhs.NewDBConnection(r.cfg)
 	defer vhs.CloseDBConnection(db)
 
 	var id int
 	var row *sql.Row
 
-	query := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id"
+	query := "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id"
 
-	row = db.QueryRow(query, user.Username, user.Password)
+	row = db.QueryRow(query, user.Username, auth.GeneratePasswordHash(user.PasswordHash))
 
 	if err := row.Scan(&id); err != nil {
 		return -1, err
@@ -33,13 +34,13 @@ func (r *UserInterfaceRepo) POSTUser(user vhs.User) (int, error) {
 	return id, nil
 }
 
-func (r *UserInterfaceRepo) GETUser(id int) (*vhs.User, error) {
+func (r *UserInterfaceStorage) GETUser(id int) (*vhs.User, error) {
 	db := vhs.NewDBConnection(r.cfg)
 	defer vhs.CloseDBConnection(db)
 
 	var user vhs.User
 
-	query := "SELECT id, username, password FROM users WHERE id=$1"
+	query := "SELECT id, username, password_hash FROM users WHERE id=$1"
 
 	if err := db.Get(&user, query, id); err != nil {
 		return nil, errors.New("user not found in database")
@@ -48,7 +49,7 @@ func (r *UserInterfaceRepo) GETUser(id int) (*vhs.User, error) {
 	return &user, nil
 }
 
-func (r *UserInterfaceRepo) GETAllUsers() (map[int]*vhs.User, error) {
+func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vhs.User, error) {
 	db := vhs.NewDBConnection(r.cfg)
 	defer vhs.CloseDBConnection(db)
 
@@ -65,8 +66,8 @@ func (r *UserInterfaceRepo) GETAllUsers() (map[int]*vhs.User, error) {
 
 	for rows.Next() {
 		var user vhs.User
-		rows.Scan(&user.Id, &user.Username, &user.Password)
-		users[user.Id] = &vhs.User{Id: user.Id, Username: user.Username, Password: user.Password}
+		rows.Scan(&user.Id, &user.Username, &user.PasswordHash)
+		users[user.Id] = &vhs.User{Id: user.Id, Username: user.Username, PasswordHash: user.PasswordHash}
 	}
 
 	if len(users) == 0 {
@@ -76,7 +77,7 @@ func (r *UserInterfaceRepo) GETAllUsers() (map[int]*vhs.User, error) {
 	return users, nil
 }
 
-func (r *UserInterfaceRepo) PUTUser(id int, user vhs.User) (int, error) {
+func (r *UserInterfaceStorage) PUTUser(id int, user vhs.User) (int, error) {
 	if err := r.checkUserInDB(id); err != nil {
 		return -1, err
 	}
@@ -87,9 +88,9 @@ func (r *UserInterfaceRepo) PUTUser(id int, user vhs.User) (int, error) {
 	var rows *sql.Rows
 	var err error
 
-	query := "UPDATE users SET username=$1, password=$2 WHERE id=$3"
+	query := "UPDATE users SET username=$1, password_hash=$2 WHERE id=$3"
 
-	if rows, err = db.Query(query, user.Username, user.Password, id); err != nil {
+	if rows, err = db.Query(query, user.Username, user.PasswordHash, id); err != nil {
 		return -1, err
 	}
 	defer rows.Close()
@@ -97,7 +98,7 @@ func (r *UserInterfaceRepo) PUTUser(id int, user vhs.User) (int, error) {
 	return id, nil
 }
 
-func (r *UserInterfaceRepo) PATCHUser(id int, user vhs.User) (int, error) {
+func (r *UserInterfaceStorage) PATCHUser(id int, user vhs.User) (int, error) {
 	if err := r.checkUserInDB(id); err != nil {
 		return -1, err
 	}
@@ -108,9 +109,9 @@ func (r *UserInterfaceRepo) PATCHUser(id int, user vhs.User) (int, error) {
 	var rows *sql.Rows
 	var err error
 
-	query := "UPDATE users SET username=CASE WHEN $1 <> '' THEN $1 ELSE username END, password=CASE WHEN $2 <> '' THEN $2 ELSE password END WHERE id=$3"
+	query := "UPDATE users SET username=CASE WHEN $1 <> '' THEN $1 ELSE username END, password_hash=CASE WHEN $2 <> '' THEN $2 ELSE password END WHERE id=$3"
 
-	if rows, err = db.Query(query, user.Username, user.Password, id); err != nil {
+	if rows, err = db.Query(query, user.Username, user.PasswordHash, id); err != nil {
 		return -1, err
 	}
 	defer rows.Close()
@@ -118,7 +119,7 @@ func (r *UserInterfaceRepo) PATCHUser(id int, user vhs.User) (int, error) {
 	return id, nil
 }
 
-func (r *UserInterfaceRepo) DELETEUser(id int) (int, error) {
+func (r *UserInterfaceStorage) DELETEUser(id int) (int, error) {
 	if err := r.checkUserInDB(id); err != nil {
 		return -1, err
 	}
@@ -139,7 +140,7 @@ func (r *UserInterfaceRepo) DELETEUser(id int) (int, error) {
 	return id, nil
 }
 
-func (r *UserInterfaceRepo) checkUserInDB(id int) error {
+func (r *UserInterfaceStorage) checkUserInDB(id int) error {
 	db := vhs.NewDBConnection(r.cfg)
 	defer vhs.CloseDBConnection(db)
 

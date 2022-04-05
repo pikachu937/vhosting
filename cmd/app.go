@@ -12,8 +12,8 @@ import (
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
 	"github.com/mikerumy/vhservice/pkg/handler"
-	"github.com/mikerumy/vhservice/pkg/repository"
 	"github.com/mikerumy/vhservice/pkg/service"
+	"github.com/mikerumy/vhservice/pkg/storage"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -49,26 +49,26 @@ func main() {
 	}
 
 	// Apply DB part of config
-	repos := repository.NewRepository(dbCfg)
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
+	stor := storage.NewStorage(dbCfg)
+	services := service.NewService(stor)
+	handler := handler.NewHandler(services)
 
 	// Init Routes
 	router := gin.New()
 	userInterface := router.Group("/user-interface")
 	{
-		userInterface.POST("/", handlers.POSTUser)
-		userInterface.GET("/:id", handlers.GETUser)
-		userInterface.GET("/all", handlers.GETAllUsers)
-		userInterface.PUT("/:id", handlers.PUTUser)
-		userInterface.PATCH("/:id", handlers.PATCHUser)
-		userInterface.DELETE("/:id", handlers.DELETEUser)
+		userInterface.POST("/", handler.POSTUser)
+		userInterface.GET("/:id", handler.GETUser)
+		userInterface.GET("/all", handler.GETAllUsers)
+		userInterface.PUT("/:id", handler.PUTUser)
+		userInterface.PATCH("/:id", handler.PATCHUser)
+		userInterface.DELETE("/:id", handler.DELETEUser)
 	}
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", handlers.SignUp)
-		auth.POST("/sign-in", handlers.SignIn)
+		auth.POST("/sign-up", handler.SignUp)
+		auth.POST("/sign-in", handler.SignIn)
 	}
 
 	// Start Server and init server part of config

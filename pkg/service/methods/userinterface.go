@@ -2,37 +2,37 @@ package service
 
 import (
 	vhs "github.com/mikerumy/vhservice"
-	repository "github.com/mikerumy/vhservice/pkg/repository/interfaces"
+	storage "github.com/mikerumy/vhservice/pkg/storage/interfaces"
 )
 
 type UserInterfaceService struct {
-	repo repository.UserInterface
+	stor storage.UserInterface
 }
 
-func NewUserInterfaceService(repo repository.UserInterface) *UserInterfaceService {
-	return &UserInterfaceService{repo: repo}
+func NewUserInterfaceService(stor storage.UserInterface) *UserInterfaceService {
+	return &UserInterfaceService{stor: stor}
 }
 
 func (s *UserInterfaceService) POSTUser(user vhs.User) (int, error) {
-	return s.repo.POSTUser(user)
+	return s.stor.POSTUser(user)
 }
 
 func (s *UserInterfaceService) GETUser(id int) (*vhs.User, error) {
-	return s.repo.GETUser(id)
+	return s.stor.GETUser(id)
 }
 
 func (s *UserInterfaceService) GETAllUsers() (map[int]*vhs.User, error) {
-	return s.repo.GETAllUsers()
+	return s.stor.GETAllUsers()
 }
 
 func (s *UserInterfaceService) PUTUser(id int, user vhs.User) (int, error) {
-	return s.repo.PUTUser(id, user)
+	return s.stor.PUTUser(id, user)
 }
 
 func (s *UserInterfaceService) PATCHUser(id int, user vhs.User) (int, error) {
-	return s.repo.PATCHUser(id, user)
+	return s.stor.PATCHUser(id, user)
 }
 
 func (s *UserInterfaceService) DELETEUser(id int) (int, error) {
-	return s.repo.DELETEUser(id)
+	return s.stor.DELETEUser(id)
 }

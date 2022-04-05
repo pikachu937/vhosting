@@ -1,4 +1,4 @@
-package repository
+package storage
 
 import vhs "github.com/mikerumy/vhservice"
 
