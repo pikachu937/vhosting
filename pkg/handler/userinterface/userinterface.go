@@ -79,6 +79,21 @@ func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
+	user, err := h.services.GETAllUsers()
+	if err != nil {
+		logrus.Println("all-users getting error:", err.Error())
+
+		c.JSON(http.StatusNotFound, ErrorResponse{
+			Message: err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 func (h *UserInterfaceHandler) PUTUser(c *gin.Context) {
 	id, err := h.services.PUTUser(putPatchCommon(c))
 	if err != nil {
@@ -91,7 +106,7 @@ func (h *UserInterfaceHandler) PUTUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, ErrorResponse{
+	c.JSON(http.StatusOK, ErrorResponse{
 		Message: fmt.Sprintf("updated user with id %d", id),
 	})
 }

@@ -21,6 +21,10 @@ func (s *UserInterfaceService) GETUser(id int) (*vhs.User, error) {
 	return s.repo.GETUser(id)
 }
 
+func (s *UserInterfaceService) GETAllUsers() (map[int]*vhs.User, error) {
+	return s.repo.GETAllUsers()
+}
+
 func (s *UserInterfaceService) PUTUser(id int, user vhs.User) (int, error) {
 	return s.repo.PUTUser(id, user)
 }

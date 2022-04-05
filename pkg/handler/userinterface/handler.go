@@ -8,6 +8,7 @@ import (
 type UserInterface interface {
 	POSTUser(c *gin.Context)
 	GETUser(c *gin.Context)
+	GETAllUsers(c *gin.Context)
 	PUTUser(c *gin.Context)
 	PATCHUser(c *gin.Context)
 	DELETEUser(c *gin.Context)
@@ -30,6 +31,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		userInterface.POST("/", h.POSTUser)
 		userInterface.GET("/:id", h.GETUser)
+		userInterface.GET("/all", h.GETAllUsers)
 		userInterface.PUT("/:id", h.PUTUser)
 		userInterface.PATCH("/:id", h.PATCHUser)
 		userInterface.DELETE("/:id", h.DELETEUser)
