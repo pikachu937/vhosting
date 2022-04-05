@@ -3,6 +3,7 @@
 #### Available methods:
 * POST      /userinterface/       POSTUser
 * GET       /userinterface/:id    GETUser
+* GET       /userinterface/all    GETAllUsers
 * PUT       /userinterface/:id    PUTUser
 * PATCH     /userinterface/:id    PATCHUser
 * DELETE    /userinterface/:id    DELETEUser
