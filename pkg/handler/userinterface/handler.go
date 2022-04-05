@@ -23,19 +23,3 @@ func NewHandler(services *service.Service) *Handler {
 		UserInterface: NewUserInterfaceHandler(services),
 	}
 }
-
-func (h *Handler) InitRoutes() *gin.Engine {
-	router := gin.New()
-
-	userInterface := router.Group("/userinterface")
-	{
-		userInterface.POST("/", h.POSTUser)
-		userInterface.GET("/:id", h.GETUser)
-		userInterface.GET("/all", h.GETAllUsers)
-		userInterface.PUT("/:id", h.PUTUser)
-		userInterface.PATCH("/:id", h.PATCHUser)
-		userInterface.DELETE("/:id", h.DELETEUser)
-	}
-
-	return router
-}

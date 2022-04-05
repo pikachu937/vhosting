@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
@@ -50,12 +51,23 @@ func main() {
 	repos := repository.NewRepository(dbCfg)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
+
+	router := gin.New()
+	userInterface := router.Group("/userinterface")
+	{
+		userInterface.POST("/", handlers.POSTUser)
+		userInterface.GET("/:id", handlers.GETUser)
+		userInterface.GET("/all", handlers.GETAllUsers)
+		userInterface.PUT("/:id", handlers.PUTUser)
+		userInterface.PATCH("/:id", handlers.PATCHUser)
+		userInterface.DELETE("/:id", handlers.DELETEUser)
+	}
 	/* ========================================= */
 
 	// Starting Server
 	srv := new(vhs.Server)
 	go func() {
-		srv.Run(svCfg, handlers.InitRoutes())
+		srv.Run(svCfg, router)
 	}()
 
 	// Shutting Down Server
