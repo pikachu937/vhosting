@@ -42,7 +42,7 @@ func (r *UserInterfaceRepo) GETUser(id int) (*vhs.User, error) {
 	query := "SELECT id, username, password FROM users WHERE id=$1"
 
 	if err := db.Get(&user, query, id); err != nil {
-		return nil, errors.New("user not present in database")
+		return nil, errors.New("user not found in database")
 	}
 
 	return &user, nil
@@ -67,6 +67,10 @@ func (r *UserInterfaceRepo) GETAllUsers() (map[int]*vhs.User, error) {
 		var user vhs.User
 		rows.Scan(&user.Id, &user.Username, &user.Password)
 		users[user.Id] = &vhs.User{Id: user.Id, Username: user.Username, Password: user.Password}
+	}
+
+	if len(users) == 0 {
+		return nil, errors.New("users not found in database")
 	}
 
 	return users, nil
@@ -152,7 +156,7 @@ func (r *UserInterfaceRepo) checkUserInDB(id int) error {
 
 	rows.Next()
 	if rows.Scan(&idStr); idStr == "" {
-		return errors.New("user not present in database")
+		return errors.New("user not found in database")
 	}
 
 	return nil

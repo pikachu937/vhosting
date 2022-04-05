@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vhs "github.com/mikerumy/vhservice"
-	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
+	"github.com/mikerumy/vhservice/pkg/service"
 	"github.com/sirupsen/logrus"
 )
 

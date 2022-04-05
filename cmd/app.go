@@ -11,10 +11,10 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	vhs "github.com/mikerumy/vhservice"
-	handler "github.com/mikerumy/vhservice/pkg/handler/userinterface"
+	"github.com/mikerumy/vhservice/pkg/handler"
 	"github.com/mikerumy/vhservice/pkg/logger"
-	repository "github.com/mikerumy/vhservice/pkg/repository/userinterface"
-	service "github.com/mikerumy/vhservice/pkg/service/userinterface"
+	"github.com/mikerumy/vhservice/pkg/repository"
+	"github.com/mikerumy/vhservice/pkg/service"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
