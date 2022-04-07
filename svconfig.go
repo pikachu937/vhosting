@@ -1,4 +1,4 @@
-package vhs
+package vh
 
 type SVConfig struct {
 	Host string

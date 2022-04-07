@@ -1,4 +1,4 @@
-package vhs
+package vh
 
 type DBConfig struct {
 	Host     string

@@ -1,9 +1,9 @@
 package handler
 
 import (
-	interfaces "github.com/mikerumy/vhservice/pkg/handler/interfaces"
-	methods "github.com/mikerumy/vhservice/pkg/handler/methods"
-	"github.com/mikerumy/vhservice/pkg/service"
+	interfaces "github.com/mikerumy/vhosting/pkg/handler/interfaces"
+	methods "github.com/mikerumy/vhosting/pkg/handler/methods"
+	"github.com/mikerumy/vhosting/pkg/service"
 )
 
 type Handler struct {

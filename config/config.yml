@@ -5,5 +5,5 @@ db:
   username: "postgres"
   host: "127.0.0.1"
   port: "5432"
-  dbname: "vhs_db"
+  dbname: "vhosting_db"
   sslmode: "disable"

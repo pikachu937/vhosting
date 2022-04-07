@@ -1,8 +1,8 @@
-package vhs
+package vh
 
 import (
-	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -18,7 +18,11 @@ func NewErrorResponse(c *gin.Context, statusCode int, message string) {
 }
 
 func NewOKResponse(c *gin.Context, message interface{}) {
-	if fmt.Sprintf("%T", message) == "string" {
+	if reflect.TypeOf(message) == reflect.TypeOf("") {
+		c.AbortWithStatusJSON(http.StatusOK, response{message.(string)})
+		return
+	}
+	if reflect.TypeOf(message) == reflect.TypeOf(0) {
 		c.AbortWithStatusJSON(http.StatusOK, response{message.(string)})
 		return
 	}

@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	vhs "github.com/mikerumy/vhservice"
-	"github.com/mikerumy/vhservice/pkg/service"
+	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,18 +23,18 @@ func NewAuthorizationHandler(services *service.Service) *AuthorizationHandler {
 }
 
 func (h *AuthorizationHandler) SignUp(c *gin.Context) {
-	var input vhs.User
+	var input vh.User
 
 	if err := c.BindJSON(&input); err != nil {
 		logrus.Println("invalid input error:", err.Error())
-		vhs.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	id, err := h.services.Authorization.POSTUser(input)
 	if err != nil {
 		logrus.Println("query error:", err.Error())
-		vhs.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -48,14 +48,14 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 
 	if err := c.BindJSON(&input); err != nil {
 		logrus.Println("invalid input error", err.Error())
-		vhs.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
 		logrus.Println("token generation error", err.Error())
-		vhs.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

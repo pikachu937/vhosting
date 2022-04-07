@@ -3,20 +3,20 @@ package storage
 import (
 	"fmt"
 
-	vhs "github.com/mikerumy/vhservice"
+	vh "github.com/mikerumy/vhosting"
 )
 
 type AuthorizationStorage struct {
-	cfg vhs.DBConfig
+	cfg vh.DBConfig
 }
 
-func NewAuthorizationStorage(cfg vhs.DBConfig) *AuthorizationStorage {
+func NewAuthorizationStorage(cfg vh.DBConfig) *AuthorizationStorage {
 	return &AuthorizationStorage{cfg: cfg}
 }
 
-func (r *AuthorizationStorage) POSTUser(user vhs.User) (int, error) {
-	db := vhs.NewDBConnection(r.cfg)
-	defer vhs.CloseDBConnection(db)
+func (r *AuthorizationStorage) POSTUser(user vh.User) (int, error) {
+	db := vh.NewDBConnection(r.cfg)
+	defer vh.CloseDBConnection(db)
 
 	var id int
 
@@ -30,11 +30,11 @@ func (r *AuthorizationStorage) POSTUser(user vhs.User) (int, error) {
 	return id, nil
 }
 
-func (r *AuthorizationStorage) GETUser(username, password string) (vhs.User, error) {
-	db := vhs.NewDBConnection(r.cfg)
-	defer vhs.CloseDBConnection(db)
+func (r *AuthorizationStorage) GETUser(username, password string) (vh.User, error) {
+	db := vh.NewDBConnection(r.cfg)
+	defer vh.CloseDBConnection(db)
 
-	var user vhs.User
+	var user vh.User
 
 	query := fmt.Sprintf("SELECT id FROM users WHERE username=$1 AND password_hash=$2")
 

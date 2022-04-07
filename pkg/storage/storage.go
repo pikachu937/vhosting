@@ -1,9 +1,9 @@
 package storage
 
 import (
-	vhs "github.com/mikerumy/vhservice"
-	interfaces "github.com/mikerumy/vhservice/pkg/storage/interfaces"
-	methods "github.com/mikerumy/vhservice/pkg/storage/methods"
+	vh "github.com/mikerumy/vhosting"
+	interfaces "github.com/mikerumy/vhosting/pkg/storage/interfaces"
+	methods "github.com/mikerumy/vhosting/pkg/storage/methods"
 )
 
 type Storage struct {
@@ -11,7 +11,7 @@ type Storage struct {
 	interfaces.Authorization
 }
 
-func NewStorage(cfg vhs.DBConfig) *Storage {
+func NewStorage(cfg vh.DBConfig) *Storage {
 	return &Storage{
 		UserInterface: methods.NewUserInterfaceStorage(cfg),
 		Authorization: methods.NewAuthorizationStorage(cfg),

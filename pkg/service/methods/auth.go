@@ -1,18 +1,15 @@
 package service
 
 import (
-	"crypto/sha1"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	vhs "github.com/mikerumy/vhservice"
-	storage "github.com/mikerumy/vhservice/pkg/storage/interfaces"
+	vh "github.com/mikerumy/vhosting"
+	storage "github.com/mikerumy/vhosting/pkg/storage/interfaces"
 )
 
 const (
-	salt       = "jK@s13DvU3o3H#e0N7j9G@h9K7r#Ps"
 	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
 	tokenTTL   = 12 * time.Hour
 )
@@ -30,13 +27,13 @@ func NewAuthService(stor storage.Authorization) *AuthService {
 	return &AuthService{stor: stor}
 }
 
-func (s *AuthService) POSTUser(user vhs.User) (int, error) {
-	user.PasswordHash = GeneratePasswordHash(user.PasswordHash)
+func (s *AuthService) POSTUser(user vh.User) (int, error) {
+	user.PasswordHash = vh.GeneratePasswordHash(user.PasswordHash)
 	return s.stor.POSTUser(user)
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.stor.GETUser(username, GeneratePasswordHash(password))
+	user, err := s.stor.GETUser(username, vh.GeneratePasswordHash(password))
 	if err != nil {
 		return "", err
 	}
@@ -70,11 +67,4 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	}
 
 	return claims.UserId, nil
-}
-
-func GeneratePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
-
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }

@@ -1,9 +1,9 @@
 package service
 
-import vhs "github.com/mikerumy/vhservice"
+import vh "github.com/mikerumy/vhosting"
 
 type Authorization interface {
-	POSTUser(user vhs.User) (int, error)
+	POSTUser(user vh.User) (int, error)
 	GenerateToken(username, password string) (string, error)
 	ParseToken(token string) (int, error)
 }

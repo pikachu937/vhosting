@@ -10,10 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	vhs "github.com/mikerumy/vhservice"
-	"github.com/mikerumy/vhservice/pkg/handler"
-	"github.com/mikerumy/vhservice/pkg/service"
-	"github.com/mikerumy/vhservice/pkg/storage"
+	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/pkg/handler"
+	"github.com/mikerumy/vhosting/pkg/service"
+	"github.com/mikerumy/vhosting/pkg/storage"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -33,13 +33,13 @@ func main() {
 	}
 
 	// Read server part of config settings
-	svCfg := vhs.SVConfig{
+	svCfg := vh.SVConfig{
 		Host: viper.GetString("host"),
 		Port: viper.GetString("port"),
 	}
 
 	// Read DB part of config settings
-	dbCfg := vhs.DBConfig{
+	dbCfg := vh.DBConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -49,30 +49,30 @@ func main() {
 	}
 
 	// Apply DB part of config
-	stor := storage.NewStorage(dbCfg)
-	services := service.NewService(stor)
-	handler := handler.NewHandler(services)
+	stors := storage.NewStorage(dbCfg)
+	services := service.NewService(stors)
+	handlers := handler.NewHandler(services)
 
 	// Init Routes
 	router := gin.New()
 	userInterface := router.Group("/user-interface")
 	{
-		userInterface.POST("/", handler.POSTUser)
-		userInterface.GET("/:id", handler.GETUser)
-		userInterface.GET("/all", handler.GETAllUsers)
-		userInterface.PUT("/:id", handler.PUTUser)
-		userInterface.PATCH("/:id", handler.PATCHUser)
-		userInterface.DELETE("/:id", handler.DELETEUser)
+		userInterface.POST("/", handlers.POSTUser)
+		userInterface.GET("/:id", handlers.GETUser)
+		userInterface.GET("/all", handlers.GETAllUsers)
+		userInterface.PUT("/:id", handlers.PUTUser)
+		userInterface.PATCH("/:id", handlers.PATCHUser)
+		userInterface.DELETE("/:id", handlers.DELETEUser)
 	}
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", handler.SignUp)
-		auth.POST("/sign-in", handler.SignIn)
+		auth.POST("/sign-up", handlers.SignUp)
+		auth.POST("/sign-in", handlers.SignIn)
 	}
 
 	// Start Server and init server part of config
-	srv := new(vhs.Server)
+	srv := new(vh.Server)
 	go func() {
 		srv.Run(svCfg, router)
 	}()

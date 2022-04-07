@@ -1,9 +1,9 @@
 package service
 
 import (
-	interfaces "github.com/mikerumy/vhservice/pkg/service/interfaces"
-	methods "github.com/mikerumy/vhservice/pkg/service/methods"
-	"github.com/mikerumy/vhservice/pkg/storage"
+	interfaces "github.com/mikerumy/vhosting/pkg/service/interfaces"
+	methods "github.com/mikerumy/vhosting/pkg/service/methods"
+	"github.com/mikerumy/vhosting/pkg/storage"
 )
 
 type Service struct {
