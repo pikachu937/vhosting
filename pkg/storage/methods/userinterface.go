@@ -20,9 +20,6 @@ func (r *UserInterfaceStorage) POSTUser(user vh.User) (int, error) {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
-	var id int
-	var row *sql.Row
-
 	sql := vh.INSERT_TBL_COL_VAL_RET
 	tbl := vh.UsersTable
 	col := fmt.Sprintf("(%s, %s)", vh.Username, vh.PassHash)
@@ -31,7 +28,9 @@ func (r *UserInterfaceStorage) POSTUser(user vh.User) (int, error) {
 	query := fmt.Sprintf(sql, tbl, col, val, ret)
 
 	userPassHash := vh.GeneratePasswordHash(user.PasswordHash)
-	row = db.QueryRow(query, user.Username, userPassHash)
+	row := db.QueryRow(query, user.Username, userPassHash)
+
+	var id int
 
 	if err := row.Scan(&id); err != nil {
 		return -1, err
@@ -44,13 +43,13 @@ func (r *UserInterfaceStorage) GETUser(id int) (*vh.User, error) {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
-	var user vh.User
-
 	sql := vh.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s", vh.Id, vh.Username, vh.PassHash)
 	tbl := vh.UsersTable
 	cnd := fmt.Sprintf("%s=$1", vh.Id)
 	query := fmt.Sprintf(sql, col, tbl, cnd)
+
+	var user vh.User
 
 	if err := db.Get(&user, query, id); err != nil {
 		return nil, err
@@ -63,28 +62,30 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
-	var rows *sql.Rows
-	var err error
-	users := make(map[int]*vh.User)
-
 	sql := vh.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := vh.UsersTable
 	query := fmt.Sprintf(sql, col, tbl)
 
-	if rows, err = db.Query(query); err != nil {
+	users := make(map[int]*vh.User)
+
+	rows, err := db.Query(query)
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var user vh.User
-		rows.Scan(&user.Id, &user.Username, &user.PasswordHash)
+		if err := rows.Scan(&user.Id, &user.Username, &user.PasswordHash); err != nil {
+			return nil, err
+		}
 		users[user.Id] = &vh.User{Id: user.Id, Username: user.Username, PasswordHash: user.PasswordHash}
 	}
 
-	if len(users) == 0 {
-		return nil, errors.New("users not found in database")
+	err = rows.Err()
+	if err != nil {
+		return nil, err
 	}
 
 	return users, nil
