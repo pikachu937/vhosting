@@ -60,7 +60,6 @@ func main() {
 		userInterface.POST("/", handlers.POSTUser)
 		userInterface.GET("/:id", handlers.GETUser)
 		userInterface.GET("/all", handlers.GETAllUsers)
-		userInterface.PUT("/:id", handlers.PUTUser)
 		userInterface.PATCH("/:id", handlers.PATCHUser)
 		userInterface.DELETE("/:id", handlers.DELETEUser)
 	}

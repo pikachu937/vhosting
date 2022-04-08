@@ -13,7 +13,7 @@ func NewUserInterfaceService(stor storage.UserInterface) *UserInterfaceService {
 	return &UserInterfaceService{stor: stor}
 }
 
-func (s *UserInterfaceService) POSTUser(user vh.User) (int, error) {
+func (s *UserInterfaceService) POSTUser(user vh.User) error {
 	return s.stor.POSTUser(user)
 }
 
@@ -25,14 +25,10 @@ func (s *UserInterfaceService) GETAllUsers() (map[int]*vh.User, error) {
 	return s.stor.GETAllUsers()
 }
 
-func (s *UserInterfaceService) PUTUser(id int, user vh.User) (int, error) {
-	return s.stor.PUTUser(id, user)
-}
-
-func (s *UserInterfaceService) PATCHUser(id int, user vh.User) (int, error) {
+func (s *UserInterfaceService) PATCHUser(id int, user vh.User) error {
 	return s.stor.PATCHUser(id, user)
 }
 
-func (s *UserInterfaceService) DELETEUser(id int) (int, error) {
+func (s *UserInterfaceService) DELETEUser(id int) error {
 	return s.stor.DELETEUser(id)
 }

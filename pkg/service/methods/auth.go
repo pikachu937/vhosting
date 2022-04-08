@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
+	signingKey = "jD2@hSw2eGe7#HkU7fH@8kLe0#6GeD"
 	tokenTTL   = 12 * time.Hour
 )
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	UserId int `json:"user_id"`
+	UserId int `json:"user-id"`
 }
 
 type AuthService struct {

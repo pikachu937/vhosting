@@ -17,6 +17,15 @@ func NewErrorResponse(c *gin.Context, statusCode int, message string) {
 	c.AbortWithStatusJSON(statusCode, response{message})
 }
 
+func NewGoodResponse(c *gin.Context, statusCode int, message interface{}) {
+	if reflect.TypeOf(message) == reflect.TypeOf("") || reflect.TypeOf(message) == reflect.TypeOf(0) {
+		c.AbortWithStatusJSON(statusCode, response{message.(string)})
+		return
+	}
+
+	c.AbortWithStatusJSON(statusCode, message)
+}
+
 func NewOKResponse(c *gin.Context, message interface{}) {
 	if reflect.TypeOf(message) == reflect.TypeOf("") {
 		c.AbortWithStatusJSON(http.StatusOK, response{message.(string)})
