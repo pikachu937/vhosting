@@ -5,6 +5,5 @@
     "is-superuser":  false,
     "is-staff":      false,
     "first-name":   "Imya",
-    "last-name":    "Familiya",
-    "email":        "i.familiya@mail.com"
+    "last-name":    "Familiya"
 }

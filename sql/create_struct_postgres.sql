@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS public.group_perms;
 DROP TABLE IF EXISTS public.users;
 DROP TABLE IF EXISTS public.groups;
 DROP TABLE IF EXISTS public.perms;
+DROP TABLE IF EXISTS public.sessions;
 
 
 CREATE TABLE IF NOT EXISTS public.perms (
@@ -41,16 +42,15 @@ CREATE TABLE IF NOT EXISTS public.users (
     is_staff      BOOLEAN                  NOT NULL,
     first_name    VARCHAR(50)              NOT NULL,
     last_name     VARCHAR(50)              NOT NULL,
-    email         VARCHAR(255)             NOT NULL,
     date_joined   TIMESTAMP WITH TIME ZONE NOT NULL,
     last_login    TIMESTAMP WITH TIME ZONE NOT NULL,
 	CONSTRAINT pk_users PRIMARY KEY (id)
 );
-INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, email, date_joined, last_login) VALUES
-(0, 'superuser', '6a4b40733133447655336f33482365304e376a39474068394b377223507320f3765880a5c269b747e1e906054a4b4a3a991259f1e16b5dde4742cec2319a', 'true',  'true',  'false', '-', '-', 'superuser@superuser.com', '1970-01-01 03:00:00.000000+03', '1970-01-01 03:00:00.000000+03'),
-(1, 'ivanov',    '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'true',  'false', 'Ivan', 'Ivanov', 'i.ivanov@google.com', '2022-04-07 12:55:10.017647+03', '2022-04-07 12:55:10.017647+03'),
-(2, 'petrov',    '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'false', 'true',  'Petr', 'Petrov', 'p.petrov@yandex.ru', '2022-04-07 12:56:10.017647+03', '2022-04-07 12:56:10.017647+03'),
-(3, 'sidorov',   '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'false', 'false', 'Sidor', 'Sidorov', 's.sidorov@mail.ru', '2022-04-07 12:57:10.017647+03', '2022-04-07 12:57:10.017647+03');
+INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, date_joined, last_login) VALUES
+(0, 'superuser', '6a4b40733133447655336f33482365304e376a39474068394b377223507320f3765880a5c269b747e1e906054a4b4a3a991259f1e16b5dde4742cec2319a', 'true',  'true',  'false', '-',     '-',       '1970-01-01 03:00:00.000000+03', '1970-01-01 03:00:00.000000+03'),
+(1, 'ivanov',    '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'true',  'false', 'Ivan',  'Ivanov',  '2022-04-07 12:55:10.017647+03', '2022-04-07 12:55:10.017647+03'),
+(2, 'petrov',    '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'false', 'true',  'Petr',  'Petrov',  '2022-04-07 12:56:10.017647+03', '2022-04-07 12:56:10.017647+03'),
+(3, 'sidorov',   '6a4b40733133447655336f33482365304e376a39474068394b37722350735994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'true',  'false', 'false', 'Sidor', 'Sidorov', '2022-04-07 12:57:10.017647+03', '2022-04-07 12:57:10.017647+03');
 ALTER SEQUENCE users_id_seq RESTART WITH 4;
 
 
@@ -62,11 +62,11 @@ CREATE TABLE IF NOT EXISTS public.group_perms (
 	CONSTRAINT fk_group_perms_group FOREIGN KEY (group_id)
 		REFERENCES public.groups (id) MATCH SIMPLE
 		ON UPDATE NO ACTION
-		ON DELETE NO ACTION,
+		ON DELETE CASCADE,
 	CONSTRAINT fk_group_perms_perm FOREIGN KEY (perm_id)
 		REFERENCES public.perms (id) MATCH SIMPLE
 		ON UPDATE NO ACTION
-		ON DELETE NO ACTION
+		ON DELETE CASCADE
 );
 INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
 (0, 0, 0),
@@ -85,11 +85,11 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 	CONSTRAINT fk_user_groups_user FOREIGN KEY (user_id)
 		REFERENCES public.users (id) MATCH SIMPLE
 		ON UPDATE NO ACTION
-		ON DELETE NO ACTION,
+		ON DELETE CASCADE,
 	CONSTRAINT fk_user_groups_group FOREIGN KEY (group_id)
 		REFERENCES public.groups (id) MATCH SIMPLE
 		ON UPDATE NO ACTION
-		ON DELETE NO ACTION
+		ON DELETE CASCADE
 );
 INSERT INTO public.user_groups (id, user_id, group_id) VALUES
 (0, 0, 0),
@@ -97,3 +97,11 @@ INSERT INTO public.user_groups (id, user_id, group_id) VALUES
 (2, 2, 1),
 (3, 3, 2);
 ALTER SEQUENCE user_groups_id_seq RESTART WITH 4;
+
+
+CREATE TABLE IF NOT EXISTS public.sessions (
+    id            SERIAL                   NOT NULL UNIQUE,
+    content       VARCHAR(512)             NOT NULL,
+    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    CONSTRAINT pk_sessions PRIMARY KEY (id)
+);

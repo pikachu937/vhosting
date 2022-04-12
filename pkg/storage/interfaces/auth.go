@@ -3,6 +3,9 @@ package storage
 import vh "github.com/mikerumy/vhosting"
 
 type Authorization interface {
-	POSTUser(user vh.User) (int, error)
-	GETUser(username, password string) (vh.User, error)
+	POSTSession(session vh.Session) error
+	GETNamePass(namepass vh.NamePass) error
+	DELETECurrentSession(cookieValue string) error
+	UPDATELoginTimestamp(username, timestamp string) error
+	UPDATEUserPassword(namepass vh.NamePass) error
 }

@@ -27,10 +27,14 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 		return
 	}
 
+	user.PasswordHash = vh.GeneratePasswordHash(user.PasswordHash)
+	user.DateJoined = vh.MakeTimestamp()
+	user.LastLogin = user.DateJoined
+	user.IsActive = true
 	err = h.services.UserInterface.POSTUser(user)
 	if err != nil {
-		logrus.Println("can not create user. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Println("can not query POSTUser. error:", err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -49,8 +53,8 @@ func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 	var user *vh.User
 	user, err = h.services.UserInterface.GETUser(id)
 	if err != nil {
-		logrus.Println("can not get user. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusNotFound, err.Error())
+		logrus.Println("can not query GETUser. error:", err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -61,8 +65,8 @@ func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
 	var users map[int]*vh.User
 	users, err := h.services.UserInterface.GETAllUsers()
 	if err != nil {
-		logrus.Println("can not get all-users. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusNotFound, err.Error())
+		logrus.Println("can not query GETAllUsers. error:", err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -71,7 +75,6 @@ func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
 
 func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 	var id int
-	var user vh.User
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Println("can not convert input param id to type int. error:", err.Error())
@@ -79,6 +82,7 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 		return
 	}
 
+	var user vh.User
 	err = c.BindJSON(&user)
 	if err != nil {
 		logrus.Println("can not bind user. error:", err.Error())
@@ -86,10 +90,11 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 		return
 	}
 
+	user.PasswordHash = vh.GeneratePasswordHash(user.PasswordHash)
 	err = h.services.UserInterface.PATCHUser(id, user)
 	if err != nil {
-		logrus.Println("can not partially update user. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Println("can not query PATCHUser. error:", err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -106,8 +111,8 @@ func (h *UserInterfaceHandler) DELETEUser(c *gin.Context) {
 
 	err = h.services.UserInterface.DELETEUser(id)
 	if err != nil {
-		logrus.Println("can not delete user. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Println("can not query DELETEUser. error:", err.Error())
+		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

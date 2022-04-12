@@ -66,8 +66,9 @@ func main() {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", handlers.SignUp)
 		auth.POST("/sign-in", handlers.SignIn)
+		auth.POST("/change-password", handlers.ChangePassword)
+		auth.POST("/sign-out", handlers.SignOut)
 	}
 
 	// Start Server and init server part of config

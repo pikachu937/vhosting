@@ -3,9 +3,9 @@ package handler
 import "github.com/gin-gonic/gin"
 
 type UserInterface interface {
-	POSTUser(*gin.Context)
-	GETUser(*gin.Context)
-	GETAllUsers(*gin.Context)
-	PATCHUser(*gin.Context)
-	DELETEUser(*gin.Context)
+	POSTUser(c *gin.Context)
+	GETUser(c *gin.Context)
+	GETAllUsers(c *gin.Context)
+	PATCHUser(c *gin.Context)
+	DELETEUser(c *gin.Context)
 }

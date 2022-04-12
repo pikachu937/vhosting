@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	vh "github.com/mikerumy/vhosting"
 )
@@ -22,20 +21,13 @@ func (r *UserInterfaceStorage) POSTUser(user vh.User) error {
 	defer vh.CloseDBConnection(db)
 
 	template := vh.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", vh.UsersTable, vh.Username, vh.PassHash,
-		vh.IsActive, vh.IsSuperUser, vh.IsStaff, vh.FirstName, vh.LastName, vh.Email, vh.DateJoined, vh.LastLogin)
-	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", vh.UsersTable, vh.Username, vh.PassHash,
+		vh.IsActive, vh.IsSuperUser, vh.IsStaff, vh.FirstName, vh.LastName, vh.DateJoined, vh.LastLogin)
+	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	var userDateJoined time.Time = time.Now()
-	var userLastLogin time.Time = userDateJoined
-	var userPassHash string = vh.GeneratePasswordHash(user.PasswordHash)
-	var userIsActive bool = false
-	if user.IsActive == nil {
-		userIsActive = true
-	}
-	_, err := db.Query(query, user.Username, userPassHash, userIsActive, user.IsSuperUser, user.IsStaff,
-		user.FirstName, user.LastName, user.Email, userDateJoined, userLastLogin)
+	_, err := db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff,
+		user.FirstName, user.LastName, user.DateJoined, user.LastLogin)
 	if err != nil {
 		return err
 	}
@@ -48,8 +40,8 @@ func (r *UserInterfaceStorage) GETUser(id int) (*vh.User, error) {
 	defer vh.CloseDBConnection(db)
 
 	template := vh.SELECT_COL_FROM_TBL_WHERE_CND
-	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s", vh.Id, vh.Username, vh.PassHash,
-		vh.IsActive, vh.IsSuperUser, vh.IsStaff, vh.FirstName, vh.LastName, vh.Email, vh.DateJoined, vh.LastLogin)
+	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", vh.Id, vh.Username, vh.PassHash,
+		vh.IsActive, vh.IsSuperUser, vh.IsStaff, vh.FirstName, vh.LastName, vh.DateJoined, vh.LastLogin)
 	tbl := vh.UsersTable
 	cnd := fmt.Sprintf("%s=$1", vh.Id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
@@ -83,13 +75,13 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 	var user vh.User
 	for rows.Next() {
 		err = rows.Scan(&user.Id, &user.Username, &user.PasswordHash, &user.IsActive, &user.IsSuperUser,
-			&user.IsStaff, &user.FirstName, &user.LastName, &user.Email, &user.DateJoined, &user.LastLogin)
+			&user.IsStaff, &user.FirstName, &user.LastName, &user.DateJoined, &user.LastLogin)
 		if err != nil {
 			return nil, err
 		}
 		users[user.Id] = &vh.User{Id: user.Id, Username: user.Username, PasswordHash: user.PasswordHash,
 			IsActive: user.IsActive, IsSuperUser: user.IsSuperUser, IsStaff: user.IsStaff, FirstName: user.FirstName,
-			LastName: user.LastName, Email: user.Email, DateJoined: user.DateJoined, LastLogin: user.LastLogin}
+			LastName: user.LastName, DateJoined: user.DateJoined, LastLogin: user.LastLogin}
 	}
 
 	err = rows.Err()
@@ -117,23 +109,17 @@ func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
 	tbl := vh.UsersTable
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", vh.Username, vh.Username) +
 		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", vh.PassHash, vh.PassHash) +
-		fmt.Sprintf("%s=$3, ", vh.IsActive) +
-		fmt.Sprintf("%s=$4, ", vh.IsSuperUser) +
-		fmt.Sprintf("%s=$5, ", vh.IsStaff) +
+		fmt.Sprintf("%s=CASE WHEN $3 <> false THEN $3 ELSE %s END, ", vh.IsActive, vh.IsActive) +
+		fmt.Sprintf("%s=CASE WHEN $4 <> true THEN $4 ELSE %s END, ", vh.IsSuperUser, vh.IsSuperUser) +
+		fmt.Sprintf("%s=CASE WHEN $5 <> true THEN $5 ELSE %s END, ", vh.IsStaff, vh.IsStaff) +
 		fmt.Sprintf("%s=CASE WHEN $6 <> '' THEN $6 ELSE %s END, ", vh.FirstName, vh.FirstName) +
-		fmt.Sprintf("%s=CASE WHEN $7 <> '' THEN $7 ELSE %s END, ", vh.LastName, vh.LastName) +
-		fmt.Sprintf("%s=CASE WHEN $8 <> '' THEN $8 ELSE %s END", vh.Email, vh.Email)
-	cnd := fmt.Sprintf("%s=$9", vh.Id)
+		fmt.Sprintf("%s=CASE WHEN $7 <> '' THEN $7 ELSE %s END, ", vh.LastName, vh.LastName)
+	cnd := fmt.Sprintf("%s=$8", vh.Id)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows
-	var userPassHash string = vh.GeneratePasswordHash(user.PasswordHash)
-	var userIsActive bool = false
-	if user.IsActive == nil {
-		userIsActive = true
-	}
-	rows, err = db.Query(query, user.Username, userPassHash, userIsActive, user.IsSuperUser, user.IsStaff,
-		user.FirstName, user.LastName, user.Email, id)
+	rows, err = db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff,
+		user.FirstName, user.LastName, id)
 	if err != nil {
 		return err
 	}
