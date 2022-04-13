@@ -2,8 +2,8 @@ package storage
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"reflect"
 
 	vh "github.com/mikerumy/vhosting"
 )
@@ -14,6 +14,42 @@ type UserInterfaceStorage struct {
 
 func NewUserInterfaceStorage(cfg vh.DBConfig) *UserInterfaceStorage {
 	return &UserInterfaceStorage{cfg: cfg}
+}
+
+func (r *UserInterfaceStorage) CheckUserExistence(idOrUsername interface{}) (bool, error) {
+	db := vh.NewDBConnection(r.cfg)
+	defer vh.CloseDBConnection(db)
+
+	var template, col, tbl, cnd, query string
+	var rows *sql.Rows
+	var err error
+
+	if reflect.TypeOf(idOrUsername) == reflect.TypeOf(0) {
+		template = vh.SELECT_COL_FROM_TBL_WHERE_CND
+		col = vh.Id
+		tbl = vh.UsersTable
+		cnd = fmt.Sprintf("%s=$1", vh.Id)
+		query = fmt.Sprintf(template, col, tbl, cnd)
+		rows, err = db.Query(query, idOrUsername.(int))
+	} else {
+		template = vh.SELECT_COL_FROM_TBL_WHERE_CND
+		col = vh.Username
+		tbl = vh.UsersTable
+		cnd = fmt.Sprintf("%s=$1", vh.Username)
+		query = fmt.Sprintf(template, col, tbl, cnd)
+		rows, err = db.Query(query, idOrUsername.(string))
+	}
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	rowIsPresent := rows.Next()
+	if !rowIsPresent {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (r *UserInterfaceStorage) POSTUser(user vh.User) error {
@@ -80,8 +116,9 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 			return nil, err
 		}
 		users[user.Id] = &vh.User{Id: user.Id, Username: user.Username, PasswordHash: user.PasswordHash,
-			IsActive: user.IsActive, IsSuperUser: user.IsSuperUser, IsStaff: user.IsStaff, FirstName: user.FirstName,
-			LastName: user.LastName, DateJoined: user.DateJoined, LastLogin: user.LastLogin}
+			IsActive: user.IsActive, IsSuperUser: user.IsSuperUser, IsStaff: user.IsStaff,
+			FirstName: user.FirstName, LastName: user.LastName, DateJoined: user.DateJoined,
+			LastLogin: user.LastLogin}
 	}
 
 	err = rows.Err()
@@ -90,16 +127,19 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 	}
 
 	if len(users) == 0 {
-		return nil, errors.New("no users to get")
+		return nil, nil
 	}
 
 	return users, nil
 }
 
 func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
-	err := r.checkUserExistence(id)
+	exist, err := r.CheckUserExistence(id)
 	if err != nil {
 		return err
+	}
+	if !exist {
+		return nil
 	}
 
 	db := vh.NewDBConnection(r.cfg)
@@ -118,8 +158,8 @@ func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows
-	rows, err = db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff,
-		user.FirstName, user.LastName, id)
+	rows, err = db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser,
+		user.IsStaff, user.FirstName, user.LastName, id)
 	if err != nil {
 		return err
 	}
@@ -129,9 +169,12 @@ func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
 }
 
 func (r *UserInterfaceStorage) DELETEUser(id int) error {
-	err := r.checkUserExistence(id)
+	exist, err := r.CheckUserExistence(id)
 	if err != nil {
 		return err
+	}
+	if !exist {
+		return nil
 	}
 
 	db := vh.NewDBConnection(r.cfg)
@@ -148,37 +191,6 @@ func (r *UserInterfaceStorage) DELETEUser(id int) error {
 		return err
 	}
 	defer rows.Close()
-
-	return nil
-}
-
-func (r *UserInterfaceStorage) checkUserExistence(id int) error {
-	db := vh.NewDBConnection(r.cfg)
-	defer vh.CloseDBConnection(db)
-
-	template := vh.SELECT_COL_FROM_TBL_WHERE_CND
-	col := vh.Id
-	tbl := vh.UsersTable
-	cnd := fmt.Sprintf("%s=$1", vh.Id)
-	query := fmt.Sprintf(template, col, tbl, cnd)
-
-	var rows *sql.Rows
-	rows, err := db.Query(query, id)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	var idInColumn string
-	rows.Next()
-	rows.Scan(&idInColumn)
-	if err != nil {
-		return err
-	}
-
-	if idInColumn == "" {
-		return errors.New("user not found")
-	}
 
 	return nil
 }

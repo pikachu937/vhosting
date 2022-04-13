@@ -22,23 +22,23 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	err := c.BindJSON(&inputNamepass)
 	if err != nil {
 		logrus.Println("invalid input. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
 	err = h.services.Authorization.GETNamePass(inputNamepass)
 	if err != nil {
-		logrus.Println("can not query GETNamePass. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+		logrus.Println("cannot query GETNamePass. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	var token string
 	token, err = vh.GenerateToken(inputNamepass.Username, inputNamepass.PasswordHash)
 	if err != nil {
-		logrus.Println("can not create token. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot create token. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -48,8 +48,8 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	session.CreationDate = thisTimestamp
 	err = h.services.Authorization.POSTSession(session)
 	if err != nil {
-		logrus.Println("can not query POSTSession. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot query POSTSession. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -57,12 +57,12 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 
 	err = h.services.Authorization.UPDATELoginTimestamp(inputNamepass.Username, vh.MakeTimestamp())
 	if err != nil {
-		logrus.Println("can not query UPDATELoginTimestamp. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot query UPDATELoginTimestamp. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	vh.NewGoodResponse(c, http.StatusAccepted, "you have successfully signed-in. welcome, "+inputNamepass.Username)
+	vh.GoodResponse(c, http.StatusAccepted, "You have successfully signed in.")
 }
 
 func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
@@ -71,7 +71,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	if err != nil {
 		// logout and delete session
 		logrus.Println("you must be signed-in for changing password. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -79,8 +79,8 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	tokenNamepass, err = vh.ParseToken(cookie.Value)
 	if err != nil {
 		// logout and delete session
-		logrus.Println("can not parse token. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot parse token. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -88,13 +88,13 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	err = c.BindJSON(&inputNamepass)
 	if err != nil {
 		logrus.Println("invalid input. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if inputNamepass.Username != tokenNamepass.Username {
 		logrus.Println("entered username incorrect. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -102,20 +102,20 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 
 	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
 	if err != nil {
-		logrus.Println("can not query DELETECurrentSession. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot query DELETECurrentSession. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
 	err = h.services.Authorization.UPDATEUserPassword(inputNamepass)
 	if err != nil {
-		logrus.Println("can not query UPDATEUserPassword. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot query UPDATEUserPassword. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	vh.NewGoodResponse(c, http.StatusAccepted, "you have successfully changed password")
+	vh.GoodResponse(c, http.StatusAccepted, "You have successfully changed password.")
 }
 
 func (h *AuthorizationHandler) SignOut(c *gin.Context) {
@@ -123,7 +123,7 @@ func (h *AuthorizationHandler) SignOut(c *gin.Context) {
 	cookie, err := c.Request.Cookie(vh.CookieUserSettings)
 	if err != nil {
 		logrus.Println("you have not signed-in. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -133,10 +133,10 @@ func (h *AuthorizationHandler) SignOut(c *gin.Context) {
 
 	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
 	if err != nil {
-		logrus.Println("can not query DELETECurrentSession. error:", err.Error())
-		vh.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Println("cannot query DELETECurrentSession. error:", err.Error())
+		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	vh.NewGoodResponse(c, http.StatusAccepted, "you have successfully signed out")
+	vh.GoodResponse(c, http.StatusAccepted, "You have successfully signed out.")
 }

@@ -13,6 +13,10 @@ func NewUserInterfaceService(stor storage.UserInterface) *UserInterfaceService {
 	return &UserInterfaceService{stor: stor}
 }
 
+func (s *UserInterfaceService) CheckUserExistence(idOrUsername interface{}) (bool, error) {
+	return s.stor.CheckUserExistence(idOrUsername)
+}
+
 func (s *UserInterfaceService) POSTUser(user vh.User) error {
 	return s.stor.POSTUser(user)
 }

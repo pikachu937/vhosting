@@ -1,39 +1,40 @@
 package vh
 
 import (
-	"net/http"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type response struct {
 	Message string `json:"message"`
 }
 
-func NewErrorResponse(c *gin.Context, statusCode int, message string) {
-	logrus.Error(message)
-	c.AbortWithStatusJSON(statusCode, response{message})
+type errorContent struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
-func NewGoodResponse(c *gin.Context, statusCode int, message interface{}) {
+type errorResponse struct {
+	Error errorContent `json:"error"`
+}
+
+func ErrorResponse(c *gin.Context, statusCode int, codeOrMessage interface{}) {
+	if reflect.TypeOf(codeOrMessage) == reflect.TypeOf(0) {
+		c.AbortWithStatusJSON(statusCode, errorResponse{Error: errorContent{Code: codeOrMessage.(int),
+			Message: Errors[codeOrMessage.(int)]}})
+		return
+	}
+
+	c.AbortWithStatusJSON(statusCode, errorResponse{Error: errorContent{Code: ErrorServerDebug,
+		Message: codeOrMessage.(string)}})
+}
+
+func GoodResponse(c *gin.Context, statusCode int, message interface{}) {
 	if reflect.TypeOf(message) == reflect.TypeOf("") || reflect.TypeOf(message) == reflect.TypeOf(0) {
 		c.AbortWithStatusJSON(statusCode, response{message.(string)})
 		return
 	}
 
 	c.AbortWithStatusJSON(statusCode, message)
-}
-
-func NewOKResponse(c *gin.Context, message interface{}) {
-	if reflect.TypeOf(message) == reflect.TypeOf("") {
-		c.AbortWithStatusJSON(http.StatusOK, response{message.(string)})
-		return
-	}
-	if reflect.TypeOf(message) == reflect.TypeOf(0) {
-		c.AbortWithStatusJSON(http.StatusOK, response{message.(string)})
-		return
-	}
-	c.AbortWithStatusJSON(http.StatusOK, message)
 }
