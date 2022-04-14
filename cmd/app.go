@@ -21,6 +21,8 @@ import (
 func main() {
 	// Set up logger
 	logrus.SetFormatter(new(logrus.JSONFormatter))
+	ll, _ := logrus.ParseLevel("debug")
+	logrus.SetLevel(ll)
 
 	// Set up reader of config file
 	if err := initConfig(); err != nil {

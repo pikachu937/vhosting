@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
@@ -21,24 +22,50 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	var inputNamepass vh.NamePass
 	err := c.BindJSON(&inputNamepass)
 	if err != nil {
-		logrus.Println("invalid input. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Debugln("invalid input. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
+		logrus.Errorln("entered empty username or password")
+		vh.ErrorResponse(c, vh.ErrorEmptyRequired())
+		return
+	}
+	if !unicode.IsLetter(rune(inputNamepass.Username[0])) {
+		logrus.Errorln("entered username not starts with letter")
+		vh.ErrorResponse(c, vh.ErrorUsernameLetter())
+		return
+	}
+	if findSpaces(inputNamepass.Username) {
+		logrus.Errorln("entered spaces in username input")
+		vh.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		return
+	}
+	if findSpaces(inputNamepass.PasswordHash) {
+		logrus.Errorln("entered spaces in password input")
+		vh.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		return
+	}
+
+	exist, err := h.services.UserInterface.CheckUserExistence(inputNamepass.Username)
+	if err != nil {
+		logrus.Debugln("cannot query CheckUserExistence. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if !exist {
+		logrus.Errorln("entered invalid username")
+		vh.ErrorResponse(c, vh.ErrorUsernameInvalid())
 		return
 	}
 
 	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
-	err = h.services.Authorization.GETNamePass(inputNamepass)
-	if err != nil {
-		logrus.Println("cannot query GETNamePass. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
 	var token string
 	token, err = vh.GenerateToken(inputNamepass.Username, inputNamepass.PasswordHash)
 	if err != nil {
-		logrus.Println("cannot create token. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot create token. error:", err.Error())
+		vh.DebugResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -48,8 +75,8 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	session.CreationDate = thisTimestamp
 	err = h.services.Authorization.POSTSession(session)
 	if err != nil {
-		logrus.Println("cannot query POSTSession. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot query POSTSession. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -57,21 +84,62 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 
 	err = h.services.Authorization.UPDATELoginTimestamp(inputNamepass.Username, vh.MakeTimestamp())
 	if err != nil {
-		logrus.Println("cannot query UPDATELoginTimestamp. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot query UPDATELoginTimestamp. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.GoodResponse(c, http.StatusAccepted, "You have successfully signed in.")
+	vh.MessageResponse(c, http.StatusAccepted, "You have successfully signed in.")
 }
 
 func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
+	var inputNamepass vh.NamePass
+	err := c.BindJSON(&inputNamepass)
+	if err != nil {
+		logrus.Debugln("invalid input. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
+		logrus.Errorln("entered empty username or password")
+		vh.ErrorResponse(c, vh.ErrorEmptyRequired())
+		return
+	}
+	if !unicode.IsLetter(rune(inputNamepass.Username[0])) {
+		logrus.Errorln("entered username not starts with letter")
+		vh.ErrorResponse(c, vh.ErrorUsernameLetter())
+		return
+	}
+	if findSpaces(inputNamepass.Username) {
+		logrus.Errorln("entered spaces in username input")
+		vh.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		return
+	}
+	if findSpaces(inputNamepass.PasswordHash) {
+		logrus.Errorln("entered spaces in password input")
+		vh.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		return
+	}
+
+	exist, err := h.services.UserInterface.CheckUserExistence(inputNamepass.Username)
+	if err != nil {
+		logrus.Debugln("cannot query CheckUserExistence. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if !exist {
+		logrus.Errorln("entered invalid username")
+		vh.ErrorResponse(c, vh.ErrorUsernameInvalid())
+		return
+	}
+
 	var cookie *http.Cookie
-	cookie, err := c.Request.Cookie(vh.CookieUserSettings)
+	cookie, err = c.Request.Cookie(vh.CookieUserSettings)
 	if err != nil {
 		// logout and delete session
-		logrus.Println("you must be signed-in for changing password. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Debugln("you must be signed-in for changing password. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -79,22 +147,14 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	tokenNamepass, err = vh.ParseToken(cookie.Value)
 	if err != nil {
 		// logout and delete session
-		logrus.Println("cannot parse token. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	var inputNamepass vh.NamePass
-	err = c.BindJSON(&inputNamepass)
-	if err != nil {
-		logrus.Println("invalid input. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Debugln("cannot parse token. error:", err.Error())
+		vh.DebugResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if inputNamepass.Username != tokenNamepass.Username {
-		logrus.Println("entered username incorrect. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Debugln("entered username incorrect. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -102,28 +162,28 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 
 	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
 	if err != nil {
-		logrus.Println("cannot query DELETECurrentSession. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot query DELETECurrentSession. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
 	err = h.services.Authorization.UPDATEUserPassword(inputNamepass)
 	if err != nil {
-		logrus.Println("cannot query UPDATEUserPassword. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot query UPDATEUserPassword. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.GoodResponse(c, http.StatusAccepted, "You have successfully changed password.")
+	vh.MessageResponse(c, http.StatusAccepted, "You have successfully changed password.")
 }
 
 func (h *AuthorizationHandler) SignOut(c *gin.Context) {
 	var cookie *http.Cookie
 	cookie, err := c.Request.Cookie(vh.CookieUserSettings)
 	if err != nil {
-		logrus.Println("you have not signed-in. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		logrus.Debugln("you have not signed-in. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -133,10 +193,10 @@ func (h *AuthorizationHandler) SignOut(c *gin.Context) {
 
 	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
 	if err != nil {
-		logrus.Println("cannot query DELETECurrentSession. error:", err.Error())
-		vh.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Debugln("cannot query DELETECurrentSession. error:", err.Error())
+		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.GoodResponse(c, http.StatusAccepted, "You have successfully signed out.")
+	vh.MessageResponse(c, http.StatusAccepted, "You have successfully signed out.")
 }

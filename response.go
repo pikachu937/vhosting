@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type response struct {
-	Message string `json:"message"`
+type errorName struct {
+	Error errorContent `json:"error"`
 }
 
 type errorContent struct {
@@ -15,24 +15,25 @@ type errorContent struct {
 	Message string `json:"message"`
 }
 
-type errorResponse struct {
-	Error errorContent `json:"error"`
+type debugName struct {
+	Debug string `json:"debug"`
 }
 
-func ErrorResponse(c *gin.Context, statusCode int, codeOrMessage interface{}) {
-	if reflect.TypeOf(codeOrMessage) == reflect.TypeOf(0) {
-		c.AbortWithStatusJSON(statusCode, errorResponse{Error: errorContent{Code: codeOrMessage.(int),
-			Message: Errors[codeOrMessage.(int)]}})
-		return
-	}
-
-	c.AbortWithStatusJSON(statusCode, errorResponse{Error: errorContent{Code: ErrorServerDebug,
-		Message: codeOrMessage.(string)}})
+type messageName struct {
+	Message string `json:"message"`
 }
 
-func GoodResponse(c *gin.Context, statusCode int, message interface{}) {
-	if reflect.TypeOf(message) == reflect.TypeOf("") || reflect.TypeOf(message) == reflect.TypeOf(0) {
-		c.AbortWithStatusJSON(statusCode, response{message.(string)})
+func ErrorResponse(c *gin.Context, err customError) {
+	c.AbortWithStatusJSON(err.StatusCode, errorName{Error: errorContent{Code: err.ErrorCode, Message: err.ErrorMessage}})
+}
+
+func DebugResponse(c *gin.Context, statusCode int, message string) {
+	c.AbortWithStatusJSON(statusCode, debugName{message})
+}
+
+func MessageResponse(c *gin.Context, statusCode int, message interface{}) {
+	if reflect.TypeOf(message) == reflect.TypeOf("") {
+		c.AbortWithStatusJSON(statusCode, messageName{message.(string)})
 		return
 	}
 

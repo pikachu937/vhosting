@@ -15,9 +15,8 @@ const (
 	LastLogin   = "last_login"
 
 	SessionsTable = "sessions"
-	// Id = "id"
-	Content      = "content"
-	CreationDate = "creation_date"
+	Content       = "content"
+	CreationDate  = "creation_date"
 
 	INSERT_INTO_TBL_VALUES_VAL_RETURNING_RET = "INSERT INTO %s VALUES %s RETURNING %s"
 	INSERT_INTO_TBL_VALUES_VAL               = "INSERT INTO %s VALUES %s"
