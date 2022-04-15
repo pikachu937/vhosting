@@ -1,9 +1,0 @@
-{
-    "username":     "qwerty",
-    "password":     "12345",
-    "is-active":     true,
-    "is-superuser":  false,
-    "is-staff":      false,
-    "first-name":   "Imya",
-    "last-name":    "Familiya"
-}

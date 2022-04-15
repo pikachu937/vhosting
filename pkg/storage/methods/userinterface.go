@@ -6,13 +6,14 @@ import (
 	"reflect"
 
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/config"
 )
 
 type UserInterfaceStorage struct {
-	cfg vh.DBConfig
+	cfg config.DBConfig
 }
 
-func NewUserInterfaceStorage(cfg vh.DBConfig) *UserInterfaceStorage {
+func NewUserInterfaceStorage(cfg config.DBConfig) *UserInterfaceStorage {
 	return &UserInterfaceStorage{cfg: cfg}
 }
 

@@ -5,22 +5,22 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/mikerumy/vhosting/internal/config"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	dbDriver    = "postgres"
 	connTimeOut = 5
 )
 
-func NewDBConnection(cfg DBConfig) *sqlx.DB {
+func NewDBConnection(cfg config.DBConfig) *sqlx.DB {
 	timeAtStarting := time.Now()
 
 	var db *sqlx.DB
 
 	go func() *sqlx.DB {
 		for {
-			db, _ = sqlx.Open(dbDriver, fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+			db, _ = sqlx.Open(cfg.DBDriver, fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 				cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 
 			time.Sleep(3 * time.Millisecond)

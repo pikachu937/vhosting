@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mikerumy/vhosting/internal/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,7 +19,7 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(cfg SVConfig, handler http.Handler) error {
+func (s *Server) Run(cfg config.Config, handler http.Handler) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + cfg.Port,
 		Handler:        handler,

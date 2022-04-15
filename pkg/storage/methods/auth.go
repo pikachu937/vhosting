@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/config"
 )
 
 type AuthorizationStorage struct {
-	cfg vh.DBConfig
+	cfg config.DBConfig
 }
 
-func NewAuthorizationStorage(cfg vh.DBConfig) *AuthorizationStorage {
+func NewAuthorizationStorage(cfg config.DBConfig) *AuthorizationStorage {
 	return &AuthorizationStorage{cfg: cfg}
 }
 

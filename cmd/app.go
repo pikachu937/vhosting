@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/config"
 	"github.com/mikerumy/vhosting/pkg/handler"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/mikerumy/vhosting/pkg/storage"
@@ -25,7 +26,10 @@ func main() {
 	logrus.SetLevel(ll)
 
 	// Set up reader of config file
-	if err := initConfig(); err != nil {
+	viper.AddConfigPath("./")
+	viper.SetConfigName("config")
+	err := viper.ReadInConfig()
+	if err != nil {
 		logrus.Fatalf("failed to initializing config: %s\n", err.Error())
 	}
 
@@ -35,18 +39,19 @@ func main() {
 	}
 
 	// Read server part of config settings
-	svCfg := vh.SVConfig{
+	cfg := config.Config{
 		Host: viper.GetString("host"),
 		Port: viper.GetString("port"),
 	}
 
 	// Read DB part of config settings
-	dbCfg := vh.DBConfig{
+	dbCfg := config.DBConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
+		DBDriver: os.Getenv("DB_DRIVER"),
 		Password: os.Getenv("DB_PASSWORD"),
 	}
 
@@ -76,7 +81,7 @@ func main() {
 	// Start Server and init server part of config
 	srv := new(vh.Server)
 	go func() {
-		srv.Run(svCfg, router)
+		srv.Run(cfg, router)
 	}()
 
 	// Shut Down Server
@@ -89,10 +94,4 @@ func main() {
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s\n", err.Error())
 	}
-}
-
-func initConfig() error {
-	viper.AddConfigPath("./config/")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }
