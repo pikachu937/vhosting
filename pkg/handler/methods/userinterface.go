@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/hashing"
 	user "github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -57,7 +58,7 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 		return
 	}
 
-	usr.PasswordHash = vh.GeneratePasswordHash(usr.PasswordHash)
+	usr.PasswordHash = hashing.GeneratePasswordHash(usr.PasswordHash)
 	usr.DateJoined = vh.MakeTimestamp()
 	usr.LastLogin = usr.DateJoined
 	usr.IsActive = true
@@ -120,7 +121,7 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 		return
 	}
 
-	usr.PasswordHash = vh.GeneratePasswordHash(usr.PasswordHash)
+	usr.PasswordHash = hashing.GeneratePasswordHash(usr.PasswordHash)
 	err = h.services.UserInterface.PATCHUser(id, usr)
 	if err != nil {
 		logrus.Debugln("cannot query PATCHUser. error:", err.Error())

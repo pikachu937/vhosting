@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/hashing"
 	"github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -61,9 +62,9 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
+	inputNamepass.PasswordHash = hashing.GeneratePasswordHash(inputNamepass.PasswordHash)
 	var token string
-	token, err = vh.GenerateToken(inputNamepass.Username, inputNamepass.PasswordHash)
+	token, err = hashing.GenerateToken(inputNamepass.Username, inputNamepass.PasswordHash)
 	if err != nil {
 		logrus.Debugln("cannot create token. error:", err.Error())
 		vh.DebugResponse(c, http.StatusInternalServerError, err.Error())
@@ -145,7 +146,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	}
 
 	var tokenNamepass vh.NamePass
-	tokenNamepass, err = vh.ParseToken(cookie.Value)
+	tokenNamepass, err = hashing.ParseToken(cookie.Value)
 	if err != nil {
 		// logout and delete sess
 		logrus.Debugln("cannot parse token. error:", err.Error())
@@ -168,7 +169,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	inputNamepass.PasswordHash = vh.GeneratePasswordHash(inputNamepass.PasswordHash)
+	inputNamepass.PasswordHash = hashing.GeneratePasswordHash(inputNamepass.PasswordHash)
 	err = h.services.Authorization.UPDATEUserPassword(inputNamepass)
 	if err != nil {
 		logrus.Debugln("cannot query UPDATEUserPassword. error:", err.Error())
