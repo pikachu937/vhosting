@@ -1,14 +1,14 @@
 package storage
 
 import (
-	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/session"
+	user "github.com/mikerumy/vhosting/internal/user"
 )
 
 type Authorization interface {
 	POSTSession(sess session.Session) error
-	GETNamePass(namepass vh.NamePass) error
+	GETNamePass(namepass user.NamePass) error
 	DELETECurrentSession(cookieValue string) error
 	UPDATELoginTimestamp(username, timestamp string) error
-	UPDATEUserPassword(namepass vh.NamePass) error
+	UPDATEUserPassword(namepass user.NamePass) error
 }

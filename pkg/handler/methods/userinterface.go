@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/hashing"
+	"github.com/mikerumy/vhosting/internal/response"
 	user "github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -26,35 +27,35 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 	err := c.BindJSON(&usr)
 	if err != nil {
 		logrus.Debugln("cannot bind user. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if usr.Username == "" || usr.PasswordHash == "" {
 		logrus.Errorln("entered empty username or password")
-		vh.ErrorResponse(c, vh.ErrorEmptyRequired())
+		response.ErrorResponse(c, vh.ErrorEmptyRequired())
 		return
 	}
 	if findSpaces(usr.Username) {
 		logrus.Errorln("entered spaces in username input")
-		vh.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		response.ErrorResponse(c, vh.ErrorUsernameSpaces())
 		return
 	}
 	if findSpaces(usr.PasswordHash) {
 		logrus.Errorln("entered spaces in password input")
-		vh.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		response.ErrorResponse(c, vh.ErrorPasswordSpaces())
 		return
 	}
 
 	exist, err := h.services.UserInterface.CheckUserExistence(usr.Username)
 	if err != nil {
 		logrus.Debugln("cannot query CheckUserExistence. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if exist {
 		logrus.Errorln("entered username already in use")
-		vh.ErrorResponse(c, vh.ErrorUsernameUsed())
+		response.ErrorResponse(c, vh.ErrorUsernameUsed())
 		return
 	}
 
@@ -65,11 +66,11 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 	err = h.services.UserInterface.POSTUser(usr)
 	if err != nil {
 		logrus.Debugln("cannot query POSTUser. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusCreated, "User created.")
+	response.MessageResponse(c, http.StatusCreated, "User created.")
 }
 
 func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
@@ -77,7 +78,7 @@ func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Debugln("cannot convert input param id to type int. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -85,11 +86,11 @@ func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 	usr, err = h.services.UserInterface.GETUser(id)
 	if err != nil {
 		logrus.Debugln("cannot query GETUser. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusOK, usr)
+	response.MessageResponse(c, http.StatusOK, usr)
 }
 
 func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
@@ -97,11 +98,11 @@ func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
 	users, err := h.services.UserInterface.GETAllUsers()
 	if err != nil {
 		logrus.Debugln("cannot query GETAllUsers. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusOK, users)
+	response.MessageResponse(c, http.StatusOK, users)
 }
 
 func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
@@ -109,7 +110,7 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Debugln("cannot convert input param id to type int. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -117,7 +118,7 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 	err = c.BindJSON(&usr)
 	if err != nil {
 		logrus.Debugln("cannot bind user. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -125,29 +126,29 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 	err = h.services.UserInterface.PATCHUser(id, usr)
 	if err != nil {
 		logrus.Debugln("cannot query PATCHUser. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusOK, "User partially updated.")
+	response.MessageResponse(c, http.StatusOK, "User partially updated.")
 }
 
 func (h *UserInterfaceHandler) DELETEUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		logrus.Debugln("cannot convert input param id to type int. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.UserInterface.DELETEUser(id)
 	if err != nil {
 		logrus.Debugln("cannot query DELETEUser. error:", err.Error())
-		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
+		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusOK, "User deleted.")
+	response.MessageResponse(c, http.StatusOK, "User deleted.")
 }
 
 func findSpaces(str string) bool {

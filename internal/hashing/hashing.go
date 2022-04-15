@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/user"
 )
 
 const (
@@ -46,8 +46,8 @@ func GenerateToken(username, password string) (string, error) {
 	return token.SignedString([]byte(signingKey))
 }
 
-func ParseToken(accessToken string) (vh.NamePass, error) {
-	var namepass vh.NamePass
+func ParseToken(accessToken string) (user.NamePass, error) {
+	var namepass user.NamePass
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {

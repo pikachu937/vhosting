@@ -4,8 +4,8 @@ import "github.com/gin-gonic/gin"
 
 const (
 	CookieUserSettings = "user-settings"
-	CookieLiveDay      = 86400 // 24 hours
-	CookieLiveExpire   = -1    // Expires now
+	CookieLiveDay      = 60 * 60 * 24 // 24 hours
+	CookieLiveExpire   = -1           // Expires now
 )
 
 func SendCookie(c *gin.Context, name, value string, time int) {

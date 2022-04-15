@@ -12,3 +12,8 @@ type User struct {
 	DateJoined   string `json:"date-joined"  db:"date_joined"`
 	LastLogin    string `json:"last-login"   db:"last_login"`
 }
+
+type NamePass struct {
+	Username     string `json:"username" db:"username"`
+	PasswordHash string `json:"password" db:"password_hash"`
+}

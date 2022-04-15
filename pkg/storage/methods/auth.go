@@ -7,6 +7,7 @@ import (
 	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/config"
 	"github.com/mikerumy/vhosting/internal/session"
+	user "github.com/mikerumy/vhosting/internal/user"
 )
 
 type AuthorizationStorage struct {
@@ -34,7 +35,7 @@ func (r *AuthorizationStorage) POSTSession(sess session.Session) error {
 	return nil
 }
 
-func (r *AuthorizationStorage) GETNamePass(namepass vh.NamePass) error {
+func (r *AuthorizationStorage) GETNamePass(namepass user.NamePass) error {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
@@ -44,7 +45,7 @@ func (r *AuthorizationStorage) GETNamePass(namepass vh.NamePass) error {
 	cnd := fmt.Sprintf("%s=$1 AND %s=$2", vh.Username, vh.PassHash)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
-	var newNamePass vh.NamePass
+	var newNamePass user.NamePass
 	err := db.Get(&newNamePass, query, namepass.Username, namepass.PasswordHash)
 	if err != nil {
 		return err
@@ -92,7 +93,7 @@ func (r *AuthorizationStorage) UPDATELoginTimestamp(username, timestamp string) 
 	return nil
 }
 
-func (r *AuthorizationStorage) UPDATEUserPassword(namepass vh.NamePass) error {
+func (r *AuthorizationStorage) UPDATEUserPassword(namepass user.NamePass) error {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
