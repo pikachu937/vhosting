@@ -6,6 +6,7 @@ import (
 
 	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/config"
+	"github.com/mikerumy/vhosting/internal/session"
 )
 
 type AuthorizationStorage struct {
@@ -16,7 +17,7 @@ func NewAuthorizationStorage(cfg config.DBConfig) *AuthorizationStorage {
 	return &AuthorizationStorage{cfg: cfg}
 }
 
-func (r *AuthorizationStorage) POSTSession(session vh.Session) error {
+func (r *AuthorizationStorage) POSTSession(sess session.Session) error {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
@@ -25,7 +26,7 @@ func (r *AuthorizationStorage) POSTSession(session vh.Session) error {
 	val := "($1, $2)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	_, err := db.Query(query, session.Content, session.CreationDate)
+	_, err := db.Query(query, sess.Content, sess.CreationDate)
 	if err != nil {
 		return err
 	}

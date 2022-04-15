@@ -1,9 +1,12 @@
 package storage
 
-import vh "github.com/mikerumy/vhosting"
+import (
+	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/session"
+)
 
 type Authorization interface {
-	POSTSession(session vh.Session) error
+	POSTSession(sess session.Session) error
 	GETNamePass(namepass vh.NamePass) error
 	DELETECurrentSession(cookieValue string) error
 	UPDATELoginTimestamp(username, timestamp string) error

@@ -1,4 +1,4 @@
-package vh
+package session
 
 type Session struct {
 	Id           int    `db:"id"`

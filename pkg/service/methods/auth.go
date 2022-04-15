@@ -2,6 +2,7 @@ package service
 
 import (
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/session"
 	storage "github.com/mikerumy/vhosting/pkg/storage/interfaces"
 )
 
@@ -13,8 +14,8 @@ func NewAuthService(stor storage.Authorization) *AuthService {
 	return &AuthService{stor: stor}
 }
 
-func (s *AuthService) POSTSession(session vh.Session) error {
-	return s.stor.POSTSession(session)
+func (s *AuthService) POSTSession(sess session.Session) error {
+	return s.stor.POSTSession(sess)
 }
 
 func (s *AuthService) GETNamePass(namepass vh.NamePass) error {

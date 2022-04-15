@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
 )
@@ -70,10 +71,10 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	}
 
 	var thisTimestamp string = vh.MakeTimestamp()
-	var session vh.Session
-	session.Content = token
-	session.CreationDate = thisTimestamp
-	err = h.services.Authorization.POSTSession(session)
+	var sess session.Session
+	sess.Content = token
+	sess.CreationDate = thisTimestamp
+	err = h.services.Authorization.POSTSession(sess)
 	if err != nil {
 		logrus.Debugln("cannot query POSTSession. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
@@ -137,7 +138,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	var cookie *http.Cookie
 	cookie, err = c.Request.Cookie(vh.CookieUserSettings)
 	if err != nil {
-		// logout and delete session
+		// logout and delete sess
 		logrus.Debugln("you must be signed-in for changing password. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -146,7 +147,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	var tokenNamepass vh.NamePass
 	tokenNamepass, err = vh.ParseToken(cookie.Value)
 	if err != nil {
-		// logout and delete session
+		// logout and delete sess
 		logrus.Debugln("cannot parse token. error:", err.Error())
 		vh.DebugResponse(c, http.StatusInternalServerError, err.Error())
 		return
