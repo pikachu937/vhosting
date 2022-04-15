@@ -1,4 +1,4 @@
-package vh
+package user
 
 type User struct {
 	Id           int    `json:"id"           db:"id"`

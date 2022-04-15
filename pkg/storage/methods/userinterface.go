@@ -7,6 +7,7 @@ import (
 
 	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/config"
+	user "github.com/mikerumy/vhosting/internal/user"
 )
 
 type UserInterfaceStorage struct {
@@ -53,7 +54,7 @@ func (r *UserInterfaceStorage) CheckUserExistence(idOrUsername interface{}) (boo
 	return true, nil
 }
 
-func (r *UserInterfaceStorage) POSTUser(user vh.User) error {
+func (r *UserInterfaceStorage) POSTUser(usr user.User) error {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
@@ -63,8 +64,8 @@ func (r *UserInterfaceStorage) POSTUser(user vh.User) error {
 	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	_, err := db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff,
-		user.FirstName, user.LastName, user.DateJoined, user.LastLogin)
+	_, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperUser, usr.IsStaff,
+		usr.FirstName, usr.LastName, usr.DateJoined, usr.LastLogin)
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func (r *UserInterfaceStorage) POSTUser(user vh.User) error {
 	return nil
 }
 
-func (r *UserInterfaceStorage) GETUser(id int) (*vh.User, error) {
+func (r *UserInterfaceStorage) GETUser(id int) (*user.User, error) {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
@@ -83,16 +84,16 @@ func (r *UserInterfaceStorage) GETUser(id int) (*vh.User, error) {
 	cnd := fmt.Sprintf("%s=$1", vh.Id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
-	var user vh.User
-	err := db.Get(&user, query, id)
+	var usr user.User
+	err := db.Get(&usr, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &usr, nil
 }
 
-func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
+func (r *UserInterfaceStorage) GETAllUsers() (map[int]*user.User, error) {
 	db := vh.NewDBConnection(r.cfg)
 	defer vh.CloseDBConnection(db)
 
@@ -108,18 +109,18 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 	}
 	defer rows.Close()
 
-	var users = map[int]*vh.User{}
-	var user vh.User
+	var users = map[int]*user.User{}
+	var usr user.User
 	for rows.Next() {
-		err = rows.Scan(&user.Id, &user.Username, &user.PasswordHash, &user.IsActive, &user.IsSuperUser,
-			&user.IsStaff, &user.FirstName, &user.LastName, &user.DateJoined, &user.LastLogin)
+		err = rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperUser,
+			&usr.IsStaff, &usr.FirstName, &usr.LastName, &usr.DateJoined, &usr.LastLogin)
 		if err != nil {
 			return nil, err
 		}
-		users[user.Id] = &vh.User{Id: user.Id, Username: user.Username, PasswordHash: user.PasswordHash,
-			IsActive: user.IsActive, IsSuperUser: user.IsSuperUser, IsStaff: user.IsStaff,
-			FirstName: user.FirstName, LastName: user.LastName, DateJoined: user.DateJoined,
-			LastLogin: user.LastLogin}
+		users[usr.Id] = &user.User{Id: usr.Id, Username: usr.Username, PasswordHash: usr.PasswordHash,
+			IsActive: usr.IsActive, IsSuperUser: usr.IsSuperUser, IsStaff: usr.IsStaff,
+			FirstName: usr.FirstName, LastName: usr.LastName, DateJoined: usr.DateJoined,
+			LastLogin: usr.LastLogin}
 	}
 
 	err = rows.Err()
@@ -134,7 +135,7 @@ func (r *UserInterfaceStorage) GETAllUsers() (map[int]*vh.User, error) {
 	return users, nil
 }
 
-func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
+func (r *UserInterfaceStorage) PATCHUser(id int, usr user.User) error {
 	exist, err := r.CheckUserExistence(id)
 	if err != nil {
 		return err
@@ -159,8 +160,8 @@ func (r *UserInterfaceStorage) PATCHUser(id int, user vh.User) error {
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows
-	rows, err = db.Query(query, user.Username, user.PasswordHash, user.IsActive, user.IsSuperUser,
-		user.IsStaff, user.FirstName, user.LastName, id)
+	rows, err = db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperUser,
+		usr.IsStaff, usr.FirstName, usr.LastName, id)
 	if err != nil {
 		return err
 	}

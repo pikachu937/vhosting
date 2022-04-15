@@ -1,8 +1,9 @@
 package service
 
 import (
-	vh "github.com/mikerumy/vhosting"
 	storage "github.com/mikerumy/vhosting/pkg/storage/interfaces"
+
+	user "github.com/mikerumy/vhosting/internal/user"
 )
 
 type UserInterfaceService struct {
@@ -17,20 +18,20 @@ func (s *UserInterfaceService) CheckUserExistence(idOrUsername interface{}) (boo
 	return s.stor.CheckUserExistence(idOrUsername)
 }
 
-func (s *UserInterfaceService) POSTUser(user vh.User) error {
-	return s.stor.POSTUser(user)
+func (s *UserInterfaceService) POSTUser(usr user.User) error {
+	return s.stor.POSTUser(usr)
 }
 
-func (s *UserInterfaceService) GETUser(id int) (*vh.User, error) {
+func (s *UserInterfaceService) GETUser(id int) (*user.User, error) {
 	return s.stor.GETUser(id)
 }
 
-func (s *UserInterfaceService) GETAllUsers() (map[int]*vh.User, error) {
+func (s *UserInterfaceService) GETAllUsers() (map[int]*user.User, error) {
 	return s.stor.GETAllUsers()
 }
 
-func (s *UserInterfaceService) PATCHUser(id int, user vh.User) error {
-	return s.stor.PATCHUser(id, user)
+func (s *UserInterfaceService) PATCHUser(id int, usr user.User) error {
+	return s.stor.PATCHUser(id, usr)
 }
 
 func (s *UserInterfaceService) DELETEUser(id int) error {

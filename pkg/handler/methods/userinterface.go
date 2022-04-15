@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	vh "github.com/mikerumy/vhosting"
+	user "github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
 )
@@ -20,31 +21,31 @@ func NewUserInterfaceHandler(services *service.Service) *UserInterfaceHandler {
 }
 
 func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
-	var user vh.User
-	err := c.BindJSON(&user)
+	var usr user.User
+	err := c.BindJSON(&usr)
 	if err != nil {
 		logrus.Debugln("cannot bind user. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if user.Username == "" || user.PasswordHash == "" {
+	if usr.Username == "" || usr.PasswordHash == "" {
 		logrus.Errorln("entered empty username or password")
 		vh.ErrorResponse(c, vh.ErrorEmptyRequired())
 		return
 	}
-	if findSpaces(user.Username) {
+	if findSpaces(usr.Username) {
 		logrus.Errorln("entered spaces in username input")
 		vh.ErrorResponse(c, vh.ErrorUsernameSpaces())
 		return
 	}
-	if findSpaces(user.PasswordHash) {
+	if findSpaces(usr.PasswordHash) {
 		logrus.Errorln("entered spaces in password input")
 		vh.ErrorResponse(c, vh.ErrorPasswordSpaces())
 		return
 	}
 
-	exist, err := h.services.UserInterface.CheckUserExistence(user.Username)
+	exist, err := h.services.UserInterface.CheckUserExistence(usr.Username)
 	if err != nil {
 		logrus.Debugln("cannot query CheckUserExistence. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
@@ -56,11 +57,11 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 		return
 	}
 
-	user.PasswordHash = vh.GeneratePasswordHash(user.PasswordHash)
-	user.DateJoined = vh.MakeTimestamp()
-	user.LastLogin = user.DateJoined
-	user.IsActive = true
-	err = h.services.UserInterface.POSTUser(user)
+	usr.PasswordHash = vh.GeneratePasswordHash(usr.PasswordHash)
+	usr.DateJoined = vh.MakeTimestamp()
+	usr.LastLogin = usr.DateJoined
+	usr.IsActive = true
+	err = h.services.UserInterface.POSTUser(usr)
 	if err != nil {
 		logrus.Debugln("cannot query POSTUser. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
@@ -79,19 +80,19 @@ func (h *UserInterfaceHandler) GETUser(c *gin.Context) {
 		return
 	}
 
-	var user *vh.User
-	user, err = h.services.UserInterface.GETUser(id)
+	var usr *user.User
+	usr, err = h.services.UserInterface.GETUser(id)
 	if err != nil {
 		logrus.Debugln("cannot query GETUser. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.MessageResponse(c, http.StatusOK, user)
+	vh.MessageResponse(c, http.StatusOK, usr)
 }
 
 func (h *UserInterfaceHandler) GETAllUsers(c *gin.Context) {
-	var users map[int]*vh.User
+	var users map[int]*user.User
 	users, err := h.services.UserInterface.GETAllUsers()
 	if err != nil {
 		logrus.Debugln("cannot query GETAllUsers. error:", err.Error())
@@ -111,16 +112,16 @@ func (h *UserInterfaceHandler) PATCHUser(c *gin.Context) {
 		return
 	}
 
-	var user vh.User
-	err = c.BindJSON(&user)
+	var usr user.User
+	err = c.BindJSON(&usr)
 	if err != nil {
 		logrus.Debugln("cannot bind user. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user.PasswordHash = vh.GeneratePasswordHash(user.PasswordHash)
-	err = h.services.UserInterface.PATCHUser(id, user)
+	usr.PasswordHash = vh.GeneratePasswordHash(usr.PasswordHash)
+	err = h.services.UserInterface.PATCHUser(id, usr)
 	if err != nil {
 		logrus.Debugln("cannot query PATCHUser. error:", err.Error())
 		vh.DebugResponse(c, http.StatusBadRequest, err.Error())
