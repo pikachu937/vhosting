@@ -4,10 +4,10 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	vh "github.com/mikerumy/vhosting"
+	errors "github.com/mikerumy/vhosting/internal/errors"
 )
 
-func ErrorResponse(c *gin.Context, err vh.CustomError) {
+func ErrorResponse(c *gin.Context, err errors.CustomError) {
 	c.AbortWithStatusJSON(err.StatusCode, ErrorName{Error: ErrorContent{Code: err.ErrorCode, Message: err.ErrorMessage}})
 }
 

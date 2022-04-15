@@ -1,6 +1,8 @@
-package vh
+package dbsetting
 
 const (
+	connTimeOut = 5
+
 	UsersTable  = "users"
 	Id          = "id"
 	Username    = "username"

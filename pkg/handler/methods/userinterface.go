@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	vh "github.com/mikerumy/vhosting"
+	errors "github.com/mikerumy/vhosting/internal/errors"
 	"github.com/mikerumy/vhosting/internal/hashing"
 	"github.com/mikerumy/vhosting/internal/response"
+	timestamp "github.com/mikerumy/vhosting/internal/timestamp"
 	user "github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -33,17 +34,17 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 
 	if usr.Username == "" || usr.PasswordHash == "" {
 		logrus.Errorln("entered empty username or password")
-		response.ErrorResponse(c, vh.ErrorEmptyRequired())
+		response.ErrorResponse(c, errors.ErrorEmptyRequired())
 		return
 	}
 	if findSpaces(usr.Username) {
 		logrus.Errorln("entered spaces in username input")
-		response.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		response.ErrorResponse(c, errors.ErrorUsernameSpaces())
 		return
 	}
 	if findSpaces(usr.PasswordHash) {
 		logrus.Errorln("entered spaces in password input")
-		response.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		response.ErrorResponse(c, errors.ErrorPasswordSpaces())
 		return
 	}
 
@@ -55,12 +56,12 @@ func (h *UserInterfaceHandler) POSTUser(c *gin.Context) {
 	}
 	if exist {
 		logrus.Errorln("entered username already in use")
-		response.ErrorResponse(c, vh.ErrorUsernameUsed())
+		response.ErrorResponse(c, errors.ErrorUsernameUsed())
 		return
 	}
 
 	usr.PasswordHash = hashing.GeneratePasswordHash(usr.PasswordHash)
-	usr.DateJoined = vh.MakeTimestamp()
+	usr.DateJoined = timestamp.MakeTimestamp()
 	usr.LastLogin = usr.DateJoined
 	usr.IsActive = true
 	err = h.services.UserInterface.POSTUser(usr)

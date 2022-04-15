@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	vh "github.com/mikerumy/vhosting"
 	"github.com/mikerumy/vhosting/internal/config"
+	server "github.com/mikerumy/vhosting/internal/server"
 	"github.com/mikerumy/vhosting/pkg/handler"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/mikerumy/vhosting/pkg/storage"
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	// Start Server and init server part of config
-	srv := new(vh.Server)
+	srv := new(server.Server)
 	go func() {
 		srv.Run(cfg, router)
 	}()

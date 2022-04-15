@@ -1,4 +1,4 @@
-package vh
+package server
 
 import (
 	"context"

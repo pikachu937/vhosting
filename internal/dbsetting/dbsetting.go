@@ -1,4 +1,4 @@
-package vh
+package dbsetting
 
 import (
 	"fmt"
@@ -7,10 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mikerumy/vhosting/internal/config"
 	"github.com/sirupsen/logrus"
-)
-
-const (
-	connTimeOut = 5
 )
 
 func NewDBConnection(cfg config.DBConfig) *sqlx.DB {

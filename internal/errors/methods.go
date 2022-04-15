@@ -1,10 +1,4 @@
-package vh
-
-type CustomError struct {
-	StatusCode   int
-	ErrorCode    int
-	ErrorMessage string
-}
+package errors
 
 func ErrorEmptyRequired() CustomError {
 	return CustomError{StatusCode: 400, ErrorCode: 0, ErrorMessage: "Username or password fields cannot be empty."}

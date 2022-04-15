@@ -1,4 +1,4 @@
-package vh
+package cookie
 
 import "github.com/gin-gonic/gin"
 

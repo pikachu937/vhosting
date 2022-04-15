@@ -2,13 +2,14 @@ package handler
 
 import (
 	"net/http"
-	"unicode"
 
 	"github.com/gin-gonic/gin"
-	vh "github.com/mikerumy/vhosting"
+	"github.com/mikerumy/vhosting/internal/cookie"
+	errors "github.com/mikerumy/vhosting/internal/errors"
 	"github.com/mikerumy/vhosting/internal/hashing"
 	"github.com/mikerumy/vhosting/internal/response"
 	"github.com/mikerumy/vhosting/internal/session"
+	timestamp "github.com/mikerumy/vhosting/internal/timestamp"
 	user "github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -33,22 +34,17 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 
 	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
 		logrus.Errorln("entered empty username or password")
-		response.ErrorResponse(c, vh.ErrorEmptyRequired())
-		return
-	}
-	if !unicode.IsLetter(rune(inputNamepass.Username[0])) {
-		logrus.Errorln("entered username not starts with letter")
-		response.ErrorResponse(c, vh.ErrorUsernameLetter())
+		response.ErrorResponse(c, errors.ErrorEmptyRequired())
 		return
 	}
 	if findSpaces(inputNamepass.Username) {
 		logrus.Errorln("entered spaces in username input")
-		response.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		response.ErrorResponse(c, errors.ErrorUsernameSpaces())
 		return
 	}
 	if findSpaces(inputNamepass.PasswordHash) {
 		logrus.Errorln("entered spaces in password input")
-		response.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		response.ErrorResponse(c, errors.ErrorPasswordSpaces())
 		return
 	}
 
@@ -60,7 +56,7 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 	}
 	if !exist {
 		logrus.Errorln("entered invalid username")
-		response.ErrorResponse(c, vh.ErrorUsernameInvalid())
+		response.ErrorResponse(c, errors.ErrorUsernameInvalid())
 		return
 	}
 
@@ -73,7 +69,7 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	var thisTimestamp string = vh.MakeTimestamp()
+	var thisTimestamp string = timestamp.MakeTimestamp()
 	var sess session.Session
 	sess.Content = token
 	sess.CreationDate = thisTimestamp
@@ -84,9 +80,9 @@ func (h *AuthorizationHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	vh.SendCookie(c, vh.CookieUserSettings, token, vh.CookieLiveDay)
+	cookie.SendCookie(c, cookie.CookieUserSettings, token, cookie.CookieLiveDay)
 
-	err = h.services.Authorization.UPDATELoginTimestamp(inputNamepass.Username, vh.MakeTimestamp())
+	err = h.services.Authorization.UPDATELoginTimestamp(inputNamepass.Username, timestamp.MakeTimestamp())
 	if err != nil {
 		logrus.Debugln("cannot query UPDATELoginTimestamp. error:", err.Error())
 		response.DebugResponse(c, http.StatusBadRequest, err.Error())
@@ -107,22 +103,17 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 
 	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
 		logrus.Errorln("entered empty username or password")
-		response.ErrorResponse(c, vh.ErrorEmptyRequired())
-		return
-	}
-	if !unicode.IsLetter(rune(inputNamepass.Username[0])) {
-		logrus.Errorln("entered username not starts with letter")
-		response.ErrorResponse(c, vh.ErrorUsernameLetter())
+		response.ErrorResponse(c, errors.ErrorEmptyRequired())
 		return
 	}
 	if findSpaces(inputNamepass.Username) {
 		logrus.Errorln("entered spaces in username input")
-		response.ErrorResponse(c, vh.ErrorUsernameSpaces())
+		response.ErrorResponse(c, errors.ErrorUsernameSpaces())
 		return
 	}
 	if findSpaces(inputNamepass.PasswordHash) {
 		logrus.Errorln("entered spaces in password input")
-		response.ErrorResponse(c, vh.ErrorPasswordSpaces())
+		response.ErrorResponse(c, errors.ErrorPasswordSpaces())
 		return
 	}
 
@@ -134,12 +125,12 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	}
 	if !exist {
 		logrus.Errorln("entered invalid username")
-		response.ErrorResponse(c, vh.ErrorUsernameInvalid())
+		response.ErrorResponse(c, errors.ErrorUsernameInvalid())
 		return
 	}
 
-	var cookie *http.Cookie
-	cookie, err = c.Request.Cookie(vh.CookieUserSettings)
+	var newCookie *http.Cookie
+	newCookie, err = c.Request.Cookie(cookie.CookieUserSettings)
 	if err != nil {
 		// logout and delete sess
 		logrus.Debugln("you must be signed-in for changing password. error:", err.Error())
@@ -148,7 +139,7 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 	}
 
 	var tokenNamepass user.NamePass
-	tokenNamepass, err = hashing.ParseToken(cookie.Value)
+	tokenNamepass, err = hashing.ParseToken(newCookie.Value)
 	if err != nil {
 		// logout and delete sess
 		logrus.Debugln("cannot parse token. error:", err.Error())
@@ -162,9 +153,9 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	vh.RevokeCookie(c, vh.CookieUserSettings)
+	cookie.RevokeCookie(c, cookie.CookieUserSettings)
 
-	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
+	err = h.services.Authorization.DELETECurrentSession(newCookie.Value)
 	if err != nil {
 		logrus.Debugln("cannot query DELETECurrentSession. error:", err.Error())
 		response.DebugResponse(c, http.StatusBadRequest, err.Error())
@@ -183,19 +174,19 @@ func (h *AuthorizationHandler) ChangePassword(c *gin.Context) {
 }
 
 func (h *AuthorizationHandler) SignOut(c *gin.Context) {
-	var cookie *http.Cookie
-	cookie, err := c.Request.Cookie(vh.CookieUserSettings)
+	var newCookie *http.Cookie
+	newCookie, err := c.Request.Cookie(cookie.CookieUserSettings)
 	if err != nil {
 		logrus.Debugln("you have not signed-in. error:", err.Error())
 		response.DebugResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	vh.RevokeCookie(c, vh.CookieUserSettings)
+	cookie.RevokeCookie(c, cookie.CookieUserSettings)
 
 	// log info with global events
 
-	err = h.services.Authorization.DELETECurrentSession(cookie.Value)
+	err = h.services.Authorization.DELETECurrentSession(newCookie.Value)
 	if err != nil {
 		logrus.Debugln("cannot query DELETECurrentSession. error:", err.Error())
 		response.DebugResponse(c, http.StatusBadRequest, err.Error())

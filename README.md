@@ -7,8 +7,9 @@
 * PATCH         /user-interface/:id        PATCHUser
 * DELETE        /user-interface/:id        DELETEUser
 
-* POST          /auth/sign-up/             POSTUser
 * POST          /auth/sign-in/             POSTUser
+* POST          /auth/change-password/     POSTUser
+* POST          /auth/sign-out/            POSTUser
 
 #### First Starting:
 1. Create file ".env" in a root of your app directory and put line "DB_PASSWORD=your_db_pass" in it.
