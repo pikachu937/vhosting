@@ -1,16 +1,17 @@
-# A scalable REST API Video Hosting
+# Video Hosting Web-Service (REST API)
 
-#### Available methods:
-* POST          /user-interface/           POSTUser
-* GET           /user-interface/:id        GETUser
-* GET           /user-interface/all        GETAllUsers
-* PATCH         /user-interface/:id        PATCHUser
-* DELETE        /user-interface/:id        DELETEUser
+#### Available requests:
 
-* POST          /auth/sign-in/             POSTUser
-* POST          /auth/change-password/     POSTUser
-* POST          /auth/sign-out/            POSTUser
+* POST      /auth/sign-in            CreateUser
+* POST      /auth/change-password    CreateUser
+* POST      /auth/sign-out           CreateUser
+* POST      /user-interface          CreateUser
+* GET       /user-interface/:id      GetUser
+* GET       /user-interface/all      GetAllUsers
+* PATCH     /user-interface/:id      PartiallyUpdateUser
+* DELETE    /user-interface/:id      DeleteUser
 
 #### First Starting:
-1. Create file ".env" in a root of your app directory and put line "DB_PASSWORD=your_db_pass" in it.
-2. Create Database "vhosting_db" in your DBMS and execute SQL query file "postgres_db_up.sql" in that database.
+
+1. Create file ".env" in directory "./configs/" and post variables from example ".env.example".
+2. Create database "vhosting" in your DBMS and create tables by executing SQL query file "vhosting_database.sql".
