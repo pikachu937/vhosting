@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/auth"
-	"github.com/mikerumy/vhosting2/internal/user"
-	"github.com/mikerumy/vhosting2/pkg/response"
+	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type AuthHandler struct {
@@ -90,7 +90,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 
 	exists, err := h.userUseCase.IsUserExists(inputNamepass.Username)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorCheckExistence, err.Error())
+		statement := fmt.Sprintf("%sError: %s.", "user.ErrorCheckExistence", err.Error())
 		statusCode := http.StatusInternalServerError
 		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
 		return

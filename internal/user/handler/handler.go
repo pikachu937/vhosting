@@ -1,12 +1,9 @@
 package handler
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/user"
-	"github.com/mikerumy/vhosting2/pkg/response"
+	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type UserHandler struct {
@@ -22,177 +19,127 @@ func NewUserHandler(useCase user.UserUseCase) *UserHandler {
 func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	usr, err := h.useCase.BindJSONUser(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorBindInput, err.Error())
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorCreateUser+statement)
+		response.ErrorBindInputData(ctx, user.ErrorCreateUser, err)
 		return
 	}
 
 	if usr.Username == "" || usr.PasswordHash == "" {
-		statement := user.ErrorNamepassEmpty
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorCreateUser+statement)
+		response.ErrorErrorNamepassEmpty(ctx, user.ErrorCreateUser)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(usr.Username)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorCheckExistence, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorCreateUser+statement)
+		response.ErrorCheckExistence(ctx, user.ErrorCreateUser, err)
 		return
 	}
 	if exists {
-		statement := "User with entered username is exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorCreateUser+statement)
+		response.ErrorEnteredUsernameIsExist(ctx, user.ErrorCreateUser)
 		return
 	}
 
 	if err := h.useCase.CreateUser(usr); err != nil {
-		statement := fmt.Sprintf("Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorCreateUser+statement)
+		response.ErrorCreateUser(ctx, user.ErrorCreateUser, err)
 		return
 	}
 
-	statement := "User created."
-	statusCode := http.StatusCreated
-	response.MessageResponse(ctx, statusCode, statement)
+	response.InfoUserCreated(ctx)
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context) {
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorIdConverting, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetUser+statement)
+		response.ErrorIdConvertion(ctx, user.ErrorGetUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorCheckExistence, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetUser+statement)
+		response.ErrorCheckExistence(ctx, user.ErrorGetUser, err)
 		return
 	}
 	if !exists {
-		statement := "User with requested ID is not exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetUser+statement)
+		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorGetUser)
 		return
 	}
 
 	usr, err := h.useCase.GetUser(id)
 	if err != nil {
-		statement := fmt.Sprintf("Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetUser+statement)
+		response.ErrorCannotGetUser(ctx, user.ErrorGetUser, err)
 		return
 	}
 
-	statement := usr
-	statusCode := http.StatusOK
-	response.MessageResponse(ctx, statusCode, statement)
+	response.InfoShowUser(ctx, usr)
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 	users, err := h.useCase.GetAllUsers()
 	if err != nil {
-		statement := fmt.Sprintf("Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetAllUsers+statement)
+		response.ErrorCannotGetAllUsers(ctx, user.ErrorGetAllUsers, err)
 		return
 	}
 
 	if users == nil {
-		statement := "No users available."
-		statusCode := http.StatusOK
-		response.ErrorResponse(ctx, statusCode, user.ErrorGetAllUsers+statement)
+		response.ErrorsNoUsersAvailable(ctx, user.ErrorGetAllUsers, err)
 		return
 	}
 
-	statement := users
-	statusCode := http.StatusOK
-	response.MessageResponse(ctx, statusCode, statement)
+	response.InfoShowAllUsers(ctx, users)
 }
 
 func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorIdConverting, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorPartiallyUpdateUser+statement)
+		response.ErrorIdConvertion(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorCheckExistence, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorPartiallyUpdateUser+statement)
+		response.ErrorCheckExistence(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 	if !exists {
-		statement := "User with requested ID is not exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorPartiallyUpdateUser+statement)
+		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorPartiallyUpdateUser)
 		return
 	}
 
 	usr, err := h.useCase.BindJSONUser(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorBindInput, err.Error())
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorPartiallyUpdateUser+statement)
+		response.ErrorBindInputData(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
 	if err := h.useCase.PartiallyUpdateUser(id, usr); err != nil {
-		statement := fmt.Sprintf("Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorPartiallyUpdateUser+statement)
+		response.ErrorsNoUsersAvailable(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
-	statement := "User updated."
-	statusCode := http.StatusOK
-	response.MessageResponse(ctx, statusCode, statement)
+	response.InfoUserUpdated(ctx)
 }
 
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("Cannot convert requested param \"ID\" to type \"int\". Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorDeleteUser+statement)
+		response.ErrorIdConvertion(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		statement := fmt.Sprintf("Cannot check user existence. Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorDeleteUser+statement)
+		response.ErrorCheckExistence(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 	if !exists {
-		statement := "User with requested ID is not exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, user.ErrorDeleteUser+statement)
+		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorDeleteUser)
 		return
 	}
 
 	if err := h.useCase.DeleteUser(id); err != nil {
-		statement := fmt.Sprintf("Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, user.ErrorDeleteUser+statement)
+		response.ErrorCannotDeleteUser(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 
-	statement := "User deleted."
-	statusCode := http.StatusOK
-	response.MessageResponse(ctx, statusCode, statement)
+	response.InfoUserDeleted(ctx)
 }

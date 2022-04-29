@@ -9,6 +9,6 @@ type User struct {
 	IsStaff      bool   `json:"is-staff"     db:"is_staff"`
 	FirstName    string `json:"first-name"   db:"first_name"`
 	LastName     string `json:"last-name"    db:"last_name"`
-	DateJoined   string `json:"date-joined"  db:"date_joined"`
+	JoiningDate  string `json:"joining-date" db:"joining_date"`
 	LastLogin    string `json:"last-login"   db:"last_login"`
 }

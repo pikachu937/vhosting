@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"reflect"
 
-	dbc "github.com/mikerumy/vhosting2/internal/constants/db"
-	"github.com/mikerumy/vhosting2/internal/models"
-	sq "github.com/mikerumy/vhosting2/pkg/constants/sql"
-	"github.com/mikerumy/vhosting2/pkg/database"
+	dbc "github.com/mikerumy/vhosting/internal/constants/db"
+	"github.com/mikerumy/vhosting/internal/models"
+	sq "github.com/mikerumy/vhosting/pkg/constants/sql"
+	"github.com/mikerumy/vhosting/pkg/database"
 )
 
 type UserRepository struct {
@@ -24,14 +24,14 @@ func (r *UserRepository) CreateUser(usr models.User) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", dbc.UsersTable, dbc.Username,
+	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", dbc.TableUsers, dbc.Username,
 		dbc.PassHash, dbc.IsActive, dbc.IsSuperUser, dbc.IsStaff, dbc.FirstName,
-		dbc.LastName, dbc.DateJoined, dbc.LastLogin)
+		dbc.LastName, dbc.JoiningDate, dbc.LastLogin)
 	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
 	_, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperUser, usr.IsStaff,
-		usr.FirstName, usr.LastName, usr.DateJoined, usr.LastLogin)
+		usr.FirstName, usr.LastName, usr.JoiningDate, usr.LastLogin)
 	if err != nil {
 		return err
 	}
@@ -46,8 +46,8 @@ func (r *UserRepository) GetUser(id int) (*models.User, error) {
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", dbc.Id, dbc.Username,
 		dbc.PassHash, dbc.IsActive, dbc.IsSuperUser, dbc.IsStaff, dbc.FirstName,
-		dbc.LastName, dbc.DateJoined, dbc.LastLogin)
-	tbl := dbc.UsersTable
+		dbc.LastName, dbc.JoiningDate, dbc.LastLogin)
+	tbl := dbc.TableUsers
 	cnd := fmt.Sprintf("%s=$1", dbc.Id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
@@ -66,7 +66,7 @@ func (r *UserRepository) GetAllUsers() (map[int]*models.User, error) {
 
 	template := sq.SELECT_COL_FROM_TBL
 	col := "*"
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	query := fmt.Sprintf(template, col, tbl)
 
 	var rows *sql.Rows
@@ -80,13 +80,13 @@ func (r *UserRepository) GetAllUsers() (map[int]*models.User, error) {
 	var usr models.User
 	for rows.Next() {
 		err = rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperUser,
-			&usr.IsStaff, &usr.FirstName, &usr.LastName, &usr.DateJoined, &usr.LastLogin)
+			&usr.IsStaff, &usr.FirstName, &usr.LastName, &usr.JoiningDate, &usr.LastLogin)
 		if err != nil {
 			return nil, err
 		}
 		users[usr.Id] = &models.User{Id: usr.Id, Username: usr.Username, PasswordHash: usr.PasswordHash,
 			IsActive: usr.IsActive, IsSuperUser: usr.IsSuperUser, IsStaff: usr.IsStaff,
-			FirstName: usr.FirstName, LastName: usr.LastName, DateJoined: usr.DateJoined,
+			FirstName: usr.FirstName, LastName: usr.LastName, JoiningDate: usr.JoiningDate,
 			LastLogin: usr.LastLogin}
 	}
 
@@ -107,7 +107,7 @@ func (r *UserRepository) PartiallyUpdateUser(id int, usr models.User) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", dbc.Username, dbc.Username) +
 		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", dbc.PassHash, dbc.PassHash) +
 		fmt.Sprintf("%s=$3, ", dbc.IsActive) +
@@ -134,7 +134,7 @@ func (r *UserRepository) DeleteUser(id int) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.DELETE_FROM_TBL_WHERE_CND
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	cnd := fmt.Sprintf("%s=$1", dbc.Id)
 	query := fmt.Sprintf(template, tbl, cnd)
 
@@ -159,14 +159,14 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 	if reflect.TypeOf(idOrUsername) == reflect.TypeOf(0) {
 		template = sq.SELECT_COL_FROM_TBL_WHERE_CND
 		col = dbc.Id
-		tbl = dbc.UsersTable
+		tbl = dbc.TableUsers
 		cnd = fmt.Sprintf("%s=$1", dbc.Id)
 		query = fmt.Sprintf(template, col, tbl, cnd)
 		rows, err = db.Query(query, idOrUsername.(int))
 	} else {
 		template = sq.SELECT_COL_FROM_TBL_WHERE_CND
 		col = dbc.Username
-		tbl = dbc.UsersTable
+		tbl = dbc.TableUsers
 		cnd = fmt.Sprintf("%s=$1", dbc.Username)
 		query = fmt.Sprintf(template, col, tbl, cnd)
 		rows, err = db.Query(query, idOrUsername.(string))

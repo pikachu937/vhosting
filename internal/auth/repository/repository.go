@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	dbc "github.com/mikerumy/vhosting2/internal/constants/db"
-	"github.com/mikerumy/vhosting2/internal/models"
-	sq "github.com/mikerumy/vhosting2/pkg/constants/sql"
-	"github.com/mikerumy/vhosting2/pkg/database"
+	dbc "github.com/mikerumy/vhosting/internal/constants/db"
+	"github.com/mikerumy/vhosting/internal/models"
+	sq "github.com/mikerumy/vhosting/pkg/constants/sql"
+	"github.com/mikerumy/vhosting/pkg/database"
 )
 
 type AuthRepository struct {
@@ -24,7 +24,7 @@ func (r *AuthRepository) GetNamepass(namepass models.Namepass) error {
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", dbc.Username, dbc.PassHash)
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	cnd := fmt.Sprintf("%s=$1 AND %s=$2", dbc.Username, dbc.PassHash)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
@@ -42,7 +42,7 @@ func (r *AuthRepository) DeleteSession(token string) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.DELETE_FROM_TBL_WHERE_CND
-	tbl := dbc.SessionsTable
+	tbl := dbc.TableSessions
 	cnd := fmt.Sprintf("%s=$1", dbc.Content)
 	query := fmt.Sprintf(template, tbl, cnd)
 
@@ -61,7 +61,7 @@ func (r *AuthRepository) UpdateUserPassword(namepass models.Namepass) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", dbc.PassHash, dbc.PassHash)
 	cnd := fmt.Sprintf("%s=$2", dbc.Username)
 	query := fmt.Sprintf(template, tbl, val, cnd)
@@ -82,7 +82,7 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := dbc.Id
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	cnd := fmt.Sprintf("%s=$1 AND %s=$2", dbc.Username, dbc.PassHash)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
@@ -107,7 +107,7 @@ func (r *AuthRepository) IsSessionExists(token string) (bool, error) {
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := dbc.Content
-	tbl := dbc.SessionsTable
+	tbl := dbc.TableSessions
 	cnd := fmt.Sprintf("%s=$1", dbc.Content)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 	rows, err := db.Query(query, token)
@@ -130,7 +130,7 @@ func (r *AuthRepository) CreateSession(sess models.Session) error {
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s)", dbc.SessionsTable, dbc.Content, dbc.CreationDate)
+	tbl := fmt.Sprintf("%s (%s, %s)", dbc.TableSessions, dbc.Content, dbc.CreationDate)
 	val := "($1, $2)"
 	query := fmt.Sprintf(template, tbl, val)
 
@@ -147,7 +147,7 @@ func (r *AuthRepository) UpdateLoginTimestamp(username, timestamp string) error 
 	defer database.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
-	tbl := dbc.UsersTable
+	tbl := dbc.TableUsers
 	val := fmt.Sprintf("%s=$1", dbc.LastLogin)
 	cnd := fmt.Sprintf("%s=$2", dbc.Username)
 	query := fmt.Sprintf(template, tbl, val, cnd)

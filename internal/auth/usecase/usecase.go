@@ -2,11 +2,11 @@ package usecase
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/auth"
-	"github.com/mikerumy/vhosting2/internal/models"
-	"github.com/mikerumy/vhosting2/pkg/cookie"
-	"github.com/mikerumy/vhosting2/pkg/hashing"
-	"github.com/mikerumy/vhosting2/pkg/timestamp"
+	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/cookie"
+	"github.com/mikerumy/vhosting/pkg/hashing"
+	"github.com/mikerumy/vhosting/pkg/timestamp"
 )
 
 type AuthUseCase struct {

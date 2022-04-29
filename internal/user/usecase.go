@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/models"
+	"github.com/mikerumy/vhosting/internal/models"
 )
 
 type UserUseCase interface {

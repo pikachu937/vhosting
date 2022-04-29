@@ -45,11 +45,11 @@ CREATE TABLE IF NOT EXISTS public.users (
     is_staff      BOOLEAN                  NOT NULL,
     first_name    VARCHAR(50)              NOT NULL,
     last_name     VARCHAR(50)              NOT NULL,
-    date_joined   TIMESTAMP WITH TIME ZONE NOT NULL,
+    joining_date  TIMESTAMP WITH TIME ZONE NOT NULL,
     last_login    TIMESTAMP WITH TIME ZONE NOT NULL,
 	CONSTRAINT pk_users PRIMARY KEY (id)
 );
-INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, date_joined, last_login) VALUES
+INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, joining_date, last_login) VALUES
 (0, 'superuser', '6a4b40733133447655336f33482365304e376a39474068394b377223507320f3765880a5c269b747e1e906054a4b4a3a991259f1e16b5dde4742cec2319a', 'true',  'true',  'false', '-', '-', '2022-04-01 03:00:00.000000+03', '2022-04-01 03:00:00.000000+03'),
 (1, 'admin',     '6a4b40733133447655336f33482365304e376a39474068394b37722350738c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'true',  'true',  'false', '-', '-', '2022-04-02 03:00:00.000000+03', '2022-04-02 03:00:00.000000+03'),
 (2, 'worker',    '6a4b40733133447655336f33482365304e376a39474068394b377223507387eba76e7f3164534045ba922e7770fb58bbd14ad732bbf5ba6f11cc56989e6e', 'true',  'false', 'true',  '-', '-', '2022-04-03 03:00:00.000000+03', '2022-04-03 03:00:00.000000+03'),
@@ -66,12 +66,15 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 
 
 CREATE TABLE IF NOT EXISTS public.logs (
-    id            SERIAL                   NOT NULL UNIQUE,
-    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    session_owner VARCHAR(50)              NOT NULL,
-    log_message   VARCHAR(300)             NOT NULL,
-    error_code    INTEGER,
-    status_code   INTEGER
+    id             SERIAL                   NOT NULL UNIQUE,
+    session_owner  VARCHAR(50),
+    request_method VARCHAR(7),                              -- "POST", "GET", "PATCH", "DELETE"
+    request_path   VARCHAR(100),
+    status_code    INTEGER,
+    error_level    VARCHAR(7),                              -- "info", "warning", "error", "fatal"
+    error_code     INTEGER,
+    message        VARCHAR(300),
+    creation_date  TIMESTAMP WITH TIME ZONE
 );
 
 

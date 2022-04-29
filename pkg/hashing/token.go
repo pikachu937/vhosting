@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/mikerumy/vhosting2/internal/models"
+	"github.com/mikerumy/vhosting/internal/models"
 )
 
 type tokenClaims struct {
@@ -44,7 +44,7 @@ func ParseToken(tokenContent, signingKey string) (models.Namepass, error) {
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return namepass, errors.New("Token claims are not of type \"*tokenClaims\".")
+		return namepass, errors.New("Token claims are not of type *tokenClaims.")
 	}
 
 	namepass.Username = claims.Username

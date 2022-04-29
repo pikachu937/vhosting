@@ -1,6 +1,6 @@
 package user
 
-import "github.com/mikerumy/vhosting2/internal/models"
+import "github.com/mikerumy/vhosting/internal/models"
 
 type UserCommon interface {
 	CreateUser(usr models.User) error

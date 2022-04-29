@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mikerumy/vhosting2/internal/models"
-	"github.com/sirupsen/logrus"
+	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/response"
 	"github.com/spf13/viper"
 )
 
@@ -25,63 +25,62 @@ func LoadConfig(configPath string) (models.Config, error) {
 		return cfg, err
 	}
 
-	var varName string
-	const message = "Cannot convert cvar \"%s\". Set default value: %d. Error: %s.\n"
+	var cvarName string
 
-	varName = "db.connTimeoutSeconds"
-	dbConnTimeoutSeconds, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "db.connTimeoutSeconds"
+	dbConnTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		dbConnTimeoutSeconds = 5
-		logrus.Warningf(message, varName, dbConnTimeoutSeconds, err.Error())
+		response.WarningCannotConvertCvar(cvarName, dbConnTimeoutSeconds, err)
 	}
 
-	varName = "db.connLatencyMilliseconds"
-	dbConnLatencyMilliseconds, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "db.connLatencyMilliseconds"
+	dbConnLatencyMilliseconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		dbConnLatencyMilliseconds = 100
-		logrus.Warningf(message, varName, dbConnLatencyMilliseconds, err.Error())
+		response.WarningCannotConvertCvar(cvarName, dbConnLatencyMilliseconds, err)
 	}
 
-	varName = "db.logConnStatus"
-	dbLogConnStatus, err := strconv.ParseBool(viper.GetString(varName))
+	cvarName = "db.logConnStatus"
+	dbLogConnStatus, err := strconv.ParseBool(viper.GetString(cvarName))
 	if err != nil {
 		dbLogConnStatus = true
-		logrus.Warningf(message, varName, dbLogConnStatus, err.Error())
+		response.WarningCannotConvertCvar(cvarName, dbLogConnStatus, err)
 	}
 
-	varName = "server.debugMode"
-	serverDebugMode, err := strconv.ParseBool(viper.GetString(varName))
+	cvarName = "server.debugMode"
+	serverDebugMode, err := strconv.ParseBool(viper.GetString(cvarName))
 	if err != nil {
 		serverDebugMode = true
-		logrus.Warningf(message, varName, serverDebugMode, err.Error())
+		response.WarningCannotConvertCvar(cvarName, serverDebugMode, err)
 	}
 
-	varName = "server.maxHeaderBytes"
-	serverMaxHeaderBytes, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "server.maxHeaderBytes"
+	serverMaxHeaderBytes, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverMaxHeaderBytes = 1048576 // 1 megabyte
-		logrus.Warningf(message, varName, serverMaxHeaderBytes, err.Error())
+		response.WarningCannotConvertCvar(cvarName, serverMaxHeaderBytes, err)
 	}
 
-	varName = "server.readTimeoutSeconds"
-	serverReadTimeoutSeconds, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "server.readTimeoutSeconds"
+	serverReadTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverReadTimeoutSeconds = 15
-		logrus.Warningf(message, varName, serverReadTimeoutSeconds, err.Error())
+		response.WarningCannotConvertCvar(cvarName, serverReadTimeoutSeconds, err)
 	}
 
-	varName = "server.writeTimeoutSeconds"
-	serverWriteTimeoutSeconds, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "server.writeTimeoutSeconds"
+	serverWriteTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverWriteTimeoutSeconds = 15
-		logrus.Warningf(message, varName, serverWriteTimeoutSeconds, err.Error())
+		response.WarningCannotConvertCvar(cvarName, serverWriteTimeoutSeconds, err)
 	}
 
-	varName = "session.ttlHours"
-	sessionTTLHours, err := strconv.Atoi(viper.GetString(varName))
+	cvarName = "session.ttlHours"
+	sessionTTLHours, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		sessionTTLHours = 336 // 2 weeks
-		logrus.Warningf(message, varName, sessionTTLHours, err.Error())
+		response.WarningCannotConvertCvar(cvarName, sessionTTLHours, err)
 	}
 
 	cfg = models.Config{

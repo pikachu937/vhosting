@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/user"
+	"github.com/mikerumy/vhosting/internal/user"
 )
 
 func RegisterHTTPEndpoints(router *gin.Engine, uc user.UserUseCase) {

@@ -4,22 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/auth"
-	authhandler "github.com/mikerumy/vhosting2/internal/auth/handler"
-	authrepo "github.com/mikerumy/vhosting2/internal/auth/repository"
-	authusecase "github.com/mikerumy/vhosting2/internal/auth/usecase"
-	"github.com/mikerumy/vhosting2/internal/models"
-	"github.com/mikerumy/vhosting2/internal/user"
-	userhandler "github.com/mikerumy/vhosting2/internal/user/handler"
-	userrepo "github.com/mikerumy/vhosting2/internal/user/repository"
-	userusecase "github.com/mikerumy/vhosting2/internal/user/usecase"
-	"github.com/sirupsen/logrus"
+	"github.com/mikerumy/vhosting/internal/auth"
+	authhandler "github.com/mikerumy/vhosting/internal/auth/handler"
+	authrepo "github.com/mikerumy/vhosting/internal/auth/repository"
+	authusecase "github.com/mikerumy/vhosting/internal/auth/usecase"
+	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/user"
+	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
+	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
+	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
+	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type App struct {
@@ -76,9 +77,9 @@ func (a *App) Run() error {
 	}()
 	time.Sleep(50 * time.Millisecond)
 	if notStarted {
-		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.\n", err.Error()))
+		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.", err.Error()))
 	}
-	logrus.Infof("Server was successfully started at port \"%s\".\n", a.cfg.ServerPort)
+	response.InfoServerWasSuccessfullyStarted(getOutboundIP().String(), a.cfg.ServerPort)
 
 	// Server shut down
 	quit := make(chan os.Signal, 1)
@@ -91,9 +92,21 @@ func (a *App) Run() error {
 	defer shutdown()
 
 	if err := a.httpServer.Shutdown(ctx); err != nil {
-		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.\n", err.Error()))
+		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.", err.Error()))
 	}
 
-	logrus.Infof("Server was gracefully shut down.\n")
+	response.InfoServerWasGracefullyShutDown()
 	return nil
+}
+
+func getOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		response.WarningCannotGetLocalIP(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }

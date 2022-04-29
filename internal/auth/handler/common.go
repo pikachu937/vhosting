@@ -5,10 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting2/internal/auth"
-	"github.com/mikerumy/vhosting2/internal/models"
-	"github.com/mikerumy/vhosting2/internal/user"
-	"github.com/mikerumy/vhosting2/pkg/response"
+	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 func (h *AuthHandler) deleteSessionCookie(ctx *gin.Context, baseError string) bool {
@@ -33,14 +32,14 @@ func (h *AuthHandler) bindCheckQuit(ctx *gin.Context, baseError string) (models.
 	// Read input, check input for emptiness, check name-pass for existance
 	inputNamepass, err := h.useCase.BindJSONNamepass(ctx)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", user.ErrorBindInput, err.Error())
+		statement := fmt.Sprintf("%sError: %s.", "user.ErrorBindInput", err.Error())
 		statusCode := http.StatusBadRequest
 		response.ErrorResponse(ctx, statusCode, baseError+statement)
 		return inputNamepass, true
 	}
 
 	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
-		statement := user.ErrorNamepassEmpty
+		statement := "user.ErrorNamepassEmpty"
 		statusCode := http.StatusBadRequest
 		response.ErrorResponse(ctx, statusCode, baseError+statement)
 		return inputNamepass, true

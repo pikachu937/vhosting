@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/mikerumy/vhosting2/internal/models"
-	"github.com/sirupsen/logrus"
+	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 func NewDBConnection(cfg models.Config) *sqlx.DB {
@@ -34,7 +34,8 @@ func NewDBConnection(cfg models.Config) *sqlx.DB {
 	for t := connTimeout; t > 0; t-- {
 		if db != nil {
 			if cfg.DBLogConnStatus {
-				logrus.Infoln("Established opening of connection to DB. Time of connection:", time.Since(timeAtStarting).Round(time.Millisecond))
+				response.Response(nil, models.Log{Message: fmt.Sprintf("Established opened DB connection in %s.",
+					time.Since(timeAtStarting).Round(time.Millisecond).String())})
 				return db
 			}
 
@@ -44,17 +45,17 @@ func NewDBConnection(cfg models.Config) *sqlx.DB {
 		time.Sleep(time.Second)
 	}
 
-	logrus.Errorf("Time waiting of DB connection exceeded limit (%d seconds).\n", connTimeout)
+	response.Response(nil, models.Log{Message: fmt.Sprintf("Time waiting of DB connection exceeded limit (%d seconds).", connTimeout)})
 	return nil
 }
 
 func CloseDBConnection(cfg models.Config, db *sqlx.DB) {
 	if err := db.Close(); err != nil {
-		logrus.Errorln("Cannot close connection to DB. Error:", err.Error())
+		response.Response(nil, models.Log{Message: fmt.Sprintf("Cannot close DB connection. Error: %s.", err.Error())})
 	}
 
 	if cfg.DBLogConnStatus {
-		logrus.Infoln("Established closing of connection to DB.")
+		response.Response(nil, models.Log{Message: "Established closed connection to DB."})
 		return
 	}
 }
