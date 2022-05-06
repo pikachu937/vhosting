@@ -15,6 +15,9 @@ import (
 	authhandler "github.com/mikerumy/vhosting/internal/auth/handler"
 	authrepo "github.com/mikerumy/vhosting/internal/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/internal/auth/usecase"
+	logging "github.com/mikerumy/vhosting/internal/logging"
+	loggingrepo "github.com/mikerumy/vhosting/internal/logging/repository"
+	loggingusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
@@ -23,20 +26,23 @@ import (
 )
 
 type App struct {
-	httpServer  *http.Server
-	cfg         models.Config
-	userUseCase user.UserUseCase
-	authUseCase auth.AuthUseCase
+	httpServer     *http.Server
+	cfg            models.Config
+	userUseCase    user.UserUseCase
+	authUseCase    auth.AuthUseCase
+	loggingUseCase logging.LoggingUseCase
 }
 
 func NewApp(cfg models.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
+	loggingRepo := loggingrepo.NewLoggingRepository(cfg)
 
 	return &App{
-		cfg:         cfg,
-		userUseCase: userusecase.NewUserUseCase(cfg, userRepo),
-		authUseCase: authusecase.NewAuthUseCase(cfg, authRepo),
+		cfg:            cfg,
+		userUseCase:    userusecase.NewUserUseCase(cfg, userRepo),
+		authUseCase:    authusecase.NewAuthUseCase(cfg, authRepo),
+		loggingUseCase: loggingusecase.NewLoggingUseCase(cfg, loggingRepo),
 	}
 }
 
@@ -51,8 +57,8 @@ func (a *App) Run() error {
 	// Init Gin handler
 	router := gin.New()
 
-	// Set up handlers
-	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase)
+	// Register web routes
+	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.loggingUseCase)
 	userhandler.RegisterHTTPEndpoints(router, a.userUseCase)
 
 	// HTTP Server

@@ -1,8 +1,7 @@
 package dbconsts
 
 const (
-	TableUsers = "users"
-
+	TableUsers  = "users"
 	Id          = "id"
 	Username    = "username"
 	PassHash    = "password_hash"
@@ -15,16 +14,18 @@ const (
 	LastLogin   = "last_login"
 
 	TableSessions = "sessions"
+	Content       = "content"
+	CreationDate  = "creation_date"
 
-	Content      = "content"
-	CreationDate = "creation_date"
-
-	TableLogs = "logs"
-
+	TableLogs     = "logs"
 	SessionOwner  = "session_owner"
 	RequestMethod = "request_method"
 	RequestPath   = "request_path"
 	StatusCode    = "status_code"
 	ErrorCode     = "error_code"
 	Message       = "message"
+
+	TableUserGroups = "user_groups"
+	UserId          = "user_id"
+	GroupId         = "group_id"
 )

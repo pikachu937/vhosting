@@ -8,14 +8,16 @@ import (
 )
 
 type AuthHandler struct {
-	useCase     auth.AuthUseCase
-	userUseCase user.UserUseCase
+	useCase        auth.AuthUseCase
+	userUseCase    user.UserUseCase
+	loggingUseCase logging.LoggingUseCase
 }
 
-func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase) *AuthHandler {
+func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase, loggingUseCase logging.LoggingUseCase) *AuthHandler {
 	return &AuthHandler{
-		useCase:     useCase,
-		userUseCase: userUseCase,
+		useCase:        useCase,
+		userUseCase:    userUseCase,
+		loggingUseCase: loggingUseCase,
 	}
 }
 
@@ -23,9 +25,23 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	logging.SetTimestamp(ctx)
 	logging.ResetSessionOwner(ctx)
 
-	h.deleteSessionCookie(ctx, auth.ErrorSignIn)
-	inputNamepass, quit := h.bindCheckQuit(ctx, auth.ErrorSignIn)
-	if quit {
+	cookieToken := h.useCase.ReadCookie(ctx)
+	if cookieToken != "" {
+		if err := h.useCase.DeleteSession(cookieToken); err != nil {
+			auth.ErrorCannotDeleteSession(ctx, auth.ErrorSignIn, err)
+			return
+		}
+		h.useCase.DeleteCookie(ctx)
+	}
+
+	inputNamepass, err := h.useCase.BindJSONNamepass(ctx)
+	if err != nil {
+		user.ErrorCannotBindInputData(ctx, auth.ErrorSignIn, err)
+		return
+	}
+
+	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
+		user.ErrorUsernameOrPasswordCannotBeEmpty(ctx, auth.ErrorSignIn)
 		return
 	}
 
@@ -39,6 +55,8 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 		return
 	}
 
+	logging.SetSessionOwner(ctx, inputNamepass.Username)
+
 	newToken, err := h.useCase.GenerateToken(inputNamepass)
 	if err != nil {
 		auth.ErrorCannotGenerateToken(ctx, auth.ErrorSignIn, err)
@@ -51,29 +69,42 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	}
 
 	h.useCase.SendCookie(ctx, newToken)
-	logging.SetSessionOwner(ctx, inputNamepass.Username)
+
 	auth.InfoYouHaveSuccessfullySignedIn(ctx)
+	// h.loggingUseCase.CreateLogRecord(models.Log{Message: "Hello!"})
 }
 
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	logging.SetTimestamp(ctx)
 	logging.ResetSessionOwner(ctx)
 
-	token := h.useCase.ReadCookie(ctx)
-	if token == "" {
+	cookieToken := h.useCase.ReadCookie(ctx)
+	if cookieToken == "" {
 		auth.ErrorYouMustBeSignedInForChangingPassword(ctx, auth.ErrorChangePassword)
 		return
 	}
 
-	cookieNamepass, err := h.useCase.ParseToken(token)
+	cookieNamepass, err := h.useCase.ParseToken(cookieToken)
 	if err != nil {
 		auth.ErrorCannotParseToken(ctx, auth.ErrorChangePassword, err)
 		return
 	}
 
-	h.deleteSessionCookie(ctx, auth.ErrorChangePassword)
-	inputNamepass, quit := h.bindCheckQuit(ctx, auth.ErrorChangePassword)
-	if quit {
+	if err := h.useCase.DeleteSession(cookieToken); err != nil {
+		auth.ErrorCannotDeleteSession(ctx, auth.ErrorChangePassword, err)
+		return
+	}
+
+	h.useCase.DeleteCookie(ctx)
+
+	inputNamepass, err := h.useCase.BindJSONNamepass(ctx)
+	if err != nil {
+		user.ErrorCannotBindInputData(ctx, auth.ErrorChangePassword, err)
+		return
+	}
+
+	if inputNamepass.Username == "" || inputNamepass.PasswordHash == "" {
+		user.ErrorUsernameOrPasswordCannotBeEmpty(ctx, auth.ErrorChangePassword)
 		return
 	}
 
@@ -87,6 +118,8 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
+	logging.SetSessionOwner(ctx, cookieNamepass.Username)
+
 	if inputNamepass.Username != cookieNamepass.Username {
 		auth.ErrorEnteredUsernameIsIncorrect(ctx, auth.ErrorChangePassword)
 		return
@@ -98,7 +131,6 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	logging.SetSessionOwner(ctx, cookieNamepass.Username)
 	auth.InfoYouHaveSuccessfullyChangedPassword(ctx)
 }
 
@@ -106,13 +138,13 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	logging.SetTimestamp(ctx)
 	logging.ResetSessionOwner(ctx)
 
-	token := h.useCase.ReadCookie(ctx)
-	if token == "" {
+	cookieToken := h.useCase.ReadCookie(ctx)
+	if cookieToken == "" {
 		auth.ErrorYouMustBeSignedInForSignOut(ctx, auth.ErrorSignOut)
 		return
 	}
 
-	cookieNamepass, err := h.useCase.ParseToken(token)
+	cookieNamepass, err := h.useCase.ParseToken(cookieToken)
 	if err != nil {
 		auth.ErrorCannotParseToken(ctx, auth.ErrorSignOut, err)
 		return
@@ -128,12 +160,14 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 		return
 	}
 
-	sessDeleted := h.deleteSessionCookie(ctx, auth.ErrorSignOut)
-	if !sessDeleted {
-		auth.ErrorYouMustBeSignedIn(ctx, auth.ErrorSignOut)
+	logging.SetSessionOwner(ctx, cookieNamepass.Username)
+
+	if err := h.useCase.DeleteSession(cookieToken); err != nil {
+		auth.ErrorCannotDeleteSession(ctx, auth.ErrorSignIn, err)
 		return
 	}
 
-	logging.SetSessionOwner(ctx, cookieNamepass.Username)
+	h.useCase.DeleteCookie(ctx)
+
 	auth.InfoYouHaveSuccessfullySignedOut(ctx)
 }

@@ -3,8 +3,10 @@ package response
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/internal/auth/handler"
 	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/pkg/timestamp"
@@ -24,12 +26,10 @@ type ErrorData struct {
 }
 
 func Response(ctx *gin.Context, log models.Log) {
-	log.CreationDate = timestamp.WriteThisTimestamp()
-	var err error
+	// Сomplete log
+	if isHTTPRequest(ctx) {
+		var err error
 
-	printLine := log.ErrorLevel + "\t"
-
-	if ctx != nil {
 		log.CreationDate, err = logging.ReadTimestamp(ctx)
 		if err != nil {
 			ErrorCannotResponseProperly(ctx, err)
@@ -42,11 +42,17 @@ func Response(ctx *gin.Context, log models.Log) {
 
 		log.RequestMethod = ctx.Request.Method
 		log.RequestPath = ctx.Request.URL.Path
+	} else {
+		log.CreationDate = timestamp.WriteThisTimestamp()
+	}
 
-		printLine += log.SessionOwner + HTTPLogIndent +
-			log.RequestMethod + HTTPLogIndent +
-			log.RequestPath + HTTPLogIndent +
-			fmt.Sprintf("%d", log.StatusCode) + HTTPLogIndent
+	// Print line in console
+	printLine := log.ErrorLevel + "\t"
+	if isHTTPRequest(ctx) {
+		printLine += log.SessionOwner + HTTPPrintIndent +
+			log.RequestMethod + HTTPPrintIndent +
+			log.RequestPath + HTTPPrintIndent +
+			strconv.Itoa(log.StatusCode) + HTTPPrintIndent
 	}
 
 	errorLine := ""
@@ -55,8 +61,7 @@ func Response(ctx *gin.Context, log models.Log) {
 	}
 
 	if reflect.TypeOf(log.Message) == reflect.TypeOf("") {
-		errorLine += log.Message.(string)
-		printLine += errorLine + "\t"
+		printLine += errorLine + log.Message.(string) + "\t"
 	} else {
 		if fmt.Sprintf("%T", log.Message) == "*models.User" {
 			printLine += "Got user's data.\t"
@@ -70,7 +75,8 @@ func Response(ctx *gin.Context, log models.Log) {
 
 	fmt.Println(printLine)
 
-	if ctx != nil {
+	// Send API response
+	if isHTTPRequest(ctx) {
 		if log.ErrorLevel == ErrLevelError {
 			ctx.AbortWithStatusJSON(log.StatusCode, ErrorOutput{
 				ErrorData{ErrCode: log.ErrorCode, Statement: log.Message.(string)},
@@ -85,4 +91,15 @@ func Response(ctx *gin.Context, log models.Log) {
 
 		ctx.AbortWithStatusJSON(log.StatusCode, log.Message)
 	}
+
+	var h *handler.AuthHandler
+	h.loggingUseCase.CreateLogRecord()
+	h.loggingUseCase.CreateLogRecord(models.Log{Message: "Hello!"})
+}
+
+func isHTTPRequest(ctx *gin.Context) bool {
+	if ctx != nil {
+		return true
+	}
+	return false
 }

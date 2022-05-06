@@ -5,5 +5,5 @@ const (
 	ErrLevelWarning = "warning"
 	ErrLevelError   = "error"
 	ErrLevelFatal   = "fatal"
-	HTTPLogIndent   = "    "
+	HTTPPrintIndent = "    "
 )
