@@ -1,6 +1,8 @@
 package auth
 
-import "github.com/mikerumy/vhosting/internal/models"
+import (
+	"github.com/mikerumy/vhosting/internal/models"
+)
 
 type AuthCommon interface {
 	GetNamepass(namepass models.Namepass) error

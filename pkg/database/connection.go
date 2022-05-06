@@ -6,7 +6,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mikerumy/vhosting/internal/models"
-	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 func NewDBConnection(cfg models.Config) *sqlx.DB {
@@ -34,28 +33,25 @@ func NewDBConnection(cfg models.Config) *sqlx.DB {
 	for t := connTimeout; t > 0; t-- {
 		if db != nil {
 			if cfg.DBLogConnStatus {
-				response.Response(nil, models.Log{Message: fmt.Sprintf("Established opened DB connection in %s.",
-					time.Since(timeAtStarting).Round(time.Millisecond).String())})
+				InfoEstablishedOpenedDBConnection(timeAtStarting)
 				return db
 			}
-
 			return db
 		}
-
 		time.Sleep(time.Second)
 	}
 
-	response.Response(nil, models.Log{Message: fmt.Sprintf("Time waiting of DB connection exceeded limit (%d seconds).", connTimeout)})
+	ErrorTimeWaitingOfDBConnectionExceededLimit(connTimeout)
 	return nil
 }
 
 func CloseDBConnection(cfg models.Config, db *sqlx.DB) {
 	if err := db.Close(); err != nil {
-		response.Response(nil, models.Log{Message: fmt.Sprintf("Cannot close DB connection. Error: %s.", err.Error())})
+		ErrorCannotCloseDBConnection(err)
 	}
 
 	if cfg.DBLogConnStatus {
-		response.Response(nil, models.Log{Message: "Established closed connection to DB."})
+		InfoEstablishedClosedConnectionToDB()
 		return
 	}
 }

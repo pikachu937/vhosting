@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type UserHandler struct {
@@ -17,129 +17,143 @@ func NewUserHandler(useCase user.UserUseCase) *UserHandler {
 }
 
 func (h *UserHandler) CreateUser(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	usr, err := h.useCase.BindJSONUser(ctx)
 	if err != nil {
-		response.ErrorBindInputData(ctx, user.ErrorCreateUser, err)
+		user.ErrorCannotBindInputData(ctx, user.ErrorCreateUser, err)
 		return
 	}
 
 	if usr.Username == "" || usr.PasswordHash == "" {
-		response.ErrorErrorNamepassEmpty(ctx, user.ErrorCreateUser)
+		user.ErrorUsernameOrPasswordCannotBeEmpty(ctx, user.ErrorCreateUser)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(usr.Username)
 	if err != nil {
-		response.ErrorCheckExistence(ctx, user.ErrorCreateUser, err)
+		user.ErrorCannotCheckUserExistence(ctx, user.ErrorCreateUser, err)
 		return
 	}
 	if exists {
-		response.ErrorEnteredUsernameIsExist(ctx, user.ErrorCreateUser)
+		user.ErrorUserWithEnteredUsernameIsExist(ctx, user.ErrorCreateUser)
 		return
 	}
 
-	if err := h.useCase.CreateUser(usr); err != nil {
-		response.ErrorCreateUser(ctx, user.ErrorCreateUser, err)
+	if err := h.useCase.CreateUser(ctx, usr); err != nil {
+		user.ErrorCannotCreateUser(ctx, user.ErrorCreateUser, err)
 		return
 	}
 
-	response.InfoUserCreated(ctx)
+	user.InfoUserCreated(ctx)
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		response.ErrorIdConvertion(ctx, user.ErrorGetUser, err)
+		user.ErrorCannotConvertRequestedIDToTypeInt(ctx, user.ErrorGetUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		response.ErrorCheckExistence(ctx, user.ErrorGetUser, err)
+		user.ErrorCannotCheckUserExistence(ctx, user.ErrorGetUser, err)
 		return
 	}
 	if !exists {
-		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorGetUser)
+		user.ErrorUserWithRequestedIDIsNotExist(ctx, user.ErrorGetUser)
 		return
 	}
 
 	usr, err := h.useCase.GetUser(id)
 	if err != nil {
-		response.ErrorCannotGetUser(ctx, user.ErrorGetUser, err)
+		user.ErrorCannotGetUser(ctx, user.ErrorGetUser, err)
 		return
 	}
 
-	response.InfoShowUser(ctx, usr)
+	user.InfoGotUserData(ctx, usr)
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	users, err := h.useCase.GetAllUsers()
 	if err != nil {
-		response.ErrorCannotGetAllUsers(ctx, user.ErrorGetAllUsers, err)
+		user.ErrorCannotGetAllUsers(ctx, user.ErrorGetAllUsers, err)
 		return
 	}
 
 	if users == nil {
-		response.ErrorsNoUsersAvailable(ctx, user.ErrorGetAllUsers, err)
+		user.ErrorNoUsersAvailable(ctx, user.ErrorGetAllUsers, err)
 		return
 	}
 
-	response.InfoShowAllUsers(ctx, users)
+	user.InfoGotAllUsersData(ctx, users)
 }
 
 func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		response.ErrorIdConvertion(ctx, user.ErrorPartiallyUpdateUser, err)
+		user.ErrorCannotConvertRequestedIDToTypeInt(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		response.ErrorCheckExistence(ctx, user.ErrorPartiallyUpdateUser, err)
+		user.ErrorCannotCheckUserExistence(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 	if !exists {
-		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorPartiallyUpdateUser)
+		user.ErrorUserWithRequestedIDIsNotExist(ctx, user.ErrorPartiallyUpdateUser)
 		return
 	}
 
 	usr, err := h.useCase.BindJSONUser(ctx)
 	if err != nil {
-		response.ErrorBindInputData(ctx, user.ErrorPartiallyUpdateUser, err)
+		user.ErrorCannotBindInputData(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
 	if err := h.useCase.PartiallyUpdateUser(id, usr); err != nil {
-		response.ErrorsNoUsersAvailable(ctx, user.ErrorPartiallyUpdateUser, err)
+		user.ErrorNoUsersAvailable(ctx, user.ErrorPartiallyUpdateUser, err)
 		return
 	}
 
-	response.InfoUserUpdated(ctx)
+	user.InfoUserPartiallyUpdated(ctx)
 }
 
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
 
 	id, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		response.ErrorIdConvertion(ctx, user.ErrorDeleteUser, err)
+		user.ErrorCannotConvertRequestedIDToTypeInt(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 
 	exists, err := h.useCase.IsUserExists(id)
 	if err != nil {
-		response.ErrorCheckExistence(ctx, user.ErrorDeleteUser, err)
+		user.ErrorCannotCheckUserExistence(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 	if !exists {
-		response.ErrorUserRequestedIDIsNotExist(ctx, user.ErrorDeleteUser)
+		user.ErrorUserWithRequestedIDIsNotExist(ctx, user.ErrorDeleteUser)
 		return
 	}
 
 	if err := h.useCase.DeleteUser(id); err != nil {
-		response.ErrorCannotDeleteUser(ctx, user.ErrorDeleteUser, err)
+		user.ErrorCannotDeleteUser(ctx, user.ErrorDeleteUser, err)
 		return
 	}
 
-	response.InfoUserDeleted(ctx)
+	user.InfoUserDeleted(ctx)
 }

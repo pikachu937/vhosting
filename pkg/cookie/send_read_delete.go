@@ -10,11 +10,11 @@ const (
 	CookieExpiresNow = -1
 )
 
-func SendCookie(ctx *gin.Context, value string, tokenTTLHours int) {
+func Send(ctx *gin.Context, value string, tokenTTLHours int) {
 	ctx.SetCookie(CookieName, value, tokenTTLHours*CookieTTLHour, "/", "", false, true)
 }
 
-func ReadCookie(ctx *gin.Context) string {
+func Read(ctx *gin.Context) string {
 	gottenCookie, err := ctx.Request.Cookie(CookieName)
 	if err != nil {
 		return ""
@@ -24,6 +24,6 @@ func ReadCookie(ctx *gin.Context) string {
 	return cookieValue
 }
 
-func DeleteCookie(ctx *gin.Context) {
+func Delete(ctx *gin.Context) {
 	ctx.SetCookie(CookieName, "", CookieExpiresNow, "/", "", false, true)
 }

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mikerumy/vhosting/internal/models"
-	"github.com/mikerumy/vhosting/pkg/response"
 	"github.com/spf13/viper"
 )
 
@@ -31,56 +30,56 @@ func LoadConfig(configPath string) (models.Config, error) {
 	dbConnTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		dbConnTimeoutSeconds = 5
-		response.WarningCannotConvertCvar(cvarName, dbConnTimeoutSeconds, err)
+		WarningCannotConvertCvar(cvarName, dbConnTimeoutSeconds, err)
 	}
 
 	cvarName = "db.connLatencyMilliseconds"
 	dbConnLatencyMilliseconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		dbConnLatencyMilliseconds = 100
-		response.WarningCannotConvertCvar(cvarName, dbConnLatencyMilliseconds, err)
+		WarningCannotConvertCvar(cvarName, dbConnLatencyMilliseconds, err)
 	}
 
 	cvarName = "db.logConnStatus"
 	dbLogConnStatus, err := strconv.ParseBool(viper.GetString(cvarName))
 	if err != nil {
 		dbLogConnStatus = true
-		response.WarningCannotConvertCvar(cvarName, dbLogConnStatus, err)
+		WarningCannotConvertCvar(cvarName, dbLogConnStatus, err)
 	}
 
 	cvarName = "server.debugMode"
 	serverDebugMode, err := strconv.ParseBool(viper.GetString(cvarName))
 	if err != nil {
 		serverDebugMode = true
-		response.WarningCannotConvertCvar(cvarName, serverDebugMode, err)
+		WarningCannotConvertCvar(cvarName, serverDebugMode, err)
 	}
 
 	cvarName = "server.maxHeaderBytes"
 	serverMaxHeaderBytes, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverMaxHeaderBytes = 1048576 // 1 megabyte
-		response.WarningCannotConvertCvar(cvarName, serverMaxHeaderBytes, err)
+		WarningCannotConvertCvar(cvarName, serverMaxHeaderBytes, err)
 	}
 
 	cvarName = "server.readTimeoutSeconds"
 	serverReadTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverReadTimeoutSeconds = 15
-		response.WarningCannotConvertCvar(cvarName, serverReadTimeoutSeconds, err)
+		WarningCannotConvertCvar(cvarName, serverReadTimeoutSeconds, err)
 	}
 
 	cvarName = "server.writeTimeoutSeconds"
 	serverWriteTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		serverWriteTimeoutSeconds = 15
-		response.WarningCannotConvertCvar(cvarName, serverWriteTimeoutSeconds, err)
+		WarningCannotConvertCvar(cvarName, serverWriteTimeoutSeconds, err)
 	}
 
 	cvarName = "session.ttlHours"
 	sessionTTLHours, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
 		sessionTTLHours = 336 // 2 weeks
-		response.WarningCannotConvertCvar(cvarName, sessionTTLHours, err)
+		WarningCannotConvertCvar(cvarName, sessionTTLHours, err)
 	}
 
 	cfg = models.Config{

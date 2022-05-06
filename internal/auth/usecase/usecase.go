@@ -3,10 +3,10 @@ package usecase
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/pkg/cookie"
 	"github.com/mikerumy/vhosting/pkg/hashing"
-	"github.com/mikerumy/vhosting/pkg/timestamp"
 )
 
 type AuthUseCase struct {
@@ -45,20 +45,24 @@ func (u *AuthUseCase) IsSessionExists(token string) (bool, error) {
 	return u.authRepo.IsSessionExists(token)
 }
 
-func (u *AuthUseCase) CreateSession(username, token string) error {
-	thisTimestamp := timestamp.WriteThisTimestamp()
+func (u *AuthUseCase) CreateSession(ctx *gin.Context, username, token string) error {
 	var sess models.Session
+	var err error
 	sess.Content = token
-	sess.CreationDate = thisTimestamp
-	if err := u.authRepo.CreateSession(sess); err != nil {
+	sess.CreationDate, err = logging.ReadTimestamp(ctx)
+	if err != nil {
 		return err
 	}
 
-	return u.authRepo.UpdateLoginTimestamp(username, thisTimestamp)
+	if err = u.authRepo.CreateSession(sess); err != nil {
+		return err
+	}
+
+	return u.authRepo.UpdateLoginTimestamp(username, sess.CreationDate)
 }
 
 func (u *AuthUseCase) ReadCookie(ctx *gin.Context) string {
-	return cookie.ReadCookie(ctx)
+	return cookie.Read(ctx)
 }
 
 func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (models.Namepass, error) {
@@ -82,7 +86,7 @@ func (u *AuthUseCase) GenerateToken(namepass models.Namepass) (string, error) {
 }
 
 func (u *AuthUseCase) SendCookie(ctx *gin.Context, token string) {
-	cookie.SendCookie(ctx, token, u.cfg.SessionTTLHours)
+	cookie.Send(ctx, token, u.cfg.SessionTTLHours)
 }
 
 func (u *AuthUseCase) ParseToken(token string) (models.Namepass, error) {
@@ -90,5 +94,5 @@ func (u *AuthUseCase) ParseToken(token string) (models.Namepass, error) {
 }
 
 func (u *AuthUseCase) DeleteCookie(ctx *gin.Context) {
-	cookie.DeleteCookie(ctx)
+	cookie.Delete(ctx)
 }

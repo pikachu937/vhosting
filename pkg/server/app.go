@@ -20,7 +20,6 @@ import (
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
 	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
 	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
-	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type App struct {
@@ -79,7 +78,7 @@ func (a *App) Run() error {
 	if notStarted {
 		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.", err.Error()))
 	}
-	response.InfoServerWasSuccessfullyStarted(getOutboundIP().String(), a.cfg.ServerPort)
+	InfoServerWasSuccessfullyStartedAtLocalIP(getOutboundIP().String(), a.cfg.ServerPort)
 
 	// Server shut down
 	quit := make(chan os.Signal, 1)
@@ -95,14 +94,14 @@ func (a *App) Run() error {
 		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.", err.Error()))
 	}
 
-	response.InfoServerWasGracefullyShutDown()
+	InfoServerWasGracefullyShutDown()
 	return nil
 }
 
 func getOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		response.WarningCannotGetLocalIP(err)
+		WarningCannotGetLocalIP(err)
 	}
 	defer conn.Close()
 

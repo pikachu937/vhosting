@@ -2,7 +2,7 @@ db:
   connTimeoutSeconds: 5
   connLatencyMilliseconds: 50
   host: "127.0.0.1"
-  logConnStatus: true
+  logConnStatus: false
   name: "vhosting"
   port: "5432"
   sslMode: "disable"

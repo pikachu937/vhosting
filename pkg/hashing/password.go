@@ -3,8 +3,6 @@ package hashing
 import (
 	"crypto/sha256"
 	"fmt"
-
-	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 func GeneratePasswordHash(password, salt string) string {
@@ -14,7 +12,7 @@ func GeneratePasswordHash(password, salt string) string {
 
 	hash := sha256.New()
 	if _, err := hash.Write([]byte(password)); err != nil {
-		response.ErrorWriteBytesHashingVariable(err)
+		ErrorCannotWriteBytesIntoHashingVariable(err)
 		return ""
 	}
 

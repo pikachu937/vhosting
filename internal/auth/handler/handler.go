@@ -1,13 +1,10 @@
 package handler
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/response"
 )
 
 type AuthHandler struct {
@@ -23,6 +20,9 @@ func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase) *Aut
 }
 
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	h.deleteSessionCookie(ctx, auth.ErrorSignIn)
 	inputNamepass, quit := h.bindCheckQuit(ctx, auth.ErrorSignIn)
 	if quit {
@@ -31,54 +31,43 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 
 	exists, err := h.useCase.IsNamepassExists(inputNamepass.Username, inputNamepass.PasswordHash)
 	if err != nil {
-		statement := fmt.Sprintf("Cannot check username and password existence. Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+		user.ErrorCannotCheckUserExistence(ctx, auth.ErrorSignIn, err)
 		return
 	}
 	if !exists {
-		statement := "User with entered username and password is not exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+		auth.ErrorUserWithEnteredUsernameOrPasswordIsNotExist(ctx, auth.ErrorSignIn)
 		return
 	}
 
 	newToken, err := h.useCase.GenerateToken(inputNamepass)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", auth.ErrorGenerateToken, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+		auth.ErrorCannotGenerateToken(ctx, auth.ErrorSignIn, err)
 		return
 	}
 
-	if err = h.useCase.CreateSession(inputNamepass.Username, newToken); err != nil {
-		statement := fmt.Sprintf("%sError: %s.", auth.ErrorCreateSession, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+	if err = h.useCase.CreateSession(ctx, inputNamepass.Username, newToken); err != nil {
+		auth.ErrorCannotCreateSession(ctx, auth.ErrorSignIn, err)
 		return
 	}
 
 	h.useCase.SendCookie(ctx, newToken)
-
-	statement := "You have successfully signed-in."
-	statusCode := http.StatusAccepted
-	response.MessageResponse(ctx, statusCode, statement)
+	logging.SetSessionOwner(ctx, inputNamepass.Username)
+	auth.InfoYouHaveSuccessfullySignedIn(ctx)
 }
 
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
 	token := h.useCase.ReadCookie(ctx)
 	if token == "" {
-		statement := "You must be signed-in for changing password." + auth.ErrorSignInTry
-		statusCode := http.StatusUnauthorized
-		response.ErrorResponse(ctx, statusCode, auth.ErrorChangePassword+statement)
+		auth.ErrorYouMustBeSignedInForChangingPassword(ctx, auth.ErrorChangePassword)
 		return
 	}
 
 	cookieNamepass, err := h.useCase.ParseToken(token)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", auth.ErrorParseToken, err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorChangePassword+statement)
+		auth.ErrorCannotParseToken(ctx, auth.ErrorChangePassword, err)
 		return
 	}
 
@@ -90,48 +79,61 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 
 	exists, err := h.userUseCase.IsUserExists(inputNamepass.Username)
 	if err != nil {
-		statement := fmt.Sprintf("%sError: %s.", "user.ErrorCheckExistence", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+		user.ErrorCannotCheckUserExistence(ctx, auth.ErrorChangePassword, err)
 		return
 	}
 	if !exists {
-		statement := "User with entered username is not exist."
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignIn+statement)
+		auth.ErrorUserWithEnteredUsernameIsNotExist(ctx, auth.ErrorChangePassword)
 		return
 	}
 
 	if inputNamepass.Username != cookieNamepass.Username {
-		statement := "Entered username is incorrect." + auth.ErrorSignInTry
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, auth.ErrorChangePassword+statement)
+		auth.ErrorEnteredUsernameIsIncorrect(ctx, auth.ErrorChangePassword)
 		return
 	}
 
 	err = h.useCase.UpdateUserPassword(inputNamepass)
 	if err != nil {
-		statement := fmt.Sprintf("Cannot update user password. Error: %s.", err.Error())
-		statusCode := http.StatusInternalServerError
-		response.ErrorResponse(ctx, statusCode, auth.ErrorChangePassword+statement)
+		auth.ErrorCannotUpdateUserPassword(ctx, auth.ErrorChangePassword, err)
 		return
 	}
 
-	statement := "You have successfully changed password."
-	statusCode := http.StatusAccepted
-	response.MessageResponse(ctx, statusCode, statement)
+	logging.SetSessionOwner(ctx, cookieNamepass.Username)
+	auth.InfoYouHaveSuccessfullyChangedPassword(ctx)
 }
 
 func (h *AuthHandler) SignOut(ctx *gin.Context) {
-	sessDeleted := h.deleteSessionCookie(ctx, auth.ErrorCannotSignIn)
-	if !sessDeleted {
-		statement := "You must be signed-in." + auth.ErrorSignInTry
-		statusCode := http.StatusBadRequest
-		response.ErrorResponse(ctx, statusCode, auth.ErrorSignOut+statement)
+	logging.SetTimestamp(ctx)
+	logging.ResetSessionOwner(ctx)
+
+	token := h.useCase.ReadCookie(ctx)
+	if token == "" {
+		auth.ErrorYouMustBeSignedInForSignOut(ctx, auth.ErrorSignOut)
 		return
 	}
 
-	statement := "You have successfully signed out."
-	statusCode := http.StatusAccepted
-	response.MessageResponse(ctx, statusCode, statement)
+	cookieNamepass, err := h.useCase.ParseToken(token)
+	if err != nil {
+		auth.ErrorCannotParseToken(ctx, auth.ErrorSignOut, err)
+		return
+	}
+
+	exists, err := h.userUseCase.IsUserExists(cookieNamepass.Username)
+	if err != nil {
+		user.ErrorCannotCheckUserExistence(ctx, auth.ErrorSignOut, err)
+		return
+	}
+	if !exists {
+		auth.ErrorUserWithCookieReadUsernameIsNotExist(ctx, auth.ErrorSignOut)
+		return
+	}
+
+	sessDeleted := h.deleteSessionCookie(ctx, auth.ErrorSignOut)
+	if !sessDeleted {
+		auth.ErrorYouMustBeSignedIn(ctx, auth.ErrorSignOut)
+		return
+	}
+
+	logging.SetSessionOwner(ctx, cookieNamepass.Username)
+	auth.InfoYouHaveSuccessfullySignedOut(ctx)
 }

@@ -4,10 +4,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/hashing"
-	"github.com/mikerumy/vhosting/pkg/timestamp"
 )
 
 type UserUseCase struct {
@@ -22,14 +22,14 @@ func NewUserUseCase(cfg models.Config, userRepo user.UserRepository) *UserUseCas
 	}
 }
 
-func (u *UserUseCase) CreateUser(usr models.User) error {
-	thisTimestamp := timestamp.WriteThisTimestamp()
-	if usr.JoiningDate == "" {
-		usr.JoiningDate = thisTimestamp
+func (u *UserUseCase) CreateUser(ctx *gin.Context, usr models.User) error {
+	timestamp, err := logging.ReadTimestamp(ctx)
+	if err != nil {
+		return err
 	}
-	if usr.LastLogin == "" {
-		usr.LastLogin = thisTimestamp
-	}
+
+	usr.JoiningDate = timestamp
+	usr.LastLogin = timestamp
 	usr.IsActive = true
 	return u.userRepo.CreateUser(usr)
 }
