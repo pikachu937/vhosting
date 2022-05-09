@@ -8,7 +8,7 @@ import (
 	dbc "github.com/mikerumy/vhosting/internal/constants/db"
 	"github.com/mikerumy/vhosting/internal/models"
 	sq "github.com/mikerumy/vhosting/pkg/constants/sql"
-	"github.com/mikerumy/vhosting/pkg/database"
+	"github.com/mikerumy/vhosting/pkg/db_tool"
 )
 
 type UserRepository struct {
@@ -20,8 +20,8 @@ func NewUserRepository(cfg models.Config) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(usr models.User) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", dbc.TableUsers, dbc.Username,
@@ -40,8 +40,8 @@ func (r *UserRepository) CreateUser(usr models.User) error {
 }
 
 func (r *UserRepository) GetUser(id int) (*models.User, error) {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", dbc.Id, dbc.Username,
@@ -61,8 +61,8 @@ func (r *UserRepository) GetUser(id int) (*models.User, error) {
 }
 
 func (r *UserRepository) GetAllUsers() (map[int]*models.User, error) {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.SELECT_COL_FROM_TBL
 	col := "*"
@@ -103,8 +103,8 @@ func (r *UserRepository) GetAllUsers() (map[int]*models.User, error) {
 }
 
 func (r *UserRepository) PartiallyUpdateUser(id int, usr models.User) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := dbc.TableUsers
@@ -130,8 +130,8 @@ func (r *UserRepository) PartiallyUpdateUser(id int, usr models.User) error {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.DELETE_FROM_TBL_WHERE_CND
 	tbl := dbc.TableUsers
@@ -149,8 +149,8 @@ func (r *UserRepository) DeleteUser(id int) error {
 }
 
 func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	var template, col, tbl, cnd, query string
 	var rows *sql.Rows

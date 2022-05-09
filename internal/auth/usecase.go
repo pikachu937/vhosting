@@ -8,7 +8,7 @@ import (
 type AuthUseCase interface {
 	AuthCommon
 
-	CreateSession(ctx *gin.Context, username, timestamp string) error
+	CreateSession(ctx *gin.Context, username, token, timestamp string) error
 	ReadCookie(ctx *gin.Context) string
 	BindJSONNamepass(ctx *gin.Context) (models.Namepass, error)
 	GenerateToken(namepass models.Namepass) (string, error)

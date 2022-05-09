@@ -49,12 +49,6 @@ CREATE TABLE IF NOT EXISTS public.users (
     last_login    TIMESTAMP WITH TIME ZONE NOT NULL,
 	CONSTRAINT pk_users PRIMARY KEY (id)
 );
-INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, joining_date, last_login) VALUES
-(0, 'superuser', '6a4b40733133447655336f33482365304e376a39474068394b377223507320f3765880a5c269b747e1e906054a4b4a3a991259f1e16b5dde4742cec2319a', 'true',  'true',  'false', '-', '-', '2022-04-01 03:00:00.000000+03', '2022-04-01 03:00:00.000000+03'),
-(1, 'admin',     '6a4b40733133447655336f33482365304e376a39474068394b37722350738c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'true',  'true',  'false', '-', '-', '2022-04-02 03:00:00.000000+03', '2022-04-02 03:00:00.000000+03'),
-(2, 'worker',    '6a4b40733133447655336f33482365304e376a39474068394b377223507387eba76e7f3164534045ba922e7770fb58bbd14ad732bbf5ba6f11cc56989e6e', 'true',  'false', 'true',  '-', '-', '2022-04-03 03:00:00.000000+03', '2022-04-03 03:00:00.000000+03'),
-(3, 'user',      '6a4b40733133447655336f33482365304e376a39474068394b377223507304f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb', 'true',  'false', 'false', '-', '-', '2022-04-04 03:00:00.000000+03', '2022-04-04 03:00:00.000000+03');
-ALTER SEQUENCE users_id_seq RESTART WITH 4;
 
 
 CREATE TABLE IF NOT EXISTS public.sessions (
@@ -67,11 +61,11 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 
 CREATE TABLE IF NOT EXISTS public.logs (
     id             SERIAL                   NOT NULL UNIQUE,
+    error_level    VARCHAR(7),                              -- "info", "warning", "error", "fatal"
     session_owner  VARCHAR(50),
     request_method VARCHAR(7),                              -- "POST", "GET", "PATCH", "DELETE"
     request_path   VARCHAR(100),
     status_code    INTEGER,
-    error_level    VARCHAR(7),                              -- "info", "warning", "error", "fatal"
     error_code     INTEGER,
     message        VARCHAR(300),
     creation_date  TIMESTAMP WITH TIME ZONE
@@ -115,9 +109,6 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
 );
-INSERT INTO public.user_groups (id, user_id, group_id) VALUES
-(0, 0, 0);
-ALTER SEQUENCE user_groups_id_seq RESTART WITH 1;
 
 
 CREATE TABLE IF NOT EXISTS public.infos (

@@ -3,10 +3,9 @@ package usecase
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
-	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/models"
-	"github.com/mikerumy/vhosting/pkg/cookie"
-	"github.com/mikerumy/vhosting/pkg/hashing"
+	"github.com/mikerumy/vhosting/pkg/cookie_tool"
+	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type AuthUseCase struct {
@@ -45,11 +44,11 @@ func (u *AuthUseCase) IsSessionExists(token string) (bool, error) {
 	return u.authRepo.IsSessionExists(token)
 }
 
-func (u *AuthUseCase) CreateSession(ctx *gin.Context, username, token string) error {
+func (u *AuthUseCase) CreateSession(ctx *gin.Context, username, token, timestamp string) error {
 	var sess models.Session
 	var err error
 	sess.Content = token
-	sess.CreationDate, err = logging.ReadTimestamp(ctx)
+	sess.CreationDate = timestamp
 	if err != nil {
 		return err
 	}
@@ -62,7 +61,7 @@ func (u *AuthUseCase) CreateSession(ctx *gin.Context, username, token string) er
 }
 
 func (u *AuthUseCase) ReadCookie(ctx *gin.Context) string {
-	return cookie.Read(ctx)
+	return cookie_tool.Read(ctx)
 }
 
 func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (models.Namepass, error) {
@@ -71,14 +70,14 @@ func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (models.Namepass, error
 		return namepass, err
 	}
 	if namepass.PasswordHash != "" {
-		namepass.PasswordHash = hashing.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
+		namepass.PasswordHash = hasher.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
 	}
 	return namepass, nil
 }
 
 func (u *AuthUseCase) GenerateToken(namepass models.Namepass) (string, error) {
-	namepass.PasswordHash = hashing.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
-	token, err := hashing.GenerateToken(namepass, u.cfg.HashingTokenSigningKey, u.cfg.SessionTTLHours)
+	namepass.PasswordHash = hasher.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
+	token, err := hasher.GenerateToken(namepass, u.cfg.HashingTokenSigningKey, u.cfg.SessionTTLHours)
 	if err != nil {
 		return "", err
 	}
@@ -86,13 +85,13 @@ func (u *AuthUseCase) GenerateToken(namepass models.Namepass) (string, error) {
 }
 
 func (u *AuthUseCase) SendCookie(ctx *gin.Context, token string) {
-	cookie.Send(ctx, token, u.cfg.SessionTTLHours)
+	cookie_tool.Send(ctx, token, u.cfg.SessionTTLHours)
 }
 
 func (u *AuthUseCase) ParseToken(token string) (models.Namepass, error) {
-	return hashing.ParseToken(token, u.cfg.HashingTokenSigningKey)
+	return hasher.ParseToken(token, u.cfg.HashingTokenSigningKey)
 }
 
 func (u *AuthUseCase) DeleteCookie(ctx *gin.Context) {
-	cookie.Delete(ctx)
+	cookie_tool.Delete(ctx)
 }

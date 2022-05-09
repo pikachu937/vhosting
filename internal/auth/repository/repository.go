@@ -7,7 +7,7 @@ import (
 	dbc "github.com/mikerumy/vhosting/internal/constants/db"
 	"github.com/mikerumy/vhosting/internal/models"
 	sq "github.com/mikerumy/vhosting/pkg/constants/sql"
-	"github.com/mikerumy/vhosting/pkg/database"
+	"github.com/mikerumy/vhosting/pkg/db_tool"
 )
 
 type AuthRepository struct {
@@ -19,8 +19,8 @@ func NewAuthRepository(cfg models.Config) *AuthRepository {
 }
 
 func (r *AuthRepository) GetNamepass(namepass models.Namepass) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", dbc.Username, dbc.PassHash)
@@ -38,8 +38,8 @@ func (r *AuthRepository) GetNamepass(namepass models.Namepass) error {
 }
 
 func (r *AuthRepository) DeleteSession(token string) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.DELETE_FROM_TBL_WHERE_CND
 	tbl := dbc.TableSessions
@@ -57,8 +57,8 @@ func (r *AuthRepository) DeleteSession(token string) error {
 }
 
 func (r *AuthRepository) UpdateUserPassword(namepass models.Namepass) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := dbc.TableUsers
@@ -77,8 +77,8 @@ func (r *AuthRepository) UpdateUserPassword(namepass models.Namepass) error {
 }
 
 func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, error) {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := dbc.Id
@@ -102,8 +102,8 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 }
 
 func (r *AuthRepository) IsSessionExists(token string) (bool, error) {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.SELECT_COL_FROM_TBL_WHERE_CND
 	col := dbc.Content
@@ -126,8 +126,8 @@ func (r *AuthRepository) IsSessionExists(token string) (bool, error) {
 }
 
 func (r *AuthRepository) CreateSession(sess models.Session) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", dbc.TableSessions, dbc.Content, dbc.CreationDate)
@@ -143,8 +143,8 @@ func (r *AuthRepository) CreateSession(sess models.Session) error {
 }
 
 func (r *AuthRepository) UpdateLoginTimestamp(username, timestamp string) error {
-	db := database.NewDBConnection(r.cfg)
-	defer database.CloseDBConnection(r.cfg, db)
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := sq.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := dbc.TableUsers

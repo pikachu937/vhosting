@@ -18,6 +18,7 @@ const (
 	CreationDate  = "creation_date"
 
 	TableLogs     = "logs"
+	ErrorLevel    = "error_level"
 	SessionOwner  = "session_owner"
 	RequestMethod = "request_method"
 	RequestPath   = "request_path"

@@ -15,34 +15,35 @@ import (
 	authhandler "github.com/mikerumy/vhosting/internal/auth/handler"
 	authrepo "github.com/mikerumy/vhosting/internal/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/internal/auth/usecase"
-	logging "github.com/mikerumy/vhosting/internal/logging"
-	loggingrepo "github.com/mikerumy/vhosting/internal/logging/repository"
-	loggingusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
+	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
 	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
 	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
+	logger "github.com/mikerumy/vhosting/pkg/logger"
+	logrepo "github.com/mikerumy/vhosting/pkg/logger/repository"
+	logusecase "github.com/mikerumy/vhosting/pkg/logger/usecase"
 )
 
 type App struct {
-	httpServer     *http.Server
-	cfg            models.Config
-	userUseCase    user.UserUseCase
-	authUseCase    auth.AuthUseCase
-	loggingUseCase logging.LoggingUseCase
+	httpServer  *http.Server
+	cfg         models.Config
+	userUseCase user.UserUseCase
+	authUseCase auth.AuthUseCase
+	logUseCase  logger.LogUseCase
 }
 
 func NewApp(cfg models.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
-	loggingRepo := loggingrepo.NewLoggingRepository(cfg)
+	logRepo := logrepo.NewLogRepository(cfg)
 
 	return &App{
-		cfg:            cfg,
-		userUseCase:    userusecase.NewUserUseCase(cfg, userRepo),
-		authUseCase:    authusecase.NewAuthUseCase(cfg, authRepo),
-		loggingUseCase: loggingusecase.NewLoggingUseCase(cfg, loggingRepo),
+		cfg:         cfg,
+		userUseCase: userusecase.NewUserUseCase(cfg, userRepo),
+		authUseCase: authusecase.NewAuthUseCase(cfg, authRepo),
+		logUseCase:  logusecase.NewLogUseCase(cfg, logRepo),
 	}
 }
 
@@ -58,8 +59,8 @@ func (a *App) Run() error {
 	router := gin.New()
 
 	// Register web routes
-	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.loggingUseCase)
-	userhandler.RegisterHTTPEndpoints(router, a.userUseCase)
+	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.logUseCase)
+	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
@@ -84,7 +85,7 @@ func (a *App) Run() error {
 	if notStarted {
 		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.", err.Error()))
 	}
-	InfoServerWasSuccessfullyStartedAtLocalIP(getOutboundIP().String(), a.cfg.ServerPort)
+	logger.Print(msg.InfoServerWasSuccessfullyStartedAtLocalIP(getOutboundIP().String(), a.cfg.ServerPort))
 
 	// Server shut down
 	quit := make(chan os.Signal, 1)
@@ -100,14 +101,14 @@ func (a *App) Run() error {
 		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.", err.Error()))
 	}
 
-	InfoServerWasGracefullyShutDown()
+	logger.Print(msg.InfoServerWasGracefullyShutDown())
 	return nil
 }
 
 func getOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		WarningCannotGetLocalIP(err)
+		logger.Print(msg.WarningCannotGetLocalIP(err))
 	}
 	defer conn.Close()
 

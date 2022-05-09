@@ -4,10 +4,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/hashing"
+	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type UserUseCase struct {
@@ -22,12 +21,7 @@ func NewUserUseCase(cfg models.Config, userRepo user.UserRepository) *UserUseCas
 	}
 }
 
-func (u *UserUseCase) CreateUser(ctx *gin.Context, usr models.User) error {
-	timestamp, err := logging.ReadTimestamp(ctx)
-	if err != nil {
-		return err
-	}
-
+func (u *UserUseCase) CreateUser(ctx *gin.Context, usr models.User, timestamp string) error {
 	usr.JoiningDate = timestamp
 	usr.LastLogin = timestamp
 	usr.IsActive = true
@@ -64,7 +58,7 @@ func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (models.User, error) {
 		return usr, err
 	}
 	if usr.PasswordHash != "" {
-		usr.PasswordHash = hashing.GeneratePasswordHash(usr.PasswordHash, u.cfg.HashingPasswordSalt)
+		usr.PasswordHash = hasher.GeneratePasswordHash(usr.PasswordHash, u.cfg.HashingPasswordSalt)
 	}
 	return usr, nil
 }
