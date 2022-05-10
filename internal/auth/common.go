@@ -1,13 +1,7 @@
 package auth
 
-import (
-	"github.com/mikerumy/vhosting/internal/models"
-)
-
 type AuthCommon interface {
-	GetNamepass(namepass models.Namepass) error
-	DeleteSession(token string) error
-	UpdateUserPassword(namepass models.Namepass) error
+	GetNamepass(namepass Namepass) error
+	UpdateNamepassPassword(namepass Namepass) error
 	IsNamepassExists(username, passwordHash string) (bool, error)
-	IsSessionExists(token string) (bool, error)
 }

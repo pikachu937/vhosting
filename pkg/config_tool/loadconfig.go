@@ -6,12 +6,11 @@ import (
 	"strings"
 
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/spf13/viper"
 )
 
-func LoadConfig(configPath string) (models.Config, error) {
+func LoadConfig(configPath string) (Config, error) {
 	// Parse config file path
 	configPath = configPath[:len(configPath)-4]
 	var lastDirIndex int = strings.LastIndex(configPath, "/")
@@ -19,7 +18,7 @@ func LoadConfig(configPath string) (models.Config, error) {
 	viper.SetConfigName(configPath[lastDirIndex+1:])
 
 	// Load data from config file
-	var cfg models.Config
+	var cfg Config
 	var err error
 	err = viper.ReadInConfig()
 	if err != nil {
@@ -84,7 +83,7 @@ func LoadConfig(configPath string) (models.Config, error) {
 		logger.Print(msg.WarningCannotConvertCvar(cvarName, sessionTTLHours, err))
 	}
 
-	cfg = models.Config{
+	cfg = Config{
 		DBConnTimeoutSeconds:      dbConnTimeoutSeconds,
 		DBConnLatencyMilliseconds: dbConnLatencyMilliseconds,
 		DBDriver:                  os.Getenv("DB_DRIVER"),

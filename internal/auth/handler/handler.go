@@ -3,24 +3,28 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
 
 type AuthHandler struct {
-	useCase     auth.AuthUseCase
-	userUseCase user.UserUseCase
-	logUseCase  logger.LogUseCase
+	useCase        auth.AuthUseCase
+	userUseCase    user.UserUseCase
+	sessionUseCase session.SessionUseCase
+	loggingUseCase logging.LoggingUseCase
 }
 
-func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase, logUseCase logger.LogUseCase) *AuthHandler {
+func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase,
+	sessionUseCase session.SessionUseCase, loggingUseCase logging.LoggingUseCase) *AuthHandler {
 	return &AuthHandler{
-		useCase:     useCase,
-		userUseCase: userUseCase,
-		logUseCase:  logUseCase,
+		useCase:        useCase,
+		userUseCase:    userUseCase,
+		sessionUseCase: sessionUseCase,
+		loggingUseCase: loggingUseCase,
 	}
 }
 
@@ -29,7 +33,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 
 	cookieToken := h.useCase.ReadCookie(ctx)
 	if cookieToken != "" {
-		if err := h.useCase.DeleteSession(cookieToken); err != nil {
+		if err := h.sessionUseCase.DeleteSession(cookieToken); err != nil {
 			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return
 		}
@@ -65,7 +69,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.CreateSession(ctx, inputNamepass.Username, newToken, log.CreationDate); err != nil {
+	if err = h.sessionUseCase.CreateSession(ctx, inputNamepass.Username, newToken, log.CreationDate); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateSession(err))
 		return
 	}
@@ -90,7 +94,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.useCase.DeleteSession(cookieToken); err != nil {
+	if err := h.sessionUseCase.DeleteSession(cookieToken); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return
 	}
@@ -125,9 +129,9 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	err = h.useCase.UpdateUserPassword(inputNamepass)
+	err = h.useCase.UpdateNamepassPassword(inputNamepass)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotUpdateUserPassword(err))
+		h.report(ctx, log, msg.ErrorCannotUpdateNamepassPassword(err))
 		return
 	}
 
@@ -161,7 +165,7 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 
 	log.SessionOwner = cookieNamepass.Username
 
-	if err := h.useCase.DeleteSession(cookieToken); err != nil {
+	if err := h.sessionUseCase.DeleteSession(cookieToken); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return
 	}
@@ -171,9 +175,9 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedOut())
 }
 
-func (h *AuthHandler) report(ctx *gin.Context, log *models.Log, messageLog *models.Log) {
+func (h *AuthHandler) report(ctx *gin.Context, log *logging.Log, messageLog *logging.Log) {
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	h.logUseCase.CreateLogRecord(log)
+	h.loggingUseCase.CreateLogRecord(log)
 	logger.Print(log)
 }

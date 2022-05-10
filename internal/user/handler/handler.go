@@ -2,22 +2,22 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
 
 type UserHandler struct {
-	useCase    user.UserUseCase
-	logUseCase logger.LogUseCase
+	useCase        user.UserUseCase
+	loggingUseCase logging.LoggingUseCase
 }
 
-func NewUserHandler(useCase user.UserUseCase, logUseCase logger.LogUseCase) *UserHandler {
+func NewUserHandler(useCase user.UserUseCase, loggingUseCase logging.LoggingUseCase) *UserHandler {
 	return &UserHandler{
-		useCase:    useCase,
-		logUseCase: logUseCase,
+		useCase:        useCase,
+		loggingUseCase: loggingUseCase,
 	}
 }
 
@@ -158,9 +158,9 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoUserDeleted())
 }
 
-func (h *UserHandler) report(ctx *gin.Context, log *models.Log, messageLog *models.Log) {
+func (h *UserHandler) report(ctx *gin.Context, log *logging.Log, messageLog *logging.Log) {
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	h.logUseCase.CreateLogRecord(log)
+	h.loggingUseCase.CreateLogRecord(log)
 	logger.Print(log)
 }

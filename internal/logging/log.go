@@ -1,4 +1,4 @@
-package models
+package logging
 
 type Log struct {
 	Id            int         `db:"id"`

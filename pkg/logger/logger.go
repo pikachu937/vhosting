@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/logging"
 )
 
 const (
-	defSessionOwner = "unauthorized"
-	httpPrintIndent = "    "
+	unauthorizedOwner = "unauthorized"
+	httpPrintIndent   = "    "
 )
 
 func GetTimestamp() string {
@@ -23,7 +23,7 @@ func GetTimestamp() string {
 	gmtTime := fullTime[len(fullTime)-3:]
 	fullTimeWithoutGMT := fullTime[:len(fullTime)-4]
 
-	// Add zero to end until digits number after dot is lower than 6
+	// adds a zero to the end until ms digit number is lower than 6
 	digits := len(fullTimeWithoutGMT) - 1 - strings.LastIndex(fullTimeWithoutGMT, ".")
 	for i := digits; i < 6; i++ {
 		fullTimeWithoutGMT += "0"
@@ -32,10 +32,10 @@ func GetTimestamp() string {
 	return fullTimeWithoutGMT + gmtTime
 }
 
-func Setup(ctx *gin.Context) *models.Log {
-	var log models.Log
+func Setup(ctx *gin.Context) *logging.Log {
+	var log logging.Log
 	if ctx != nil {
-		log.SessionOwner = defSessionOwner
+		log.SessionOwner = unauthorizedOwner
 		log.RequestMethod = ctx.Request.Method
 		log.RequestPath = ctx.Request.URL.Path
 	}
@@ -43,7 +43,7 @@ func Setup(ctx *gin.Context) *models.Log {
 	return &log
 }
 
-func Complete(log1 *models.Log, log2 *models.Log) {
+func Complete(log1 *logging.Log, log2 *logging.Log) {
 	if log1.ErrorLevel == "" {
 		log1.ErrorLevel = log2.ErrorLevel
 	}
@@ -68,7 +68,7 @@ func Complete(log1 *models.Log, log2 *models.Log) {
 	log1.Message = log2.Message
 }
 
-func Print(log *models.Log) {
+func Print(log *logging.Log) {
 	printLine := log.ErrorLevel + "\t"
 
 	if log.SessionOwner != "" {

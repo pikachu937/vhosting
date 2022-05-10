@@ -6,11 +6,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/config_tool"
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func NewDBConnection(cfg models.Config) *sqlx.DB {
+func NewDBConnection(cfg config_tool.Config) *sqlx.DB {
 	timeAtStarting := time.Now()
 
 	var db *sqlx.DB
@@ -47,7 +47,7 @@ func NewDBConnection(cfg models.Config) *sqlx.DB {
 	return nil
 }
 
-func CloseDBConnection(cfg models.Config, db *sqlx.DB) {
+func CloseDBConnection(cfg config_tool.Config, db *sqlx.DB) {
 	if err := db.Close(); err != nil {
 		logger.Print(msg.ErrorCannotCloseDBConnection(err))
 	}

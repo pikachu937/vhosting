@@ -4,39 +4,39 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/pkg/config_tool"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type UserUseCase struct {
-	cfg      models.Config
+	cfg      config_tool.Config
 	userRepo user.UserRepository
 }
 
-func NewUserUseCase(cfg models.Config, userRepo user.UserRepository) *UserUseCase {
+func NewUserUseCase(cfg config_tool.Config, userRepo user.UserRepository) *UserUseCase {
 	return &UserUseCase{
 		cfg:      cfg,
 		userRepo: userRepo,
 	}
 }
 
-func (u *UserUseCase) CreateUser(ctx *gin.Context, usr models.User, timestamp string) error {
+func (u *UserUseCase) CreateUser(ctx *gin.Context, usr user.User, timestamp string) error {
 	usr.JoiningDate = timestamp
 	usr.LastLogin = timestamp
 	usr.IsActive = true
 	return u.userRepo.CreateUser(usr)
 }
 
-func (u *UserUseCase) GetUser(id int) (*models.User, error) {
+func (u *UserUseCase) GetUser(id int) (*user.User, error) {
 	return u.userRepo.GetUser(id)
 }
 
-func (u *UserUseCase) GetAllUsers() (map[int]*models.User, error) {
+func (u *UserUseCase) GetAllUsers() (map[int]*user.User, error) {
 	return u.userRepo.GetAllUsers()
 }
 
-func (u *UserUseCase) PartiallyUpdateUser(id int, usr models.User) error {
+func (u *UserUseCase) PartiallyUpdateUser(id int, usr user.User) error {
 	return u.userRepo.PartiallyUpdateUser(id, usr)
 }
 
@@ -52,8 +52,8 @@ func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {
 	return exists, nil
 }
 
-func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (models.User, error) {
-	var usr models.User
+func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (user.User, error) {
+	var usr user.User
 	if err := ctx.BindJSON(&usr); err != nil {
 		return usr, err
 	}

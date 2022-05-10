@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/auth"
 )
 
 type tokenClaims struct {
@@ -14,7 +14,7 @@ type tokenClaims struct {
 	Password string `json:"password"`
 }
 
-func GenerateToken(namepass models.Namepass, signingKey string, tokenTTLHours int) (string, error) {
+func GenerateToken(namepass auth.Namepass, signingKey string, tokenTTLHours int) (string, error) {
 	tokenTTL := time.Duration(tokenTTLHours) * time.Hour
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
@@ -28,8 +28,8 @@ func GenerateToken(namepass models.Namepass, signingKey string, tokenTTLHours in
 	return token.SignedString([]byte(signingKey))
 }
 
-func ParseToken(tokenContent, signingKey string) (models.Namepass, error) {
-	var namepass models.Namepass
+func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
+	var namepass auth.Namepass
 	token, err := jwt.ParseWithClaims(tokenContent, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {

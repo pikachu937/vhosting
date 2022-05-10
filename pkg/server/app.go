@@ -15,35 +15,42 @@ import (
 	authhandler "github.com/mikerumy/vhosting/internal/auth/handler"
 	authrepo "github.com/mikerumy/vhosting/internal/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/internal/auth/usecase"
+	"github.com/mikerumy/vhosting/internal/logging"
+	loggingrepo "github.com/mikerumy/vhosting/internal/logging/repository"
+	loggingusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/session"
+	sessionrepo "github.com/mikerumy/vhosting/internal/session/repository"
+	sessionusecase "github.com/mikerumy/vhosting/internal/session/usecase"
 	"github.com/mikerumy/vhosting/internal/user"
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
 	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
 	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
+	"github.com/mikerumy/vhosting/pkg/config_tool"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
-	logrepo "github.com/mikerumy/vhosting/pkg/logger/repository"
-	logusecase "github.com/mikerumy/vhosting/pkg/logger/usecase"
 )
 
 type App struct {
-	httpServer  *http.Server
-	cfg         models.Config
-	userUseCase user.UserUseCase
-	authUseCase auth.AuthUseCase
-	logUseCase  logger.LogUseCase
+	httpServer     *http.Server
+	cfg            config_tool.Config
+	userUseCase    user.UserUseCase
+	authUseCase    auth.AuthUseCase
+	sessionUseCase session.SessionUseCase
+	loggingUseCase logging.LoggingUseCase
 }
 
-func NewApp(cfg models.Config) *App {
+func NewApp(cfg config_tool.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
-	logRepo := logrepo.NewLogRepository(cfg)
+	sessionRepo := sessionrepo.NewSessionRepository(cfg)
+	loggingRepo := loggingrepo.NewLoggingRepository(cfg)
 
 	return &App{
-		cfg:         cfg,
-		userUseCase: userusecase.NewUserUseCase(cfg, userRepo),
-		authUseCase: authusecase.NewAuthUseCase(cfg, authRepo),
-		logUseCase:  logusecase.NewLogUseCase(cfg, logRepo),
+		cfg:            cfg,
+		userUseCase:    userusecase.NewUserUseCase(cfg, userRepo),
+		authUseCase:    authusecase.NewAuthUseCase(cfg, authRepo),
+		sessionUseCase: sessionusecase.NewSessionUseCase(cfg, sessionRepo, authRepo),
+		loggingUseCase: loggingusecase.NewLoggingUseCase(cfg, loggingRepo),
 	}
 }
 
@@ -59,8 +66,8 @@ func (a *App) Run() error {
 	router := gin.New()
 
 	// Register web routes
-	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.logUseCase)
-	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase)
+	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.sessionUseCase, a.loggingUseCase)
+	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.loggingUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{

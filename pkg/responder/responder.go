@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/internal/logging"
 )
 
 type MessageOutput struct {
@@ -20,7 +20,7 @@ type ErrorData struct {
 	Statement string `json:"statement"`
 }
 
-func Response(ctx *gin.Context, log *models.Log) {
+func Response(ctx *gin.Context, log *logging.Log) {
 	if log.StatusCode >= 400 {
 		ctx.AbortWithStatusJSON(log.StatusCode, ErrorOutput{
 			ErrorData{ErrCode: log.ErrorCode, Statement: log.Message.(string)},

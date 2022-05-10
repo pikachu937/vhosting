@@ -5,8 +5,8 @@ const (
 	ErrLevelWarning = "warning"
 	ErrLevelError   = "error"
 	ErrLevelFatal   = "fatal"
-	TypeUser        = "*models.User"
-	TypeUsersSlice  = "map[int]*models.User"
-	GotUserData     = "Got user data."
+	TypeUser        = "*user.User"
+	TypeUsersSlice  = "map[int]*user.User"
+	GotUserData     = "Got user's data."
 	GotAllUsersData = "Got all-user's data."
 )

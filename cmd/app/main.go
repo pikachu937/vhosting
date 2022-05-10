@@ -4,7 +4,6 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/server"
@@ -18,7 +17,7 @@ func main() {
 	}
 	logger.Print(msg.InfoEnvironmentVarsLoaded())
 
-	var cfg models.Config
+	var cfg config_tool.Config
 	var err error
 
 	// Load config file
