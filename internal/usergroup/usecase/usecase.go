@@ -3,17 +3,14 @@ package usecase
 import (
 	"github.com/mikerumy/vhosting/internal/user"
 	ug "github.com/mikerumy/vhosting/internal/usergroup"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
 )
 
 type UGUseCase struct {
-	cfg    config_tool.Config
 	ugRepo ug.UGRepository
 }
 
-func NewUGUseCase(cfg config_tool.Config, ugRepo ug.UGRepository) *UGUseCase {
+func NewUGUseCase(ugRepo ug.UGRepository) *UGUseCase {
 	return &UGUseCase{
-		cfg:    cfg,
 		ugRepo: ugRepo,
 	}
 }

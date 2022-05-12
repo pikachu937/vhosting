@@ -6,18 +6,15 @@ import (
 	"reflect"
 
 	lg "github.com/mikerumy/vhosting/internal/logging"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
 type LogUseCase struct {
-	cfg     config_tool.Config
 	logRepo lg.LogRepository
 }
 
-func NewLogUseCase(cfg config_tool.Config, logRepo lg.LogRepository) *LogUseCase {
+func NewLogUseCase(logRepo lg.LogRepository) *LogUseCase {
 	return &LogUseCase{
-		cfg:     cfg,
 		logRepo: logRepo,
 	}
 }

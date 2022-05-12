@@ -1,7 +1,7 @@
 package logging
 
 const (
-	TableName     = "logs"
+	TableName     = "public.logs"
 	Id            = "id"
 	ErrorLevel    = "error_level"
 	SessionOwner  = "session_owner"

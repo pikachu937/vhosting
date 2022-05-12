@@ -45,7 +45,7 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	if h.useCase.IsEmpty(usr.Username, usr.PasswordHash) {
+	if h.useCase.IsRequiredEmpty(usr.Username, usr.PasswordHash) {
 		h.report(ctx, log, msg.ErrorUsernameOrPasswordCannotBeEmpty())
 		return
 	}
@@ -60,8 +60,10 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	// Create user, create usergroup
-	if err := h.useCase.CreateUser(ctx, usr, log.CreationDate); err != nil {
+	// Assign user creation time, create user, create usergroup
+	usr.JoiningDate = log.CreationDate
+
+	if err := h.useCase.CreateUser(usr); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateUser(err))
 		return
 	}

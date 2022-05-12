@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS public.perms;
 
 
 CREATE TABLE IF NOT EXISTS public.perms (
-    id        SERIAL       NOT NULL UNIQUE,
+    id        INTEGER      NOT NULL UNIQUE,
     name      VARCHAR(100) NOT NULL UNIQUE,
     code_name VARCHAR(30)  NOT NULL UNIQUE,
 	CONSTRAINT pk_perms PRIMARY KEY (id)
@@ -21,11 +21,10 @@ INSERT INTO public.perms (id, name, code_name) VALUES
 (2, 'Can get All-Users info',    'get_all_users'),
 (3, 'Can partially update User', 'patch_user'),
 (4, 'Can delete User',           'delete_user');
-ALTER SEQUENCE perms_id_seq RESTART WITH 5;
 
 
 CREATE TABLE IF NOT EXISTS public.groups (
-    id   SERIAL      NOT NULL UNIQUE,
+    id   INTEGER     NOT NULL UNIQUE,
     name VARCHAR(30) NOT NULL UNIQUE,
 	CONSTRAINT pk_groups PRIMARY KEY (id)
 );
@@ -33,7 +32,6 @@ INSERT INTO public.groups (id, name) VALUES
 (0, 'Super Users'),
 (1, 'Staff'),
 (2, 'Users');
-ALTER SEQUENCE groups_id_seq RESTART WITH 3;
 
 
 CREATE TABLE IF NOT EXISTS public.users (

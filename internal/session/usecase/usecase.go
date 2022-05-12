@@ -4,19 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
 	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
 )
 
 type SessUseCase struct {
-	cfg      config_tool.Config
 	sessRepo sess.SessRepository
 	authRepo auth.AuthRepository
 }
 
-func NewSessUseCase(cfg config_tool.Config, sessRepo sess.SessRepository,
+func NewSessUseCase(sessRepo sess.SessRepository,
 	authRepo auth.AuthRepository) *SessUseCase {
 	return &SessUseCase{
-		cfg:      cfg,
 		sessRepo: sessRepo,
 		authRepo: authRepo,
 	}

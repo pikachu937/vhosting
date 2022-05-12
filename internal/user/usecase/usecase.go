@@ -22,16 +22,8 @@ func NewUserUseCase(cfg config_tool.Config, userRepo user.UserRepository) *UserU
 	}
 }
 
-func (u *UserUseCase) IsEmpty(username, password string) bool {
-	if username == "" || password == "" {
-		return true
-	}
-	return false
-}
-
-func (u *UserUseCase) CreateUser(ctx *gin.Context, usr user.User, timestamp string) error {
-	usr.JoiningDate = timestamp
-	usr.LastLogin = timestamp
+func (u *UserUseCase) CreateUser(usr user.User) error {
+	usr.LastLogin = usr.JoiningDate
 	usr.IsActive = true
 	return u.userRepo.CreateUser(usr)
 }
@@ -50,6 +42,13 @@ func (u *UserUseCase) PartiallyUpdateUser(usr *user.User) error {
 
 func (u *UserUseCase) DeleteUser(id int) error {
 	return u.userRepo.DeleteUser(id)
+}
+
+func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {
+	if username == "" || password == "" {
+		return true
+	}
+	return false
 }
 
 func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {

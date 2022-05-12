@@ -7,8 +7,8 @@ import (
 type UserUseCase interface {
 	UserCommon
 
-	IsEmpty(username, password string) bool
-	CreateUser(ctx *gin.Context, usr User, timestamp string) error
+	IsRequiredEmpty(username, password string) bool
+
 	BindJSONUser(ctx *gin.Context) (User, error)
 	AtoiRequestedId(ctx *gin.Context) (int, error)
 }
