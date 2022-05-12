@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
 	lg "github.com/mikerumy/vhosting/internal/logging"
@@ -67,12 +65,12 @@ func (h *PermHandler) CreatePermission(ctx *gin.Context) {
 	}
 
 	// Create permission
-	if err := h.useCase.CreatePermission(ctx, permission, log.CreationDate); err != nil {
-		h.report(ctx, log, msg.ErrorCannotCreateUser(err))
+	if err := h.useCase.CreatePermission(permission); err != nil {
+		// h.report(ctx, log, msg.ErrorCannotCreateUser(err))
 		return
 	}
 
-	fmt.Println("Not implemented.")
+	// h.report(ctx, log, msg.InfoUserCreated())
 }
 
 func (h *PermHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
