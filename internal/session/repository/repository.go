@@ -4,27 +4,27 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/mikerumy/vhosting/internal/session"
+	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
-	"github.com/mikerumy/vhosting/pkg/constants/query"
+	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_tool"
 )
 
-type SessionRepository struct {
+type SessRepository struct {
 	cfg config_tool.Config
 }
 
-func NewSessionRepository(cfg config_tool.Config) *SessionRepository {
-	return &SessionRepository{cfg: cfg}
+func NewSessRepository(cfg config_tool.Config) *SessRepository {
+	return &SessRepository{cfg: cfg}
 }
 
-func (r *SessionRepository) DeleteSession(token string) error {
+func (r *SessRepository) DeleteSession(token string) error {
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.DELETE_FROM_TBL_WHERE_CND
-	tbl := TableName
-	cnd := fmt.Sprintf("%s=$1", Content)
+	tbl := sess.TableName
+	cnd := fmt.Sprintf("%s=$1", sess.Content)
 	query := fmt.Sprintf(template, tbl, cnd)
 
 	var rows *sql.Rows
@@ -37,14 +37,14 @@ func (r *SessionRepository) DeleteSession(token string) error {
 	return nil
 }
 
-func (r *SessionRepository) IsSessionExists(token string) (bool, error) {
+func (r *SessRepository) IsSessionExists(token string) (bool, error) {
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := Content
-	tbl := TableName
-	cnd := fmt.Sprintf("%s=$1", Content)
+	col := sess.Content
+	tbl := sess.TableName
+	cnd := fmt.Sprintf("%s=$1", sess.Content)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 	rows, err := db.Query(query, token)
 
@@ -61,16 +61,16 @@ func (r *SessionRepository) IsSessionExists(token string) (bool, error) {
 	return true, nil
 }
 
-func (r *SessionRepository) CreateSession(sess session.Session) error {
+func (r *SessRepository) CreateSession(session sess.Session) error {
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s)", TableName, Content, CreationDate)
+	tbl := fmt.Sprintf("%s (%s, %s)", sess.TableName, sess.Content, sess.CreationDate)
 	val := "($1, $2)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	_, err := db.Query(query, sess.Content, sess.CreationDate)
+	_, err := db.Query(query, session.Content, session.CreationDate)
 	if err != nil {
 		return err
 	}

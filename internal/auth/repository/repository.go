@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/mikerumy/vhosting/internal/auth"
-	u "github.com/mikerumy/vhosting/internal/user/repository"
+	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
-	"github.com/mikerumy/vhosting/pkg/constants/query"
+	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_tool"
 )
 
@@ -24,9 +24,9 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := fmt.Sprintf("%s, %s", u.Username, u.PassHash)
-	tbl := u.TableName
-	cnd := fmt.Sprintf("%s=$1 AND %s=$2", u.Username, u.PassHash)
+	col := fmt.Sprintf("%s, %s", user.Username, user.PasswordHash)
+	tbl := user.TableName
+	cnd := fmt.Sprintf("%s=$1 AND %s=$2", user.Username, user.PasswordHash)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var newNamepass auth.Namepass
@@ -43,9 +43,9 @@ func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
-	tbl := u.TableName
-	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", u.PassHash, u.PassHash)
-	cnd := fmt.Sprintf("%s=$2", u.Username)
+	tbl := user.TableName
+	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", user.PasswordHash, user.PasswordHash)
+	cnd := fmt.Sprintf("%s=$2", user.Username)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows
@@ -63,9 +63,9 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := u.Id
-	tbl := u.TableName
-	cnd := fmt.Sprintf("%s=$1 AND %s=$2", u.Username, u.PassHash)
+	col := user.Id
+	tbl := user.TableName
+	cnd := fmt.Sprintf("%s=$1 AND %s=$2", user.Username, user.PasswordHash)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var rows *sql.Rows
@@ -88,9 +88,9 @@ func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) err
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
-	tbl := u.TableName
-	val := fmt.Sprintf("%s=$1", u.LastLogin)
-	cnd := fmt.Sprintf("%s=$2", u.Username)
+	tbl := user.TableName
+	val := fmt.Sprintf("%s=$1", user.LastLogin)
+	cnd := fmt.Sprintf("%s=$2", user.Username)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows

@@ -3,12 +3,13 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
-	"github.com/mikerumy/vhosting/internal/logging"
-	"github.com/mikerumy/vhosting/internal/session"
+	lg "github.com/mikerumy/vhosting/internal/logging"
+	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc auth.AuthUseCase, uuc user.UserUseCase, suc session.SessionUseCase, luc logging.LoggingUseCase) {
+func RegisterHTTPEndpoints(router *gin.Engine, uc auth.AuthUseCase, uuc user.UserUseCase,
+	suc sess.SessUseCase, luc lg.LogUseCase) {
 	h := NewAuthHandler(uc, uuc, suc, luc)
 
 	authorization := router.Group("/auth")

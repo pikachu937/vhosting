@@ -49,6 +49,9 @@ CREATE TABLE IF NOT EXISTS public.users (
     last_login    TIMESTAMP WITH TIME ZONE NOT NULL,
 	CONSTRAINT pk_users PRIMARY KEY (id)
 );
+INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, joining_date, last_login) VALUES
+(0, 'admin', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03');
+ALTER SEQUENCE users_id_seq RESTART WITH 1;
 
 
 CREATE TABLE IF NOT EXISTS public.sessions (
@@ -109,6 +112,9 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
 );
+INSERT INTO public.user_groups (id, user_id, group_id) VALUES
+(0, 0, 0);
+ALTER SEQUENCE user_groups_id_seq RESTART WITH 1;
 
 
 CREATE TABLE IF NOT EXISTS public.infos (

@@ -1,5 +1,5 @@
 package logging
 
-type LoggingCommon interface {
+type LogCommon interface {
 	CreateLogRecord(log *Log) error
 }

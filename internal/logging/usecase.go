@@ -1,5 +1,5 @@
 package logging
 
-type LoggingUseCase interface {
-	LoggingCommon
+type LogUseCase interface {
+	LogCommon
 }

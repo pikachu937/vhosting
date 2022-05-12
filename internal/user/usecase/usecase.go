@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/cookie_tool"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
@@ -19,6 +20,13 @@ func NewUserUseCase(cfg config_tool.Config, userRepo user.UserRepository) *UserU
 		cfg:      cfg,
 		userRepo: userRepo,
 	}
+}
+
+func (u *UserUseCase) IsEmpty(username, password string) bool {
+	if username == "" || password == "" {
+		return true
+	}
+	return false
 }
 
 func (u *UserUseCase) CreateUser(ctx *gin.Context, usr user.User, timestamp string) error {
@@ -36,8 +44,8 @@ func (u *UserUseCase) GetAllUsers() (map[int]*user.User, error) {
 	return u.userRepo.GetAllUsers()
 }
 
-func (u *UserUseCase) PartiallyUpdateUser(id int, usr user.User) error {
-	return u.userRepo.PartiallyUpdateUser(id, usr)
+func (u *UserUseCase) PartiallyUpdateUser(usr *user.User) error {
+	return u.userRepo.PartiallyUpdateUser(usr)
 }
 
 func (u *UserUseCase) DeleteUser(id int) error {
@@ -50,6 +58,10 @@ func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {
 		return false, err
 	}
 	return exists, nil
+}
+
+func (u *UserUseCase) GetUserId(username string) (int, error) {
+	return u.userRepo.GetUserId(username)
 }
 
 func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (user.User, error) {
@@ -69,4 +81,8 @@ func (u *UserUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
 		return -1, err
 	}
 	return idInt, nil
+}
+
+func (u *UserUseCase) ReadCookie(ctx *gin.Context) string {
+	return cookie_tool.Read(ctx)
 }

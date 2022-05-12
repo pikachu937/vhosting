@@ -20,6 +20,20 @@ func NewAuthUseCase(cfg config_tool.Config, authRepo auth.AuthRepository) *AuthU
 	}
 }
 
+func (u *AuthUseCase) IsTokenExist(token string) bool {
+	if token != "" {
+		return true
+	}
+	return false
+}
+
+func (u *AuthUseCase) IsMatched(username_1, username_2 string) bool {
+	if username_1 == username_2 {
+		return true
+	}
+	return false
+}
+
 func (u *AuthUseCase) GetNamepass(namepass auth.Namepass) error {
 	return u.authRepo.GetNamepass(namepass)
 }

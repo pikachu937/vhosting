@@ -1,4 +1,4 @@
-package repository
+package session
 
 const (
 	TableName    = "sessions"

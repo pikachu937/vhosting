@@ -1,7 +1,7 @@
 package session
 
-type SessionRepository interface {
-	SessionCommon
+type SessRepository interface {
+	SessCommon
 
-	CreateSession(sess Session) error
+	CreateSession(session Session) error
 }

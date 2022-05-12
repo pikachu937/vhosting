@@ -1,5 +1,5 @@
 package logging
 
-type LoggingRepository interface {
-	LoggingCommon
+type LogRepository interface {
+	LogCommon
 }

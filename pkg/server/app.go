@@ -15,59 +15,67 @@ import (
 	authhandler "github.com/mikerumy/vhosting/internal/auth/handler"
 	authrepo "github.com/mikerumy/vhosting/internal/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/internal/auth/usecase"
-	"github.com/mikerumy/vhosting/internal/logging"
-	loggingrepo "github.com/mikerumy/vhosting/internal/logging/repository"
-	loggingusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
+	lg "github.com/mikerumy/vhosting/internal/logging"
+	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
+	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/session"
-	sessionrepo "github.com/mikerumy/vhosting/internal/session/repository"
-	sessionusecase "github.com/mikerumy/vhosting/internal/session/usecase"
+	sess "github.com/mikerumy/vhosting/internal/session"
+	sessrepo "github.com/mikerumy/vhosting/internal/session/repository"
+	sessusecase "github.com/mikerumy/vhosting/internal/session/usecase"
 	"github.com/mikerumy/vhosting/internal/user"
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
 	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
 	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
+	ug "github.com/mikerumy/vhosting/internal/usergroup"
+	ugrepo "github.com/mikerumy/vhosting/internal/usergroup/repository"
+	ugusecase "github.com/mikerumy/vhosting/internal/usergroup/usecase"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
 )
 
 type App struct {
-	httpServer     *http.Server
-	cfg            config_tool.Config
-	userUseCase    user.UserUseCase
-	authUseCase    auth.AuthUseCase
-	sessionUseCase session.SessionUseCase
-	loggingUseCase logging.LoggingUseCase
+	httpServer  *http.Server
+	cfg         config_tool.Config
+	userUseCase user.UserUseCase
+	authUseCase auth.AuthUseCase
+	sessUseCase sess.SessUseCase
+	logUseCase  lg.LogUseCase
+	ugUseCase   ug.UGUseCase
 }
 
 func NewApp(cfg config_tool.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
-	sessionRepo := sessionrepo.NewSessionRepository(cfg)
-	loggingRepo := loggingrepo.NewLoggingRepository(cfg)
+	sessRepo := sessrepo.NewSessRepository(cfg)
+	logRepo := logrepo.NewLogRepository(cfg)
+	ugRepo := ugrepo.NewUGRepository(cfg)
 
 	return &App{
-		cfg:            cfg,
-		userUseCase:    userusecase.NewUserUseCase(cfg, userRepo),
-		authUseCase:    authusecase.NewAuthUseCase(cfg, authRepo),
-		sessionUseCase: sessionusecase.NewSessionUseCase(cfg, sessionRepo, authRepo),
-		loggingUseCase: loggingusecase.NewLoggingUseCase(cfg, loggingRepo),
+		cfg:         cfg,
+		userUseCase: userusecase.NewUserUseCase(cfg, userRepo),
+		authUseCase: authusecase.NewAuthUseCase(cfg, authRepo),
+		sessUseCase: sessusecase.NewSessUseCase(cfg, sessRepo, authRepo),
+		logUseCase:  logusecase.NewLogUseCase(cfg, logRepo),
+		ugUseCase:   ugusecase.NewUGUseCase(cfg, ugRepo),
 	}
 }
 
 func (a *App) Run() error {
-	// Server mode
+	// Debug mode
 	if a.cfg.ServerDebugMode {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Init Gin handler
+	// Init handlers
 	router := gin.New()
 
-	// Register web routes
-	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase, a.sessionUseCase, a.loggingUseCase)
-	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.loggingUseCase)
+	// Register routes
+	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase,
+		a.sessUseCase, a.logUseCase)
+	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase,
+		a.authUseCase, a.sessUseCase, a.ugUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
