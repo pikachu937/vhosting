@@ -127,7 +127,7 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 	}
 
 	if users == nil {
-		h.report(ctx, log, msg.ErrorNoUsersAvailable(err))
+		h.report(ctx, log, msg.InfoNoUsersAvailable())
 		return
 	}
 
@@ -167,7 +167,7 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 
 	// Partially update user, update usergroup
 	if err := h.useCase.PartiallyUpdateUser(&usr); err != nil {
-		h.report(ctx, log, msg.ErrorNoUsersAvailable(err))
+		h.report(ctx, log, msg.InfoNoUsersAvailable())
 		return
 	}
 
@@ -233,7 +233,7 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
 		return false
 	}
 	if id < 0 {
-		if err := h.DeleteSessionCookie(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
 			return false
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
@@ -243,9 +243,9 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
 	log.SessionOwner = cookieNamepass.Username
 
 	// Check Superuser permissions
-	inGroup, err := h.ugUseCase.IsUserInGroup(id, ug.SuperuserGroup)
+	inGroup, err := h.useCase.IsUserSuperuser(cookieNamepass.Username)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckThatUserInGroup(err))
+		h.report(ctx, log, msg.ErrorCannotCheckSuperuserPermissions(err))
 	}
 	if !inGroup {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
@@ -255,7 +255,7 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
 	return true
 }
 
-func (h *UserHandler) DeleteSessionCookie(ctx *gin.Context, log *lg.Log, token string) error {
+func (h *UserHandler) DeleteSessionAndCookie(ctx *gin.Context, log *lg.Log, token string) error {
 	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err

@@ -1,8 +1,12 @@
 package auth
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
+
+type AuthCommon interface {
+	GetNamepass(namepass Namepass) error
+	UpdateNamepassPassword(namepass Namepass) error
+	IsNamepassExists(username, passwordHash string) (bool, error)
+}
 
 type AuthUseCase interface {
 	AuthCommon
@@ -15,4 +19,10 @@ type AuthUseCase interface {
 	SendCookie(ctx *gin.Context, token string)
 	ParseToken(token string) (Namepass, error)
 	DeleteCookie(ctx *gin.Context)
+}
+
+type AuthRepository interface {
+	AuthCommon
+
+	UpdateNamepassLastLogin(username, token string) error
 }

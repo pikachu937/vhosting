@@ -51,6 +51,10 @@ func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {
 	return false
 }
 
+func (u *UserUseCase) IsUserSuperuser(username string) (bool, error) {
+	return u.userRepo.IsUserSuperuser(username)
+}
+
 func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {
 	exists, err := u.userRepo.IsUserExists(idOrUsername)
 	if err != nil {

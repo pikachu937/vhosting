@@ -15,14 +15,11 @@ func NewUGUseCase(ugRepo ug.UGRepository) *UGUseCase {
 	}
 }
 
-func (u *UGUseCase) IsUserInGroup(userId, groupId int) (bool, error) {
-	return u.ugRepo.IsUserInGroup(userId, groupId)
-}
+// func (u *UGUseCase) IsUserInGroup(userId, groupId int) bool {
+// 	return u.ugRepo.IsUserInGroup(userId, groupId)
+// }
 
 func (u *UGUseCase) CreateUsergroup(usr *user.User) error {
-	if usr.IsSuperUser {
-		return u.ugRepo.CreateUsergroup(usr.Id, ug.SuperuserGroup)
-	}
 	if usr.IsStaff {
 		return u.ugRepo.CreateUsergroup(usr.Id, ug.StaffGroup)
 	}
@@ -30,9 +27,6 @@ func (u *UGUseCase) CreateUsergroup(usr *user.User) error {
 }
 
 func (u *UGUseCase) UpdateUsergroup(usr *user.User) error {
-	if usr.IsSuperUser {
-		return u.ugRepo.UpdateUsergroup(usr.Id, ug.SuperuserGroup)
-	}
 	if usr.IsStaff {
 		return u.ugRepo.UpdateUsergroup(usr.Id, ug.StaffGroup)
 	}

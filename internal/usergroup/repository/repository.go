@@ -17,28 +17,28 @@ func NewUGRepository(cfg config_tool.Config) *UGRepository {
 	return &UGRepository{cfg: cfg}
 }
 
-func (r *UGRepository) IsUserInGroup(userId, groupId int) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+// func (r *UGRepository) IsUserInGroup(userId, groupId int) bool {
+// 	db := db_tool.NewDBConnection(r.cfg)
+// 	defer db_tool.CloseDBConnection(r.cfg, db)
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := ug.GroupId
-	tbl := ug.TableName
-	cnd := fmt.Sprintf("%s=$1", ug.UserId)
-	query := fmt.Sprintf(template, col, tbl, cnd)
+// 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+// 	col := ug.GroupId
+// 	tbl := ug.TableName
+// 	cnd := fmt.Sprintf("%s=$1", ug.UserId)
+// 	query := fmt.Sprintf(template, col, tbl, cnd)
 
-	var groupIdPtr *int
-	err := db.Get(&groupIdPtr, query, userId)
-	if err != nil {
-		return false, err
-	}
+// 	var groupIdPtr *int
+// 	err := db.Get(&groupIdPtr, query, userId)
+// 	if err != nil {
+// 		return false
+// 	}
 
-	if groupId != *groupIdPtr {
-		return false, nil
-	}
+// 	if groupId != *groupIdPtr {
+// 		return false
+// 	}
 
-	return true, nil
-}
+// 	return true
+// }
 
 func (r *UGRepository) CreateUsergroup(userId, groupId int) error {
 	db := db_tool.NewDBConnection(r.cfg)

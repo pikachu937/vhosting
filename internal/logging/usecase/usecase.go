@@ -27,8 +27,12 @@ func (u *LogUseCase) CreateLogRecord(log *lg.Log) error {
 		log.Message = logger.GotUserData
 		return u.logRepo.CreateLogRecord(log)
 	}
-	if fmt.Sprintf("%T", log.Message) == logger.TypeUsersSlice {
+	if fmt.Sprintf("%T", log.Message) == logger.TypeUsersMap {
 		log.Message = logger.GotAllUsersData
+		return u.logRepo.CreateLogRecord(log)
+	}
+	if fmt.Sprintf("%T", log.Message) == logger.TypeUserpermsMap {
+		log.Message = logger.GotUserPermissions
 		return u.logRepo.CreateLogRecord(log)
 	}
 	return errors.New("Undefined type of message.")

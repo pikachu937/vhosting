@@ -148,6 +148,30 @@ func (r *UserRepository) DeleteUser(id int) error {
 	return nil
 }
 
+func (r *UserRepository) IsUserSuperuser(username string) (bool, error) {
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
+
+	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	col := user.IsSuperUser
+	tbl := user.TableName
+	cnd := fmt.Sprintf("%s=$1", user.Username)
+	query := fmt.Sprintf(template, col, tbl, cnd)
+	rows, err := db.Query(query, username)
+
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	rowIsPresent := rows.Next()
+	if !rowIsPresent {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)

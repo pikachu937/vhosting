@@ -35,7 +35,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	cookieToken := h.useCase.ReadCookie(ctx)
 
 	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionCookie(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
 			return
 		}
 	}
@@ -87,7 +87,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	// Read cookie for token, check if token exists, delete current session and cookie (if exists)
 	cookieToken := h.useCase.ReadCookie(ctx)
 	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionCookie(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
 			return
 		}
 	} else {
@@ -147,7 +147,7 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	// Read cookie for token, check if token exists, delete current session and cookie (if exists)
 	cookieToken := h.useCase.ReadCookie(ctx)
 	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionCookie(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
 			return
 		}
 	} else {
@@ -177,7 +177,7 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedOut())
 }
 
-func (h *AuthHandler) DeleteSessionCookie(ctx *gin.Context, log *lg.Log, token string) error {
+func (h *AuthHandler) DeleteSessionAndCookie(ctx *gin.Context, log *lg.Log, token string) error {
 	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err

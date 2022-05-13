@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS public.videos;
 DROP TABLE IF EXISTS public.infos;
 DROP TABLE IF EXISTS public.user_groups;
+DROP TABLE IF EXISTS public.user_perms;
 DROP TABLE IF EXISTS public.group_perms;
 DROP TABLE IF EXISTS public.logs;
 DROP TABLE IF EXISTS public.sessions;
@@ -96,6 +97,22 @@ INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
 ALTER SEQUENCE group_perms_id_seq RESTART WITH 5;
 
 
+CREATE TABLE IF NOT EXISTS public.user_perms (
+    id      SERIAL  NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL,
+    perm_id INTEGER NOT NULL,
+	CONSTRAINT pk_user_perms PRIMARY KEY (id),
+	CONSTRAINT fk_user_perms_users FOREIGN KEY (user_id)
+		REFERENCES public.users (id) MATCH SIMPLE
+		ON UPDATE NO ACTION
+		ON DELETE CASCADE,
+	CONSTRAINT fk_user_perms_perms FOREIGN KEY (perm_id)
+		REFERENCES public.perms (id) MATCH SIMPLE
+		ON UPDATE NO ACTION
+		ON DELETE CASCADE
+);
+
+
 CREATE TABLE IF NOT EXISTS public.user_groups (
     id       SERIAL  NOT NULL UNIQUE,
     user_id  INTEGER NOT NULL,
@@ -110,9 +127,6 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
 );
-INSERT INTO public.user_groups (id, user_id, group_id) VALUES
-(0, 0, 0);
-ALTER SEQUENCE user_groups_id_seq RESTART WITH 1;
 
 
 CREATE TABLE IF NOT EXISTS public.infos (

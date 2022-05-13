@@ -19,10 +19,6 @@ import (
 	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
 	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	perm "github.com/mikerumy/vhosting/internal/permission"
-	permhandler "github.com/mikerumy/vhosting/internal/permission/handler"
-	permrepo "github.com/mikerumy/vhosting/internal/permission/repository"
-	permusecase "github.com/mikerumy/vhosting/internal/permission/usecase"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	sessrepo "github.com/mikerumy/vhosting/internal/session/repository"
 	sessusecase "github.com/mikerumy/vhosting/internal/session/usecase"
@@ -33,12 +29,12 @@ import (
 	ug "github.com/mikerumy/vhosting/internal/usergroup"
 	ugrepo "github.com/mikerumy/vhosting/internal/usergroup/repository"
 	ugusecase "github.com/mikerumy/vhosting/internal/usergroup/usecase"
+	up "github.com/mikerumy/vhosting/internal/userperm"
+	uphandler "github.com/mikerumy/vhosting/internal/userperm/handler"
+	uprepo "github.com/mikerumy/vhosting/internal/userperm/repository"
+	upusecase "github.com/mikerumy/vhosting/internal/userperm/usecase"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
-	// gp "github.com/mikerumy/vhosting/internal/group"
-	// gphandler "github.com/mikerumy/vhosting/internal/group/handler"
-	// gprepo "github.com/mikerumy/vhosting/internal/group/repository"
-	// gpusecase "github.com/mikerumy/vhosting/internal/group/usecase"
 )
 
 type App struct {
@@ -49,8 +45,7 @@ type App struct {
 	sessUseCase sess.SessUseCase
 	logUseCase  lg.LogUseCase
 	ugUseCase   ug.UGUseCase
-	permUseCase perm.PermUseCase
-	// gpUseCase   gp.GPUseCase
+	upUseCase   up.UPUseCase
 }
 
 func NewApp(cfg config_tool.Config) *App {
@@ -59,8 +54,7 @@ func NewApp(cfg config_tool.Config) *App {
 	sessRepo := sessrepo.NewSessRepository(cfg)
 	logRepo := logrepo.NewLogRepository(cfg)
 	ugRepo := ugrepo.NewUGRepository(cfg)
-	permRepo := permrepo.NewPermRepository(cfg)
-	// gpRepo := gprepo.NewGPRepository(cfg)
+	upRepo := uprepo.NewUPRepository(cfg)
 
 	return &App{
 		cfg:         cfg,
@@ -69,8 +63,7 @@ func NewApp(cfg config_tool.Config) *App {
 		sessUseCase: sessusecase.NewSessUseCase(sessRepo, authRepo),
 		logUseCase:  logusecase.NewLogUseCase(logRepo),
 		ugUseCase:   ugusecase.NewUGUseCase(ugRepo),
-		permUseCase: permusecase.NewPermUseCase(permRepo),
-		// gpUseCase:   gpusecase.NewGPUseCase(gpRepo),
+		upUseCase:   upusecase.NewUPUseCase(upRepo),
 	}
 }
 
@@ -90,9 +83,8 @@ func (a *App) Run() error {
 		a.sessUseCase, a.logUseCase)
 	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.ugUseCase)
-	permhandler.RegisterHTTPEndpoints(router, a.permUseCase, a.logUseCase,
-		a.authUseCase, a.userUseCase, a.sessUseCase, a.ugUseCase)
-	// gphandler.RegisterHTTPEndpoints(router, a.gpUseCase)
+	uphandler.RegisterHTTPEndpoints(router, a.upUseCase, a.logUseCase,
+		a.authUseCase, a.sessUseCase, a.ugUseCase, a.userUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{

@@ -89,8 +89,11 @@ func Print(log *logging.Log) {
 		if fmt.Sprintf("%T", log.Message) == TypeUser {
 			printLine += GotUserData + "\t"
 		}
-		if fmt.Sprintf("%T", log.Message) == TypeUsersSlice {
+		if fmt.Sprintf("%T", log.Message) == TypeUsersMap {
 			printLine += GotAllUsersData + "\t"
+		}
+		if fmt.Sprintf("%T", log.Message) == TypeUserpermsMap {
+			printLine += GotUserPermissions + "\t"
 		}
 	}
 
