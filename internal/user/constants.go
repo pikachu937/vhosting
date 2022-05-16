@@ -6,7 +6,7 @@ const (
 	Username     = "username"
 	PasswordHash = "password_hash"
 	IsActive     = "is_active"
-	IsSuperUser  = "is_superuser"
+	IsSuperuser  = "is_superuser"
 	IsStaff      = "is_staff"
 	FirstName    = "first_name"
 	LastName     = "last_name"

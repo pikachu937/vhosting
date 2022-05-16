@@ -9,7 +9,8 @@ type UserCommon interface {
 	PartiallyUpdateUser(usr *User) error
 	DeleteUser(id int) error
 
-	IsUserSuperuser(username string) (bool, error)
+	IsUserSuperuserOrStaff(username string) (bool, error)
+	IsUserHavePersonalPermission(userId int, userPerm string) (bool, error)
 	IsUserExists(idOrUsername interface{}) (bool, error)
 	GetUserId(username string) (int, error)
 }

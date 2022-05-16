@@ -21,3 +21,11 @@ func (u *UPUseCase) CreateUserperm(userperm *up.Userperm) error {
 func (u *UPUseCase) GetUserPermissions(id int) (map[int]*up.Userperm, error) {
 	return u.upRepo.GetUserPermissions(id)
 }
+
+func (u *UPUseCase) UpsertUserPermissions(userId, groupId int) error {
+	return u.upRepo.UpsertUserPermissions(userId, groupId)
+}
+
+func (u *UPUseCase) DeleteUserPermissions(userId, groupId int) error {
+	return u.upRepo.DeleteUserPermissions(userId, groupId)
+}

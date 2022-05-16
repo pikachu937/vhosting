@@ -8,6 +8,7 @@ import (
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/user"
 	ug "github.com/mikerumy/vhosting/internal/usergroup"
+	up "github.com/mikerumy/vhosting/internal/userperm"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
@@ -18,23 +19,26 @@ type UserHandler struct {
 	authUseCase auth.AuthUseCase
 	sessUseCase sess.SessUseCase
 	ugUseCase   ug.UGUseCase
+	upUseCase   up.UPUseCase
 }
 
 func NewUserHandler(useCase user.UserUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
-	sessUseCase sess.SessUseCase, ugUseCase ug.UGUseCase) *UserHandler {
+	sessUseCase sess.SessUseCase, ugUseCase ug.UGUseCase, upUseCase up.UPUseCase) *UserHandler {
 	return &UserHandler{
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
 		sessUseCase: sessUseCase,
 		ugUseCase:   ugUseCase,
+		upUseCase:   upUseCase,
 	}
 }
 
 func (h *UserHandler) CreateUser(ctx *gin.Context) {
+	actPermission := "post_user"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
@@ -60,7 +64,7 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	// Assign user creation time, create user, create usergroup
+	// Assign user's creation time, create user, create usergroup and append permissions from it
 	usr.JoiningDate = log.CreationDate
 
 	if err := h.useCase.CreateUser(usr); err != nil {
@@ -73,8 +77,7 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.ugUseCase.CreateUsergroup(&usr); err != nil {
-		h.report(ctx, log, msg.ErrorCannotCreateUsergroup(err))
+	if !h.IsUsergroupCreatedAndUserPermissionsUpserted(ctx, log, usr) {
 		return
 	}
 
@@ -82,9 +85,10 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context) {
+	actPermission := "get_user"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
@@ -114,9 +118,10 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
+	actPermission := "get_all_users"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
@@ -135,12 +140,14 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 }
 
 func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
+	actPermission := "patch_user"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
+	// Read requested ID, check user for existance
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
@@ -157,6 +164,7 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 		return
 	}
 
+	// Read input, partially update user
 	usr, err := h.useCase.BindJSONUser(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
@@ -165,14 +173,17 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 
 	usr.Id = reqId
 
-	// Partially update user, update usergroup
 	if err := h.useCase.PartiallyUpdateUser(&usr); err != nil {
 		h.report(ctx, log, msg.InfoNoUsersAvailable())
 		return
 	}
 
-	if err := h.ugUseCase.UpdateUsergroup(&usr); err != nil {
-		h.report(ctx, log, msg.ErrorCannotUpdateUsergroup(err))
+	// Delete user's staff and user groups, create usergroup and append permissions from it
+	h.ugUseCase.DeleteUsergroup(reqId, ug.StaffGroup)
+
+	h.ugUseCase.DeleteUsergroup(reqId, ug.UserGroup)
+
+	if !h.IsUsergroupCreatedAndUserPermissionsUpserted(ctx, log, usr) {
 		return
 	}
 
@@ -180,9 +191,10 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
+	actPermission := "delete_user"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
@@ -210,7 +222,7 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoUserDeleted())
 }
 
-func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
+func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
 	// Read cookie for token, check if token is exist
 	cookieToken := h.authUseCase.ReadCookie(ctx)
 
@@ -242,12 +254,21 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
 
 	log.SessionOwner = cookieNamepass.Username
 
-	// Check Superuser permissions
-	inGroup, err := h.useCase.IsUserSuperuser(cookieNamepass.Username)
+	// Check superuser permissions
+	var firstCheck, secondCheck bool
+	firstCheck, err = h.useCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckSuperuserPermissions(err))
+		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
+		return false
 	}
-	if !inGroup {
+	if !firstCheck {
+		if secondCheck, err = h.useCase.IsUserHavePersonalPermission(id, permission); err != nil {
+			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
+			return false
+		}
+	}
+
+	if !firstCheck && !secondCheck {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
 		return false
 	}
@@ -272,4 +293,29 @@ func (h *UserHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 		responder.Response(ctx, log)
 	}
 	logger.Print(log)
+}
+
+func (h *UserHandler) IsUsergroupCreatedAndUserPermissionsUpserted(ctx *gin.Context, log *lg.Log, usr user.User) bool {
+	if !usr.IsSuperuser && !usr.IsStaff {
+		if err := h.ugUseCase.CreateUsergroup(usr.Id, ug.UserGroup); err != nil {
+			h.report(ctx, log, msg.ErrorCannotCreateUsergroup(err))
+			return false
+		}
+
+		if err := h.upUseCase.UpsertUserPermissions(usr.Id, ug.UserGroup); err != nil {
+			h.report(ctx, log, msg.ErrorCannotUpsertUserPermissions(err))
+			return false
+		}
+	} else if usr.IsStaff {
+		if err := h.ugUseCase.CreateUsergroup(usr.Id, ug.StaffGroup); err != nil {
+			h.report(ctx, log, msg.ErrorCannotCreateUsergroup(err))
+			return false
+		}
+
+		if err := h.upUseCase.UpsertUserPermissions(usr.Id, ug.StaffGroup); err != nil {
+			h.report(ctx, log, msg.ErrorCannotUpsertUserPermissions(err))
+			return false
+		}
+	}
+	return true
 }

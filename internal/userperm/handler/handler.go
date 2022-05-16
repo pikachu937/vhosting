@@ -35,9 +35,10 @@ func NewUPHandler(useCase up.UPUseCase, logUseCase lg.LogUseCase, authUseCase au
 }
 
 func (h *UPHandler) GetUserPermissions(ctx *gin.Context) {
+	actPermission := "get_user_perms"
 	log := logger.Setup(ctx)
 
-	if !h.IsPermissionsChecked(ctx, log) {
+	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
@@ -71,7 +72,7 @@ func (h *UPHandler) GetUserPermissions(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoGotUserPermissions(userperms))
 }
 
-func (h *UPHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
+func (h *UPHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
 	// Read cookie for token, check if token is exist
 	cookieToken := h.authUseCase.ReadCookie(ctx)
 
@@ -103,12 +104,21 @@ func (h *UPHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log) bool {
 
 	log.SessionOwner = cookieNamepass.Username
 
-	// Check Superuser permissions
-	inGroup, err := h.userUseCase.IsUserSuperuser(cookieNamepass.Username)
+	// Check superuser permissions
+	var firstCheck, secondCheck bool
+	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckSuperuserPermissions(err))
+		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
+		return false
 	}
-	if !inGroup {
+	if !firstCheck {
+		if secondCheck, err = h.userUseCase.IsUserHavePersonalPermission(id, permission); err != nil {
+			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
+			return false
+		}
+	}
+
+	if !firstCheck && !secondCheck {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
 		return false
 	}

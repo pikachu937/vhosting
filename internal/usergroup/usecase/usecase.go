@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"github.com/mikerumy/vhosting/internal/user"
 	ug "github.com/mikerumy/vhosting/internal/usergroup"
 )
 
@@ -15,20 +14,21 @@ func NewUGUseCase(ugRepo ug.UGRepository) *UGUseCase {
 	}
 }
 
+func (u *UGUseCase) CreateUsergroup(userId, groupId int) error {
+	return u.ugRepo.CreateUsergroup(userId, groupId)
+}
+
+func (u *UGUseCase) DeleteUsergroup(userId, groupId int) error {
+	return u.ugRepo.DeleteUsergroup(userId, groupId)
+}
+
 // func (u *UGUseCase) IsUserInGroup(userId, groupId int) bool {
 // 	return u.ugRepo.IsUserInGroup(userId, groupId)
 // }
 
-func (u *UGUseCase) CreateUsergroup(usr *user.User) error {
-	if usr.IsStaff {
-		return u.ugRepo.CreateUsergroup(usr.Id, ug.StaffGroup)
-	}
-	return u.ugRepo.CreateUsergroup(usr.Id, ug.UserGroup)
-}
-
-func (u *UGUseCase) UpdateUsergroup(usr *user.User) error {
-	if usr.IsStaff {
-		return u.ugRepo.UpdateUsergroup(usr.Id, ug.StaffGroup)
-	}
-	return u.ugRepo.UpdateUsergroup(usr.Id, ug.UserGroup)
-}
+// func (u *UGUseCase) UpdateUsergroup(usr *user.User) error {
+// 	if usr.IsStaff {
+// 		return u.ugRepo.UpdateUsergroup(usr.Id, ug.StaffGroup)
+// 	}
+// 	return u.ugRepo.UpdateUsergroup(usr.Id, ug.UserGroup)
+// }

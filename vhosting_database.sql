@@ -17,11 +17,31 @@ CREATE TABLE IF NOT EXISTS public.perms (
 	CONSTRAINT pk_perms PRIMARY KEY (id)
 );
 INSERT INTO public.perms (id, name, code_name) VALUES
-(0, 'Can create User',           'post_user'),
-(1, 'Can get User info',         'get_user'),
-(2, 'Can get All-Users info',    'get_all_users'),
-(3, 'Can partially update User', 'patch_user'),
-(4, 'Can delete User',           'delete_user');
+( 0, 'Can create a User',            'post_user'),
+( 1, 'Can get a User',               'get_user'),
+( 2, 'Can get all the Users',        'get_all_users'),
+( 3, 'Can partially update a User',  'patch_user'),
+( 4, 'Can delete a User',            'delete_user'),
+
+( 5, 'Can create a Group',           'post_group'),
+( 6, 'Can get a Group',              'get_group'),
+( 7, 'Can get all the Users',        'get_all_groups'),
+( 8, 'Can partially update a User',  'patch_group'),
+( 9, 'Can delete a User',            'delete_group'),
+
+(10, 'Can get the user Permissions', 'get_user_perms'),
+
+(11, 'Can create a Video',           'post_video'),
+(12, 'Can get a Video',              'get_video'),
+(13, 'Can get all the Videos',       'get_all_videos'),
+(14, 'Can partially update a Video', 'patch_video'),
+(15, 'Can delete a Video',           'delete_video'),
+
+(16, 'Can create a Info',            'post_info'),
+(17, 'Can get a Info',               'get_info'),
+(18, 'Can get all the Infos',        'get_all_infos'),
+(19, 'Can partially update a Info',  'patch_info'),
+(20, 'Can delete a Info',            'delete_info');
 
 
 CREATE TABLE IF NOT EXISTS public.groups (
@@ -30,9 +50,8 @@ CREATE TABLE IF NOT EXISTS public.groups (
 	CONSTRAINT pk_groups PRIMARY KEY (id)
 );
 INSERT INTO public.groups (id, name) VALUES
-(0, 'Super Users'),
-(1, 'Staff'),
-(2, 'Users');
+(0, 'Video Creators'),
+(1, 'Info Creators');
 
 
 CREATE TABLE IF NOT EXISTS public.users (
@@ -89,12 +108,18 @@ CREATE TABLE IF NOT EXISTS public.group_perms (
 		ON DELETE CASCADE
 );
 INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
-(0, 0, 0),
-(1, 0, 1),
-(2, 0, 2),
-(3, 0, 3),
-(4, 0, 4);
-ALTER SEQUENCE group_perms_id_seq RESTART WITH 5;
+(1, 0, 5),
+(2, 0, 6),
+(3, 0, 7),
+(4, 0, 8),
+(5, 0, 9),
+
+(6, 1, 10),
+(7, 1, 11),
+(8, 1, 12),
+(9, 1, 13),
+(10, 1, 14);
+ALTER SEQUENCE group_perms_id_seq RESTART WITH 11;
 
 
 CREATE TABLE IF NOT EXISTS public.user_perms (
@@ -110,6 +135,7 @@ CREATE TABLE IF NOT EXISTS public.user_perms (
 		REFERENCES public.perms (id) MATCH SIMPLE
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
+        
 );
 
 

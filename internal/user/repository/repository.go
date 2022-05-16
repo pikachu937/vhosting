@@ -6,6 +6,8 @@ import (
 	"reflect"
 
 	"github.com/mikerumy/vhosting/internal/user"
+	up "github.com/mikerumy/vhosting/internal/userperm"
+
 	"github.com/mikerumy/vhosting/pkg/config_tool"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_tool"
@@ -25,12 +27,12 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 
 	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", user.TableName, user.Username,
-		user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff, user.FirstName,
+		user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff, user.FirstName,
 		user.LastName, user.JoiningDate, user.LastLogin)
 	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	_, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperUser,
+	_, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperuser,
 		usr.IsStaff, usr.FirstName, usr.LastName, usr.JoiningDate, usr.LastLogin)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", user.Id, user.Username,
-		user.PasswordHash, user.IsActive, user.IsSuperUser, user.IsStaff, user.FirstName,
+		user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff, user.FirstName,
 		user.LastName, user.JoiningDate, user.LastLogin)
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Id)
@@ -79,13 +81,13 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 	var users = map[int]*user.User{}
 	var usr user.User
 	for rows.Next() {
-		err = rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperUser,
+		err = rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperuser,
 			&usr.IsStaff, &usr.FirstName, &usr.LastName, &usr.JoiningDate, &usr.LastLogin)
 		if err != nil {
 			return nil, err
 		}
 		users[usr.Id] = &user.User{Id: usr.Id, Username: usr.Username, PasswordHash: usr.PasswordHash,
-			IsActive: usr.IsActive, IsSuperUser: usr.IsSuperUser, IsStaff: usr.IsStaff,
+			IsActive: usr.IsActive, IsSuperuser: usr.IsSuperuser, IsStaff: usr.IsStaff,
 			FirstName: usr.FirstName, LastName: usr.LastName, JoiningDate: usr.JoiningDate,
 			LastLogin: usr.LastLogin}
 	}
@@ -111,7 +113,7 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", user.Username, user.Username) +
 		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", user.PasswordHash, user.PasswordHash) +
 		fmt.Sprintf("%s=$3, ", user.IsActive) +
-		fmt.Sprintf("%s=$4, ", user.IsSuperUser) +
+		fmt.Sprintf("%s=$4, ", user.IsSuperuser) +
 		fmt.Sprintf("%s=$5, ", user.IsStaff) +
 		fmt.Sprintf("%s=CASE WHEN $6 <> '' THEN $6 ELSE %s END, ", user.FirstName, user.FirstName) +
 		fmt.Sprintf("%s=CASE WHEN $7 <> '' THEN $7 ELSE %s END", user.LastName, user.LastName)
@@ -119,7 +121,7 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
 	var rows *sql.Rows
-	rows, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperUser,
+	rows, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperuser,
 		usr.IsStaff, usr.FirstName, usr.LastName, usr.Id)
 	if err != nil {
 		return err
@@ -148,24 +150,54 @@ func (r *UserRepository) DeleteUser(id int) error {
 	return nil
 }
 
-func (r *UserRepository) IsUserSuperuser(username string) (bool, error) {
+func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := user.IsSuperUser
+	col := fmt.Sprintf("%s OR %s", user.IsSuperuser, user.IsStaff)
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Username)
 	query := fmt.Sprintf(template, col, tbl, cnd)
+
+	var err error
 	rows, err := db.Query(query, username)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	queryRes := false
+	for rows.Next() {
+		if err = rows.Scan(&queryRes); err != nil {
+			return false, err
+		}
+	}
+
+	return queryRes, nil
+}
+
+func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
+	db := db_tool.NewDBConnection(r.cfg)
+	defer db_tool.CloseDBConnection(r.cfg, db)
+
+	template := query_consts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
+	col1 := up.Id
+	tbl1 := up.TableName
+	cnd1 := fmt.Sprintf("%s=$1 AND %s", up.UserId, up.PermId)
+	col2 := up.Id
+	tbl2 := "public.perms"
+	cnd2 := "code_name=$2"
+	query := fmt.Sprintf(template, col1, tbl1, cnd1, col2, tbl2, cnd2)
+	rows, err := db.Query(query, userId, userPerm)
 
 	if err != nil {
 		return false, err
 	}
 	defer rows.Close()
 
-	rowIsPresent := rows.Next()
-	if !rowIsPresent {
+	isRowExists := rows.Next()
+	if !isRowExists {
 		return false, nil
 	}
 
@@ -200,8 +232,8 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 	}
 	defer rows.Close()
 
-	rowIsPresent := rows.Next()
-	if !rowIsPresent {
+	isRowExists := rows.Next()
+	if !isRowExists {
 		return false, nil
 	}
 

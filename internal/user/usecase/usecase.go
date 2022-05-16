@@ -23,8 +23,10 @@ func NewUserUseCase(cfg config_tool.Config, userRepo user.UserRepository) *UserU
 }
 
 func (u *UserUseCase) CreateUser(usr user.User) error {
-	usr.LastLogin = usr.JoiningDate
 	usr.IsActive = true
+	usr.IsSuperuser = false
+	usr.IsStaff = false
+	usr.LastLogin = usr.JoiningDate
 	return u.userRepo.CreateUser(usr)
 }
 
@@ -51,8 +53,12 @@ func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {
 	return false
 }
 
-func (u *UserUseCase) IsUserSuperuser(username string) (bool, error) {
-	return u.userRepo.IsUserSuperuser(username)
+func (u *UserUseCase) IsUserSuperuserOrStaff(username string) (bool, error) {
+	return u.userRepo.IsUserSuperuserOrStaff(username)
+}
+
+func (u *UserUseCase) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
+	return u.userRepo.IsUserHavePersonalPermission(userId, userPerm)
 }
 
 func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {

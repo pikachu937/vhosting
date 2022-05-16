@@ -76,6 +76,10 @@ func ErrorYouHaveNotEnoughPermissions() *lg.Log {
 	return &lg.Log{StatusCode: 403, ErrorCode: 210, Message: "You have not enough permissions.", ErrorLevel: logger.ErrLevelError}
 }
 
-func ErrorCannotCheckSuperuserPermissions(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrorCode: 211, Message: fmt.Sprintf("Cannot check superuser permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+func ErrorCannotCheckSuperuserStaffPermissions(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 211, Message: fmt.Sprintf("Cannot check superuser/staff permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+}
+
+func ErrorCannotCheckPersonalPermission(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 212, Message: fmt.Sprintf("Cannot check personal permission. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }

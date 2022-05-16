@@ -5,7 +5,7 @@ type User struct {
 	Username     string `json:"username"     db:"username"`
 	PasswordHash string `json:"password"     db:"password_hash"`
 	IsActive     bool   `json:"is-active"    db:"is_active"`
-	IsSuperUser  bool   `json:"is-superuser" db:"is_superuser"`
+	IsSuperuser  bool   `json:"is-superuser" db:"is_superuser"`
 	IsStaff      bool   `json:"is-staff"     db:"is_staff"`
 	FirstName    string `json:"first-name"   db:"first_name"`
 	LastName     string `json:"last-name"    db:"last_name"`

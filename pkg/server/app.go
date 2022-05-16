@@ -82,7 +82,7 @@ func (a *App) Run() error {
 	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase,
 		a.sessUseCase, a.logUseCase)
 	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase,
-		a.authUseCase, a.sessUseCase, a.ugUseCase)
+		a.authUseCase, a.sessUseCase, a.ugUseCase, a.upUseCase)
 	uphandler.RegisterHTTPEndpoints(router, a.upUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.ugUseCase, a.userUseCase)
 

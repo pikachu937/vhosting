@@ -19,3 +19,11 @@ func InfoNoPermissionsAvailable() *lg.Log {
 func InfoGotUserPermissions(userperms map[int]*up.Userperm) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: userperms, ErrorLevel: logger.ErrLevelInfo}
 }
+
+func ErrorCannotUpsertUserPermissions(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 601, Message: fmt.Sprintf("Cannot upsert user permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+}
+
+func ErrorCannotDeleteUserPermissions(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 602, Message: fmt.Sprintf("Cannot delete user permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+}
