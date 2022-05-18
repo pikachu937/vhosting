@@ -18,8 +18,8 @@ type UserCommon interface {
 type UserUseCase interface {
 	UserCommon
 
-	IsRequiredEmpty(username, password string) bool
 	BindJSONUser(ctx *gin.Context) (User, error)
+	IsRequiredEmpty(username, password string) bool
 	AtoiRequestedId(ctx *gin.Context) (int, error)
 }
 

@@ -48,8 +48,11 @@ func NewDBConnection(cfg config_tool.Config) *sqlx.DB {
 }
 
 func CloseDBConnection(cfg config_tool.Config, db *sqlx.DB) {
-	if err := db.Close(); err != nil {
+	var err error
+
+	if err = db.Close(); err != nil {
 		logger.Print(msg.ErrorCannotCloseDBConnection(err))
+		return
 	}
 
 	if cfg.DBLogConnStatus {

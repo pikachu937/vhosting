@@ -17,19 +17,18 @@ const (
 )
 
 func GetTimestamp() string {
-	var time string = time.Now().Round(time.Microsecond).String()
-
-	fullTime := time[:len(time)-6]
-	gmtTime := fullTime[len(fullTime)-3:]
-	fullTimeWithoutGMT := fullTime[:len(fullTime)-4]
+	time := time.Now().Round(time.Microsecond).String()
+	time = time[:len(time)-6]
+	gmt := time[len(time)-3:]
+	timeWithoutGMT := time[:len(time)-4]
 
 	// adds a zero to the end until ms digit number is lower than 6
-	digits := len(fullTimeWithoutGMT) - 1 - strings.LastIndex(fullTimeWithoutGMT, ".")
+	digits := len(timeWithoutGMT) - 1 - strings.LastIndex(timeWithoutGMT, ".")
 	for i := digits; i < 6; i++ {
-		fullTimeWithoutGMT += "0"
+		timeWithoutGMT += "0"
 	}
 
-	return fullTimeWithoutGMT + gmtTime
+	return timeWithoutGMT + gmt
 }
 
 func Setup(ctx *gin.Context) *logging.Log {
@@ -86,14 +85,24 @@ func Print(log *logging.Log) {
 	if reflect.TypeOf(log.Message) == reflect.TypeOf("") {
 		printLine += errorLine + log.Message.(string) + "\t"
 	} else {
-		if fmt.Sprintf("%T", log.Message) == TypeUser {
-			printLine += GotUserData + "\t"
+		messageType := fmt.Sprintf("%T", log.Message)
+		if messageType == TypeOfUser {
+			printLine += GotUser + "\t"
 		}
-		if fmt.Sprintf("%T", log.Message) == TypeUsersMap {
-			printLine += GotAllUsersData + "\t"
+		if messageType == TypeOfUsers {
+			printLine += GotAllUsers + "\t"
 		}
-		if fmt.Sprintf("%T", log.Message) == TypeUserpermsMap {
-			printLine += GotUserPermissions + "\t"
+		if messageType == TypeOfGroup {
+			printLine += GotGroup + "\t"
+		}
+		if messageType == TypeOfGroups {
+			printLine += GotAllGroups + "\t"
+		}
+		if messageType == TypeOfPermIds {
+			printLine += GotUserPerms + "\t"
+		}
+		if messageType == TypeOfPerms {
+			printLine += GotAllPerms + "\t"
 		}
 	}
 

@@ -1,15 +1,24 @@
 package logger
 
 const (
-	ErrLevelInfo       = "info"
-	ErrLevelWarning    = "warning"
-	ErrLevelError      = "error"
-	ErrLevelFatal      = "fatal"
-	TypeUser           = "*user.User"
-	TypeUsersMap       = "map[int]*user.User"
-	GotUserData        = "Got user's data."
-	GotAllUsersData    = "Got all-user's data."
-	TypeUserperm       = "*userperm.Userperm"
-	TypeUserpermsMap   = "map[int]*userperm.Userperm"
-	GotUserPermissions = "Got user's permissions."
+	ErrLevelInfo    = "info"
+	ErrLevelWarning = "warning"
+	ErrLevelError   = "error"
+	ErrLevelFatal   = "fatal"
+
+	TypeOfUser  = "*user.User"
+	TypeOfUsers = "map[int]*user.User"
+	GotUser     = "Got user."
+	GotAllUsers = "Got all users."
+
+	TypeOfGroup  = "*group.Group"
+	TypeOfGroups = "map[int]*group.Group"
+	GotGroup     = "Got group."
+	GotAllGroups = "Got all groups."
+
+	TypeOfPermIds = "*permission.PermIds"
+	GotUserPerms  = "Got user permissions."
+
+	TypeOfPerms = "map[int]*permission.Perm"
+	GotAllPerms = "Got all permissions."
 )

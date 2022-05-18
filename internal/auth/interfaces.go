@@ -12,7 +12,7 @@ type AuthUseCase interface {
 	AuthCommon
 
 	ReadCookie(ctx *gin.Context) string
-	IsTokenExist(token string) bool
+	IsTokenExists(token string) bool
 	IsMatched(username_1, username_2 string) bool
 	BindJSONNamepass(ctx *gin.Context) (Namepass, error)
 	GenerateToken(namepass Namepass) (string, error)

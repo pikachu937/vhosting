@@ -24,29 +24,26 @@ func GenerateToken(namepass auth.Namepass, signingKey string, tokenTTLHours int)
 		namepass.Username,
 		namepass.PasswordHash,
 	})
-
 	return token.SignedString([]byte(signingKey))
 }
 
 func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
+	var err error
 	var namepass auth.Namepass
+	ok := false
 	token, err := jwt.ParseWithClaims(tokenContent, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-		if !ok {
+		if _, ok = token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Invalid signing method.")
 		}
-
 		return []byte(signingKey), nil
 	})
 	if err != nil {
 		return namepass, err
 	}
-
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
 		return namepass, errors.New("Token claims have a wrong type.")
 	}
-
 	namepass.Username = claims.Username
 	namepass.PasswordHash = claims.Password
 	return namepass, nil

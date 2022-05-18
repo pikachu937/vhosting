@@ -31,11 +31,12 @@ func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase,
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	// Read cookie for token, delete current session and cookie (if exists)
-	cookieToken := h.useCase.ReadCookie(ctx)
+	var err error
 
-	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
+	// Read cookie for token, check token existance, if token exists delete cookie and session
+	cookieToken := h.useCase.ReadCookie(ctx)
+	if h.useCase.IsTokenExists(cookieToken) {
+		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
 			return
 		}
 	}
@@ -65,18 +66,18 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	// Assign session owner for report, make token and session, send cookie with token
 	log.SessionOwner = inputNamepass.Username
 
-	newToken, err := h.useCase.GenerateToken(inputNamepass)
+	token, err := h.useCase.GenerateToken(inputNamepass)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGenerateToken(err))
 		return
 	}
 
-	if err = h.sessUseCase.CreateSession(ctx, inputNamepass.Username, newToken, log.CreationDate); err != nil {
+	if err = h.sessUseCase.CreateSession(ctx, inputNamepass.Username, token, log.CreationDate); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateSession(err))
 		return
 	}
 
-	h.useCase.SendCookie(ctx, newToken)
+	h.useCase.SendCookie(ctx, token)
 
 	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedIn())
 }
@@ -84,13 +85,14 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	// Read cookie for token, check if token exists, delete current session and cookie (if exists)
+	var err error
+
 	cookieToken := h.useCase.ReadCookie(ctx)
-	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
-			return
-		}
-	} else {
+	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
+	if err != nil {
+		return
+	}
+	if !exists {
 		h.report(ctx, log, msg.ErrorYouMustBeSignedInForChangingPassword())
 		return
 	}
@@ -119,7 +121,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := h.userUseCase.IsUserExists(inputNamepass.Username)
+	exists, err = h.userUseCase.IsUserExists(inputNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return
@@ -132,8 +134,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	// Assign session owner for report, update user password
 	log.SessionOwner = cookieNamepass.Username
 
-	err = h.useCase.UpdateNamepassPassword(inputNamepass)
-	if err != nil {
+	if err = h.useCase.UpdateNamepassPassword(inputNamepass); err != nil {
 		h.report(ctx, log, msg.ErrorCannotUpdateNamepassPassword(err))
 		return
 	}
@@ -144,13 +145,14 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	// Read cookie for token, check if token exists, delete current session and cookie (if exists)
+	var err error
+
 	cookieToken := h.useCase.ReadCookie(ctx)
-	if h.useCase.IsTokenExist(cookieToken) {
-		if err := h.DeleteSessionAndCookie(ctx, log, cookieToken); err != nil {
-			return
-		}
-	} else {
+	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
+	if err != nil {
+		return
+	}
+	if !exists {
 		h.report(ctx, log, msg.ErrorYouMustBeSignedInForSigningOut())
 		return
 	}
@@ -162,7 +164,7 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := h.userUseCase.IsUserExists(cookieNamepass.Username)
+	exists, err = h.userUseCase.IsUserExists(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return
@@ -177,21 +179,47 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedOut())
 }
 
-func (h *AuthHandler) DeleteSessionAndCookie(ctx *gin.Context, log *lg.Log, token string) error {
-	if err := h.sessUseCase.DeleteSession(token); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
-		return err
-	}
-	h.useCase.DeleteCookie(ctx)
-	return nil
-}
-
 func (h *AuthHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
+	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	if err := h.logUseCase.CreateLogRecord(log); err != nil {
+	if err = h.logUseCase.CreateLogRecord(log); err != nil {
 		logger.Complete(log, msg.ErrorCannotDoLogging(err))
 		responder.Response(ctx, log)
 	}
 	logger.Print(log)
+}
+
+func (h *AuthHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
+	var err error
+	h.useCase.DeleteCookie(ctx)
+	if err = h.sessUseCase.DeleteSession(token); err != nil {
+		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
+		return err
+	}
+	return nil
+}
+
+func (h *AuthHandler) IsCookieAndSessionExists(ctx *gin.Context, log *lg.Log, token string) (bool, error) {
+	// Read cookie for token, check token existance
+	// if token exists - check session existance.
+	// If cookie exists but session don't - delete cookie only.
+	// If cookie and session exists - delete cookie and session, pass forward
+	if h.useCase.IsTokenExists(token) {
+		exists, err := h.sessUseCase.IsSessionExists(token)
+		if err != nil {
+			h.report(ctx, log, msg.ErrorCannotCheckSessionExistence(err))
+			return false, err
+		}
+		if !exists {
+			h.useCase.DeleteCookie(ctx)
+			return false, nil
+		}
+		if err = h.DeleteCookieAndSession(ctx, log, token); err != nil {
+			return false, err
+		}
+		return true, nil
+	} else {
+		return false, nil
+	}
 }

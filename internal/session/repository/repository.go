@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
 
 	sess "github.com/mikerumy/vhosting/internal/session"
@@ -19,6 +18,7 @@ func NewSessRepository(cfg config_tool.Config) *SessRepository {
 }
 
 func (r *SessRepository) DeleteSession(token string) error {
+	var err error
 	db := db_tool.NewDBConnection(r.cfg)
 	defer db_tool.CloseDBConnection(r.cfg, db)
 
@@ -27,7 +27,6 @@ func (r *SessRepository) DeleteSession(token string) error {
 	cnd := fmt.Sprintf("%s=$1", sess.Content)
 	query := fmt.Sprintf(template, tbl, cnd)
 
-	var rows *sql.Rows
 	rows, err := db.Query(query, token)
 	if err != nil {
 		return err

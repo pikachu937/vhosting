@@ -10,27 +10,28 @@ import (
 )
 
 func main() {
+	var err error
+
 	// Load environment file
-	if err := godotenv.Load("./configs/.env"); err != nil {
+	if err = godotenv.Load("./configs/.env"); err != nil {
 		logger.Print(msg.FatalFailedToLoadEnvironmentFile(err))
 		return
 	}
 	logger.Print(msg.InfoEnvironmentVarsLoaded())
 
-	var cfg config_tool.Config
-	var err error
-
 	// Load config file
-	if cfg, err = config_tool.LoadConfig("./configs/config.yml"); err != nil {
+	cfg, err := config_tool.LoadConfig("./configs/config.yml")
+	if err != nil {
 		logger.Print(msg.FatalFailedToLoadConfigFile(err))
 		return
 	}
 	logger.Print(msg.InfoConfigVarsLoaded())
 
+	// Make new server content
 	app := server.NewApp(cfg)
 
-	// Run the server and wait for Ctrl+C combination from keyboard to shut down
-	if err := app.Run(); err != nil {
+	// Run the server and wait for pressing Ctrl+C from keyboard to shut down
+	if err = app.Run(); err != nil {
 		logger.Print(msg.FatalFailureOnServerRunning(err))
 	}
 }

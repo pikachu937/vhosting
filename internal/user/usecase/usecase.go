@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
-	"github.com/mikerumy/vhosting/pkg/cookie_tool"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
@@ -46,13 +45,6 @@ func (u *UserUseCase) DeleteUser(id int) error {
 	return u.userRepo.DeleteUser(id)
 }
 
-func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {
-	if username == "" || password == "" {
-		return true
-	}
-	return false
-}
-
 func (u *UserUseCase) IsUserSuperuserOrStaff(username string) (bool, error) {
 	return u.userRepo.IsUserSuperuserOrStaff(username)
 }
@@ -62,6 +54,7 @@ func (u *UserUseCase) IsUserHavePersonalPermission(userId int, userPerm string) 
 }
 
 func (u *UserUseCase) IsUserExists(idOrUsername interface{}) (bool, error) {
+	var err error
 	exists, err := u.userRepo.IsUserExists(idOrUsername)
 	if err != nil {
 		return false, err
@@ -74,8 +67,9 @@ func (u *UserUseCase) GetUserId(username string) (int, error) {
 }
 
 func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (user.User, error) {
+	var err error
 	var usr user.User
-	if err := ctx.BindJSON(&usr); err != nil {
+	if err = ctx.BindJSON(&usr); err != nil {
 		return usr, err
 	}
 	if usr.PasswordHash != "" {
@@ -84,14 +78,18 @@ func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (user.User, error) {
 	return usr, nil
 }
 
+func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {
+	if username == "" || password == "" {
+		return true
+	}
+	return false
+}
+
 func (u *UserUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	idInt, err := strconv.Atoi(ctx.Param("id"))
+	var err error
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		return -1, err
 	}
-	return idInt, nil
-}
-
-func (u *UserUseCase) ReadCookie(ctx *gin.Context) string {
-	return cookie_tool.Read(ctx)
+	return id, nil
 }

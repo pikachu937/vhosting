@@ -12,7 +12,7 @@ func InfoServerWasSuccessfullyStartedAtLocalIP(host, port string) *lg.Log {
 }
 
 func InfoServerWasGracefullyShutDown() *lg.Log {
-	return &lg.Log{Message: "Server was gracefully shut down.", ErrorLevel: logger.ErrLevelInfo}
+	return &lg.Log{Message: "Server was correctly shuted down.", ErrorLevel: logger.ErrLevelInfo}
 }
 
 func FatalFailureOnServerRunning(err error) *lg.Log {

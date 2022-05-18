@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/internal/group"
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sess "github.com/mikerumy/vhosting/internal/session"
@@ -11,207 +12,204 @@ import (
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
 
-type UserHandler struct {
-	useCase     user.UserUseCase
+type GroupHandler struct {
+	useCase     group.GroupUseCase
 	logUseCase  lg.LogUseCase
 	authUseCase auth.AuthUseCase
 	sessUseCase sess.SessUseCase
+	userUseCase user.UserUseCase
 }
 
-func NewUserHandler(useCase user.UserUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
-	sessUseCase sess.SessUseCase) *UserHandler {
-	return &UserHandler{
+func NewGroupHandler(useCase group.GroupUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *GroupHandler {
+	return &GroupHandler{
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
 		sessUseCase: sessUseCase,
+		userUseCase: userUseCase,
 	}
 }
 
-func (h *UserHandler) CreateUser(ctx *gin.Context) {
+func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "post_user"
+	actPermission := "post_group"
 
 	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
-	// Read input, check required fields, check user existence
-	inputUser, err := h.useCase.BindJSONUser(ctx)
+	// Read input, check required fields, check if new group already exists
+	inputGroup, err := h.useCase.BindJSONGroup(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputUser.Username, inputUser.PasswordHash) {
-		h.report(ctx, log, msg.ErrorUsernameOrPasswordCannotBeEmpty())
+	if h.useCase.IsRequiredEmpty(inputGroup.Name) {
+		h.report(ctx, log, msg.ErrorGroupNameCannotBeEmpty())
 		return
 	}
 
-	exists, err := h.useCase.IsUserExists(inputUser.Username)
+	exists, err := h.useCase.IsGroupExists(inputGroup.Name)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if exists {
-		h.report(ctx, log, msg.ErrorUserWithEnteredUsernameIsExist())
+		h.report(ctx, log, msg.ErrorGroupWithEnteredNameIsExist())
 		return
 	}
 
-	// Assign user creation time, create user
-	inputUser.JoiningDate = log.CreationDate
-
-	if err = h.useCase.CreateUser(inputUser); err != nil {
-		h.report(ctx, log, msg.ErrorCannotCreateUser(err))
+	// Create group
+	if err = h.useCase.CreateGroup(inputGroup); err != nil {
+		h.report(ctx, log, msg.ErrorCannotCreateGroup(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoUserCreated())
+	h.report(ctx, log, msg.InfoGroupCreated())
 }
 
-func (h *UserHandler) GetUser(ctx *gin.Context) {
+func (h *GroupHandler) GetGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "get_user"
+	actPermission := "get_group"
 
 	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
-	// Read requested ID, check user existence, get user
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsUserExists(reqId)
+	exists, err := h.useCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorUserWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
-	gottenUser, err := h.useCase.GetUser(reqId)
+	gottenGroup, err := h.useCase.GetGroup(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetUser(err))
+		h.report(ctx, log, msg.ErrorCannotGetGroup(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotUserData(gottenUser))
+	h.report(ctx, log, msg.InfoGotGroupData(gottenGroup))
 }
 
-func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
+func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "get_all_users"
+	actPermission := "get_all_groups"
 
 	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
-	// Get all users. If gotten is nothing - send such a message
-	gottenUsers, err := h.useCase.GetAllUsers()
+	gottenGroups, err := h.useCase.GetAllGroups()
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetAllUsers(err))
+		h.report(ctx, log, msg.ErrorCannotGetAllGroups(err))
 		return
 	}
 
-	if gottenUsers == nil {
-		h.report(ctx, log, msg.InfoNoUsersAvailable())
+	if gottenGroups == nil {
+		h.report(ctx, log, msg.InfoNoGroupsAvailable())
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotAllUsersData(gottenUsers))
+	h.report(ctx, log, msg.InfoGotAllGroupsData(gottenGroups))
 }
 
-func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
+func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "patch_user"
+	actPermission := "patch_group"
 
 	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
-	// Read requested ID, check user existence
+	// Read requested ID, check group for existance
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsUserExists(reqId)
+	exists, err := h.useCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorUserWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
-	// Read input, define ID as requested, partially update user
-	inputUser, err := h.useCase.BindJSONUser(ctx)
+	// Read input, define ID as requested, partially update group
+	inputGroup, err := h.useCase.BindJSONGroup(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	inputUser.Id = reqId
+	inputGroup.Id = reqId
 
-	if err = h.useCase.PartiallyUpdateUser(&inputUser); err != nil {
-		h.report(ctx, log, msg.InfoNoUsersAvailable())
+	if err = h.useCase.PartiallyUpdateGroup(&inputGroup); err != nil {
+		h.report(ctx, log, msg.InfoNoGroupsAvailable())
 		return
 	}
 
-	h.report(ctx, log, msg.InfoUserPartiallyUpdated())
+	h.report(ctx, log, msg.InfoGroupPartiallyUpdated())
 }
 
-func (h *UserHandler) DeleteUser(ctx *gin.Context) {
+func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "delete_user"
+	actPermission := "delete_group"
 
 	if !h.IsPermissionsChecked(ctx, log, actPermission) {
 		return
 	}
 
-	// Read requested ID, check user existence, delete user
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsUserExists(reqId)
+	exists, err := h.useCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorUserWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
-	if err = h.useCase.DeleteUser(reqId); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteUser(err))
+	if err = h.useCase.DeleteGroup(reqId); err != nil {
+		h.report(ctx, log, msg.ErrorCannotDeleteGroup(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoUserDeleted())
+	h.report(ctx, log, msg.InfoGroupDeleted())
 }
 
-func (h *UserHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
+func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
 	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
@@ -222,7 +220,7 @@ func (h *UserHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 	logger.Print(log)
 }
 
-func (h *UserHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
+func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
 	var err error
 	h.authUseCase.DeleteCookie(ctx)
 	if err = h.sessUseCase.DeleteSession(token); err != nil {
@@ -232,7 +230,7 @@ func (h *UserHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 	return nil
 }
 
-func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
+func (h *GroupHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
 	var err error
 
 	// Read cookie for token, check token existence, check session existence
@@ -259,7 +257,7 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 		return false
 	}
 
-	gottenUserId, err := h.useCase.GetUserId(cookieNamepass.Username)
+	gottenUserId, err := h.userUseCase.GetUserId(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return false
@@ -276,13 +274,13 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 
 	// Check superuser permissions
 	var firstCheck, secondCheck bool
-	firstCheck, err = h.useCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
+	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
 		return false
 	}
 	if !firstCheck {
-		if secondCheck, err = h.useCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
+		if secondCheck, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
 			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
 			return false
 		}

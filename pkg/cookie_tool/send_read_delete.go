@@ -15,11 +15,11 @@ func Send(ctx *gin.Context, value string, tokenTTLHours int) {
 }
 
 func Read(ctx *gin.Context) string {
+	var err error
 	gottenCookie, err := ctx.Request.Cookie(cookieName)
 	if err != nil {
 		return ""
 	}
-
 	cookieValue := gottenCookie.Value
 	return cookieValue
 }
