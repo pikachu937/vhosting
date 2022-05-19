@@ -60,12 +60,16 @@ func InfoGotAllUsersData(users map[int]*user.User) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: users, ErrorLevel: logger.ErrLevelInfo}
 }
 
+func ErrorCannotPartiallyUpdateUser(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 209, Message: fmt.Sprintf("Cannot partially update user. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+}
+
 func InfoUserPartiallyUpdated() *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: "User partially updated.", ErrorLevel: logger.ErrLevelInfo}
 }
 
 func ErrorCannotDeleteUser(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrorCode: 209, Message: fmt.Sprintf("Cannot delete user. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 500, ErrorCode: 210, Message: fmt.Sprintf("Cannot delete user. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
 func InfoUserDeleted() *lg.Log {
@@ -73,13 +77,13 @@ func InfoUserDeleted() *lg.Log {
 }
 
 func ErrorYouHaveNotEnoughPermissions() *lg.Log {
-	return &lg.Log{StatusCode: 403, ErrorCode: 210, Message: "You have not enough permissions.", ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 403, ErrorCode: 211, Message: "You have not enough permissions.", ErrorLevel: logger.ErrLevelError}
 }
 
 func ErrorCannotCheckSuperuserStaffPermissions(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrorCode: 211, Message: fmt.Sprintf("Cannot check superuser/staff permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 500, ErrorCode: 212, Message: fmt.Sprintf("Cannot check superuser/staff permissions. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
 func ErrorCannotCheckPersonalPermission(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrorCode: 212, Message: fmt.Sprintf("Cannot check personal permission. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 500, ErrorCode: 213, Message: fmt.Sprintf("Cannot check personal permission. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }

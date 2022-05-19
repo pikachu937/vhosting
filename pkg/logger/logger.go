@@ -104,6 +104,12 @@ func Print(log *logging.Log) {
 		if messageType == TypeOfPerms {
 			printLine += GotAllPerms + "\t"
 		}
+		if messageType == TypeOfInfo {
+			printLine += GotInfo + "\t"
+		}
+		if messageType == TypeOfInfos {
+			printLine += GotAllInfos + "\t"
+		}
 	}
 
 	if log.CreationDate == "" {

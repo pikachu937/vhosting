@@ -12,10 +12,10 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc auth.AuthUseCase, uuc user.Use
 	suc sess.SessUseCase, luc lg.LogUseCase) {
 	h := NewAuthHandler(uc, uuc, suc, luc)
 
-	authorization := router.Group("/auth")
+	authRoute := router.Group("/auth")
 	{
-		authorization.POST("/sign-in", h.SignIn)
-		authorization.POST("/change-password", h.ChangePassword)
-		authorization.POST("/sign-out", h.SignOut)
+		authRoute.POST("/signin", h.SignIn)
+		authRoute.POST("/change_password", h.ChangePassword)
+		authRoute.POST("/signout", h.SignOut)
 	}
 }

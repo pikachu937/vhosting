@@ -13,12 +13,12 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc group.GroupUseCase, luc lg.Log
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase) {
 	h := NewGroupHandler(uc, luc, auc, suc, uuc)
 
-	groupInterface := router.Group("/group-interface")
+	groupRoute := router.Group("/group")
 	{
-		groupInterface.POST("", h.CreateGroup)
-		groupInterface.GET(":id", h.GetGroup)
-		groupInterface.GET("all", h.GetAllGroups)
-		groupInterface.PATCH(":id", h.PartiallyUpdateGroup)
-		groupInterface.DELETE(":id", h.DeleteGroup)
+		groupRoute.POST("", h.CreateGroup)
+		groupRoute.GET(":id", h.GetGroup)
+		groupRoute.GET("all", h.GetAllGroups)
+		groupRoute.PATCH(":id", h.PartiallyUpdateGroup)
+		groupRoute.DELETE(":id", h.DeleteGroup)
 	}
 }

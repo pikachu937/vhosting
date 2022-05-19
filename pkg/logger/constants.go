@@ -21,4 +21,10 @@ const (
 
 	TypeOfPerms = "map[int]*permission.Perm"
 	GotAllPerms = "Got all permissions."
+
+	TypeOfInfo = "*info.Info"
+	GotInfo    = "Got info."
+
+	TypeOfInfos = "map[int]*info.Info"
+	GotAllInfos = "Got all infos."
 )

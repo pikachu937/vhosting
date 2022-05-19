@@ -19,6 +19,10 @@ import (
 	grouphandler "github.com/mikerumy/vhosting/internal/group/handler"
 	grouprepo "github.com/mikerumy/vhosting/internal/group/repository"
 	groupusecase "github.com/mikerumy/vhosting/internal/group/usecase"
+	"github.com/mikerumy/vhosting/internal/info"
+	infohandler "github.com/mikerumy/vhosting/internal/info/handler"
+	inforepo "github.com/mikerumy/vhosting/internal/info/repository"
+	infousecase "github.com/mikerumy/vhosting/internal/info/usecase"
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
 	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
@@ -47,6 +51,7 @@ type App struct {
 	logUseCase   lg.LogUseCase
 	groupUseCase group.GroupUseCase
 	permUseCase  perm.PermUseCase
+	infoUseCase  info.InfoUseCase
 }
 
 func NewApp(cfg config_tool.Config) *App {
@@ -56,6 +61,7 @@ func NewApp(cfg config_tool.Config) *App {
 	logRepo := logrepo.NewLogRepository(cfg)
 	groupRepo := grouprepo.NewGroupRepository(cfg)
 	permRepo := permrepo.NewPermRepository(cfg)
+	infoRepo := inforepo.NewInfoRepository(cfg)
 
 	return &App{
 		cfg:          cfg,
@@ -65,6 +71,7 @@ func NewApp(cfg config_tool.Config) *App {
 		logUseCase:   logusecase.NewLogUseCase(logRepo),
 		groupUseCase: groupusecase.NewGroupUseCase(cfg, groupRepo),
 		permUseCase:  permusecase.NewPermUseCase(cfg, permRepo),
+		infoUseCase:  infousecase.NewInfoUseCase(cfg, infoRepo),
 	}
 }
 
@@ -90,6 +97,8 @@ func (a *App) Run() error {
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	permhandler.RegisterHTTPEndpoints(router, a.permUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase, a.groupUseCase)
+	infohandler.RegisterHTTPEndpoints(router, a.infoUseCase, a.logUseCase,
+		a.authUseCase, a.sessUseCase, a.userUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{

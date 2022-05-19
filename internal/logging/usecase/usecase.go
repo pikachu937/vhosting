@@ -48,5 +48,13 @@ func (u *LogUseCase) CreateLogRecord(log *lg.Log) error {
 		log.Message = logger.GotAllPerms
 		return u.logRepo.CreateLogRecord(log)
 	}
+	if messageType == logger.TypeOfInfo {
+		log.Message = logger.GotInfo
+		return u.logRepo.CreateLogRecord(log)
+	}
+	if messageType == logger.TypeOfInfos {
+		log.Message = logger.GotAllInfos
+		return u.logRepo.CreateLogRecord(log)
+	}
 	return errors.New("Undefined type of message. Type: " + messageType)
 }

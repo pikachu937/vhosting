@@ -52,12 +52,16 @@ func InfoGotAllGroupsData(groups map[int]*group.Group) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: groups, ErrorLevel: logger.ErrLevelInfo}
 }
 
+func ErrorCannotPartiallyUpdateGroup(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrorCode: 507, Message: fmt.Sprintf("Cannot partially update group. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+}
+
 func InfoGroupPartiallyUpdated() *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: "Group partially updated.", ErrorLevel: logger.ErrLevelInfo}
 }
 
 func ErrorCannotDeleteGroup(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrorCode: 507, Message: fmt.Sprintf("Cannot delete group. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 500, ErrorCode: 508, Message: fmt.Sprintf("Cannot delete group. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
 func InfoGroupDeleted() *lg.Log {

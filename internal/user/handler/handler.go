@@ -169,7 +169,7 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 	inputUser.Id = reqId
 
 	if err = h.useCase.PartiallyUpdateUser(&inputUser); err != nil {
-		h.report(ctx, log, msg.InfoNoUsersAvailable())
+		h.report(ctx, log, msg.ErrorCannotPartiallyUpdateUser(err))
 		return
 	}
 

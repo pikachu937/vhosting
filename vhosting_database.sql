@@ -165,12 +165,12 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 
 CREATE TABLE IF NOT EXISTS public.infos (
     id            SERIAL                   NOT NULL UNIQUE,
-    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     stream        TEXT                     NOT NULL,
     start_period  TIMESTAMP WITH TIME ZONE NOT NULL,
     stop_period   TIMESTAMP WITH TIME ZONE NOT NULL,
-    time_life     TIMESTAMP WITH TIME ZONE NOT NULL,
+    life_time     TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id       INTEGER                  NOT NULL,
+    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT pk_infos PRIMARY KEY (id),
     CONSTRAINT fk_infos_users FOREIGN KEY (user_id)
 		REFERENCES public.users (id) MATCH SIMPLE
@@ -183,9 +183,9 @@ CREATE TABLE IF NOT EXISTS public.videos (
     id            SERIAL                   NOT NULL UNIQUE,
     url           VARCHAR(1024)            NOT NULL,
     file_name     VARCHAR(260)             NOT NULL,
-    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     info_id       INTEGER                  NOT NULL,
     user_id       INTEGER                  NOT NULL,
+    creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT pk_videos PRIMARY KEY (id),
     CONSTRAINT fk_videos_infos FOREIGN KEY (info_id)
 		REFERENCES public.infos (id) MATCH SIMPLE

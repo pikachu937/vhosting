@@ -12,12 +12,12 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc user.UserUseCase, luc lg.LogUs
 	auc auth.AuthUseCase, suc sess.SessUseCase) {
 	h := NewUserHandler(uc, luc, auc, suc)
 
-	userInterface := router.Group("/user-interface")
+	userRoute := router.Group("/user")
 	{
-		userInterface.POST("", h.CreateUser)
-		userInterface.GET(":id", h.GetUser)
-		userInterface.GET("all", h.GetAllUsers)
-		userInterface.PATCH(":id", h.PartiallyUpdateUser)
-		userInterface.DELETE(":id", h.DeleteUser)
+		userRoute.POST("", h.CreateUser)
+		userRoute.GET(":id", h.GetUser)
+		userRoute.GET("all", h.GetAllUsers)
+		userRoute.PATCH(":id", h.PartiallyUpdateUser)
+		userRoute.DELETE(":id", h.DeleteUser)
 	}
 }

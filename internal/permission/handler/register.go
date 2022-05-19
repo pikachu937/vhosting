@@ -14,16 +14,22 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc perm.PermUseCase, luc lg.LogUs
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase, guc group.GroupUseCase) {
 	h := NewPermHandler(uc, luc, auc, suc, uuc, guc)
 
-	permInterface := router.Group("/perm-interface")
+	permRoute := router.Group("/perm")
 	{
-		permInterface.GET("perms", h.GetAllPermissions)
+		permRoute.GET("all", h.GetAllPermissions)
+	}
 
-		permInterface.POST("user/:id", h.SetUserPermissions)
-		permInterface.GET("user/:id", h.GetUserPermissions)
-		permInterface.DELETE("user/:id", h.DeleteUserPermissions)
+	permSetUserRoute := router.Group("/perm/user")
+	{
+		permSetUserRoute.POST(":id", h.SetUserPermissions)
+		permSetUserRoute.GET(":id", h.GetUserPermissions)
+		permSetUserRoute.DELETE(":id", h.DeleteUserPermissions)
+	}
 
-		permInterface.POST("group/:id", h.SetGroupPermissions)
-		permInterface.GET("group/:id", h.GetGroupPermissions)
-		permInterface.DELETE("group/:id", h.DeleteGroupPermissions)
+	permSetGroupRoute := router.Group("/perm/group")
+	{
+		permSetGroupRoute.POST(":id", h.SetGroupPermissions)
+		permSetGroupRoute.GET(":id", h.GetGroupPermissions)
+		permSetGroupRoute.DELETE(":id", h.DeleteGroupPermissions)
 	}
 }
