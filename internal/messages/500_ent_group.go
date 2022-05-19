@@ -36,7 +36,7 @@ func ErrorCannotGetGroup(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrorCode: 505, Message: fmt.Sprintf("Cannot get group. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
-func InfoGotGroupData(grp *group.Group) *lg.Log {
+func InfoGotGroup(grp *group.Group) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: grp, ErrorLevel: logger.ErrLevelInfo}
 }
 
@@ -48,7 +48,7 @@ func InfoNoGroupsAvailable() *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: "No groups available.", ErrorLevel: logger.ErrLevelInfo}
 }
 
-func InfoGotAllGroupsData(groups map[int]*group.Group) *lg.Log {
+func InfoGotAllGroups(groups map[int]*group.Group) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: groups, ErrorLevel: logger.ErrLevelInfo}
 }
 

@@ -27,4 +27,10 @@ const (
 
 	TypeOfInfos = "map[int]*info.Info"
 	GotAllInfos = "Got all infos."
+
+	TypeOfVideo = "*video.Video"
+	GotVideo    = "Got video."
+
+	TypeOfVideos = "map[int]*video.Video"
+	GotAllVideos = "Got all videos."
 )

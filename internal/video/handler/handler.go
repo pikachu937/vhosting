@@ -3,26 +3,26 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
-	"github.com/mikerumy/vhosting/internal/group"
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
 
-type GroupHandler struct {
-	useCase     group.GroupUseCase
+type VideoHandler struct {
+	useCase     video.VideoUseCase
 	logUseCase  lg.LogUseCase
 	authUseCase auth.AuthUseCase
 	sessUseCase sess.SessUseCase
 	userUseCase user.UserUseCase
 }
 
-func NewGroupHandler(useCase group.GroupUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
-	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *GroupHandler {
-	return &GroupHandler{
+func NewVideoHandler(useCase video.VideoUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *VideoHandler {
+	return &VideoHandler{
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
@@ -31,185 +31,186 @@ func NewGroupHandler(useCase group.GroupUseCase, logUseCase lg.LogUseCase, authU
 	}
 }
 
-func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
+func (h *VideoHandler) CreateVideo(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "post_group"
+	actPermission := "post_video"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, userId := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
-	// Read input, check required fields, check if new group already exists
-	inputGroup, err := h.useCase.BindJSONGroup(ctx)
+	// Read input, check required fields
+	inputVideo, err := h.useCase.BindJSONVideo(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputGroup.Name) {
-		h.report(ctx, log, msg.ErrorGroupNameCannotBeEmpty())
+	if h.useCase.IsRequiredEmpty(inputVideo.Url, inputVideo.Filename) {
+		h.report(ctx, log, msg.ErrorUrlAndFilenameCannotBeEmpty())
 		return
 	}
 
-	exists, err := h.useCase.IsGroupExists(inputGroup.Name)
-	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
-		return
-	}
-	if exists {
-		h.report(ctx, log, msg.ErrorGroupWithEnteredNameIsExist())
+	// Assign user ID into info and creation date, create info
+	inputVideo.UserId = userId
+	inputVideo.CreationDate = log.CreationDate
+
+	if err = h.useCase.CreateVideo(inputVideo); err != nil {
+		h.report(ctx, log, msg.ErrorCannotCreateVideo(err))
 		return
 	}
 
-	// Create group
-	if err = h.useCase.CreateGroup(inputGroup); err != nil {
-		h.report(ctx, log, msg.ErrorCannotCreateGroup(err))
-		return
-	}
-
-	h.report(ctx, log, msg.InfoGroupCreated())
+	h.report(ctx, log, msg.InfoVideoCreated())
 }
 
-func (h *GroupHandler) GetGroup(ctx *gin.Context) {
+func (h *VideoHandler) GetVideo(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "get_group"
+	actPermission := "get_video"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
+	// Read requested ID, check info existence, get info
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsGroupExists(reqId)
+	exists, err := h.useCase.IsVideoExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckVideoExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorVideoWithRequestedIDIsNotExist())
 		return
 	}
 
-	gottenGroup, err := h.useCase.GetGroup(reqId)
+	gottenVideo, err := h.useCase.GetVideo(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetGroup(err))
+		h.report(ctx, log, msg.ErrorCannotGetVideo(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotGroup(gottenGroup))
+	h.report(ctx, log, msg.InfoGotVideo(gottenVideo))
 }
 
-func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
+func (h *VideoHandler) GetAllVideos(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "get_all_groups"
+	actPermission := "get_all_videos"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
-	gottenGroups, err := h.useCase.GetAllGroups()
+	// Get all infos. If gotten is nothing - send such a message
+	gottenVideos, err := h.useCase.GetAllVideos()
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetAllGroups(err))
+		h.report(ctx, log, msg.ErrorCannotGetAllVideos(err))
 		return
 	}
 
-	if gottenGroups == nil {
-		h.report(ctx, log, msg.InfoNoGroupsAvailable())
+	if gottenVideos == nil {
+		h.report(ctx, log, msg.InfoNoVideosAvailable())
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotAllGroups(gottenGroups))
+	h.report(ctx, log, msg.InfoGotAllVideos(gottenVideos))
 }
 
-func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
+func (h *VideoHandler) PartiallyUpdateVideo(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "patch_group"
+	actPermission := "patch_video"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
-	// Read requested ID, check group for existance
+	// Read requested ID, check info existence
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsGroupExists(reqId)
+	exists, err := h.useCase.IsVideoExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckVideoExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorVideoWithRequestedIDIsNotExist())
 		return
 	}
 
-	// Read input, define ID as requested, partially update group
-	inputGroup, err := h.useCase.BindJSONGroup(ctx)
+	// Read input, define ID as requested, partially update info
+	inputVideo, err := h.useCase.BindJSONVideo(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	inputGroup.Id = reqId
+	inputVideo.Id = reqId
 
-	if err = h.useCase.PartiallyUpdateGroup(&inputGroup); err != nil {
-		h.report(ctx, log, msg.ErrorCannotPartiallyUpdateGroup(err))
+	if err = h.useCase.PartiallyUpdateVideo(&inputVideo); err != nil {
+		h.report(ctx, log, msg.ErrorCannotPartiallyUpdateVideo(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGroupPartiallyUpdated())
+	h.report(ctx, log, msg.InfoVideoPartiallyUpdated())
 }
 
-func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
+func (h *VideoHandler) DeleteVideo(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "delete_group"
+	actPermission := "delete_video"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
+	// Read requested ID, check info existence, delete info
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
-	exists, err := h.useCase.IsGroupExists(reqId)
+	exists, err := h.useCase.IsVideoExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.report(ctx, log, msg.ErrorCannotCheckVideoExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.report(ctx, log, msg.ErrorVideoWithRequestedIDIsNotExist())
 		return
 	}
 
-	if err = h.useCase.DeleteGroup(reqId); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteGroup(err))
+	if err = h.useCase.DeleteVideo(reqId); err != nil {
+		h.report(ctx, log, msg.ErrorCannotDeleteVideo(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGroupDeleted())
+	h.report(ctx, log, msg.InfoVideoDeleted())
 }
 
-func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
+func (h *VideoHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
 	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
@@ -220,7 +221,7 @@ func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log)
 	logger.Print(log)
 }
 
-func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
+func (h *VideoHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
 	var err error
 	h.authUseCase.DeleteCookie(ctx)
 	if err = h.sessUseCase.DeleteSession(token); err != nil {
@@ -230,7 +231,7 @@ func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, tok
 	return nil
 }
 
-func (h *GroupHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
+func (h *VideoHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	var err error
 
 	// Read cookie for token, check token existence, check session existence
@@ -242,11 +243,11 @@ func (h *GroupHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permi
 		}
 		if !exists {
 			h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-			return false
+			return false, -1
 		}
 	} else {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
 	// Parse token, check for user existence (also, try to delete session and cookie
@@ -254,20 +255,20 @@ func (h *GroupHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permi
 	cookieNamepass, err := h.authUseCase.ParseToken(cookieToken)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotParseToken(err))
-		return false
+		return false, -1
 	}
 
 	gottenUserId, err := h.userUseCase.GetUserId(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
-		return false
+		return false, -1
 	}
 	if gottenUserId < 0 {
 		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
-			return false
+			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
-		return false
+		return false, -1
 	}
 
 	log.SessionOwner = cookieNamepass.Username
@@ -277,19 +278,19 @@ func (h *GroupHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permi
 	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
-		return false
+		return false, -1
 	}
 	if !firstCheck {
 		if secondCheck, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
 			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
-			return false
+			return false, -1
 		}
 	}
 
 	if !firstCheck && !secondCheck {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
-	return true
+	return true, gottenUserId
 }

@@ -46,7 +46,7 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	}
 
 	if h.useCase.IsRequiredEmpty(inputUser.Username, inputUser.PasswordHash) {
-		h.report(ctx, log, msg.ErrorUsernameOrPasswordCannotBeEmpty())
+		h.report(ctx, log, msg.ErrorUsernameAndPasswordCannotBeEmpty())
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotUserData(gottenUser))
+	h.report(ctx, log, msg.InfoGotUser(gottenUser))
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
@@ -129,7 +129,7 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotAllUsersData(gottenUsers))
+	h.report(ctx, log, msg.InfoGotAllUsers(gottenUsers))
 }
 
 func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {

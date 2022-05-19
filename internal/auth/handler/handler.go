@@ -49,7 +49,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	}
 
 	if h.userUseCase.IsRequiredEmpty(inputNamepass.Username, inputNamepass.PasswordHash) {
-		h.report(ctx, log, msg.ErrorUsernameOrPasswordCannotBeEmpty())
+		h.report(ctx, log, msg.ErrorUsernameAndPasswordCannotBeEmpty())
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	}
 
 	if h.userUseCase.IsRequiredEmpty(inputNamepass.Username, inputNamepass.PasswordHash) {
-		h.report(ctx, log, msg.ErrorUsernameOrPasswordCannotBeEmpty())
+		h.report(ctx, log, msg.ErrorUsernameAndPasswordCannotBeEmpty())
 		return
 	}
 

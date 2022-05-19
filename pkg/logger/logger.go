@@ -110,6 +110,12 @@ func Print(log *logging.Log) {
 		if messageType == TypeOfInfos {
 			printLine += GotAllInfos + "\t"
 		}
+		if messageType == TypeOfVideo {
+			printLine += GotVideo + "\t"
+		}
+		if messageType == TypeOfVideos {
+			printLine += GotAllVideos + "\t"
+		}
 	}
 
 	if log.CreationDate == "" {

@@ -38,6 +38,10 @@ import (
 	userhandler "github.com/mikerumy/vhosting/internal/user/handler"
 	userrepo "github.com/mikerumy/vhosting/internal/user/repository"
 	userusecase "github.com/mikerumy/vhosting/internal/user/usecase"
+	"github.com/mikerumy/vhosting/internal/video"
+	videohandler "github.com/mikerumy/vhosting/internal/video/handler"
+	videorepo "github.com/mikerumy/vhosting/internal/video/repository"
+	videousecase "github.com/mikerumy/vhosting/internal/video/usecase"
 	"github.com/mikerumy/vhosting/pkg/config_tool"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
 )
@@ -52,6 +56,7 @@ type App struct {
 	groupUseCase group.GroupUseCase
 	permUseCase  perm.PermUseCase
 	infoUseCase  info.InfoUseCase
+	videoUseCase video.VideoUseCase
 }
 
 func NewApp(cfg config_tool.Config) *App {
@@ -62,6 +67,7 @@ func NewApp(cfg config_tool.Config) *App {
 	groupRepo := grouprepo.NewGroupRepository(cfg)
 	permRepo := permrepo.NewPermRepository(cfg)
 	infoRepo := inforepo.NewInfoRepository(cfg)
+	videoRepo := videorepo.NewVideoRepository(cfg)
 
 	return &App{
 		cfg:          cfg,
@@ -72,6 +78,7 @@ func NewApp(cfg config_tool.Config) *App {
 		groupUseCase: groupusecase.NewGroupUseCase(cfg, groupRepo),
 		permUseCase:  permusecase.NewPermUseCase(cfg, permRepo),
 		infoUseCase:  infousecase.NewInfoUseCase(cfg, infoRepo),
+		videoUseCase: videousecase.NewVideoUseCase(cfg, videoRepo),
 	}
 }
 
@@ -98,6 +105,8 @@ func (a *App) Run() error {
 	permhandler.RegisterHTTPEndpoints(router, a.permUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase, a.groupUseCase)
 	infohandler.RegisterHTTPEndpoints(router, a.infoUseCase, a.logUseCase,
+		a.authUseCase, a.sessUseCase, a.userUseCase)
+	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 
 	// HTTP Server

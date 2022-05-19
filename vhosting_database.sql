@@ -183,8 +183,8 @@ CREATE TABLE IF NOT EXISTS public.videos (
     id            SERIAL                   NOT NULL UNIQUE,
     url           VARCHAR(1024)            NOT NULL,
     file_name     VARCHAR(260)             NOT NULL,
-    info_id       INTEGER                  NOT NULL,
     user_id       INTEGER                  NOT NULL,
+    info_id       INTEGER                  NOT NULL,
     creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT pk_videos PRIMARY KEY (id),
     CONSTRAINT fk_videos_infos FOREIGN KEY (info_id)

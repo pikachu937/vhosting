@@ -12,8 +12,8 @@ func ErrorCannotBindInputData(err error) *lg.Log {
 	return &lg.Log{StatusCode: 400, ErrorCode: 200, Message: fmt.Sprintf("Cannot bind input data. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
-func ErrorUsernameOrPasswordCannotBeEmpty() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrorCode: 201, Message: fmt.Sprintf("Username or password cannot be empty."), ErrorLevel: logger.ErrLevelError}
+func ErrorUsernameAndPasswordCannotBeEmpty() *lg.Log {
+	return &lg.Log{StatusCode: 400, ErrorCode: 201, Message: fmt.Sprintf("Username and password cannot be empty."), ErrorLevel: logger.ErrLevelError}
 }
 
 func ErrorCannotCheckUserExistence(err error) *lg.Log {
@@ -44,7 +44,7 @@ func ErrorCannotGetUser(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrorCode: 207, Message: fmt.Sprintf("Cannot get user. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
 }
 
-func InfoGotUserData(usr *user.User) *lg.Log {
+func InfoGotUser(usr *user.User) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: usr, ErrorLevel: logger.ErrLevelInfo}
 }
 
@@ -56,7 +56,7 @@ func InfoNoUsersAvailable() *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: "No users available.", ErrorLevel: logger.ErrLevelInfo}
 }
 
-func InfoGotAllUsersData(users map[int]*user.User) *lg.Log {
+func InfoGotAllUsers(users map[int]*user.User) *lg.Log {
 	return &lg.Log{StatusCode: 200, Message: users, ErrorLevel: logger.ErrLevelInfo}
 }
 
