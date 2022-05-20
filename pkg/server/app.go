@@ -42,13 +42,13 @@ import (
 	videohandler "github.com/mikerumy/vhosting/internal/video/handler"
 	videorepo "github.com/mikerumy/vhosting/internal/video/repository"
 	videousecase "github.com/mikerumy/vhosting/internal/video/usecase"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
 )
 
 type App struct {
 	httpServer   *http.Server
-	cfg          config_tool.Config
+	cfg          config.Config
 	userUseCase  user.UserUseCase
 	authUseCase  auth.AuthUseCase
 	sessUseCase  sess.SessUseCase
@@ -59,7 +59,7 @@ type App struct {
 	videoUseCase video.VideoUseCase
 }
 
-func NewApp(cfg config_tool.Config) *App {
+func NewApp(cfg config.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
 	sessRepo := sessrepo.NewSessRepository(cfg)

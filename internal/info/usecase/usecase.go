@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/info"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 )
 
 type InfoUseCase struct {
-	cfg      config_tool.Config
+	cfg      config.Config
 	infoRepo info.InfoRepository
 }
 
-func NewInfoUseCase(cfg config_tool.Config, infoRepo info.InfoRepository) *InfoUseCase {
+func NewInfoUseCase(cfg config.Config, infoRepo info.InfoRepository) *InfoUseCase {
 	return &InfoUseCase{
 		cfg:      cfg,
 		infoRepo: infoRepo,

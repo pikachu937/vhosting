@@ -6,13 +6,13 @@ import (
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
+func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "set_user_perms"
+	actGroupission := "set_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
 		return
 	}
 
@@ -23,14 +23,14 @@ func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
+	inputGroupIds, err := h.useCase.BindJSONGroupIds(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputPermIds) {
-		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
+	if h.useCase.IsGroupIdsRequiredEmpty(inputGroupIds) {
+		h.report(ctx, log, msg.ErrorGroupIdsCannotBeEmpty())
 		return
 	}
 
@@ -45,21 +45,21 @@ func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.SetUserPermissions(reqId, inputPermIds); err != nil {
-		h.report(ctx, log, msg.ErrorCannotSetUserPerms(err))
+	if err = h.useCase.SetUserGroups(reqId, inputGroupIds); err != nil {
+		h.report(ctx, log, msg.ErrorCannotSetUserGroups(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoUserPermsSet())
+	h.report(ctx, log, msg.InfoUserGroupsSet())
 }
 
-func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
+func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "get_user_perms"
+	actGroupission := "get_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
 		return
 	}
 
@@ -80,22 +80,22 @@ func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	gottenPerms, err := h.useCase.GetUserPermissions(reqId)
+	gottenGroups, err := h.useCase.GetUserGroups(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetUserPerms(err))
+		h.report(ctx, log, msg.ErrorCannotGetUserGroups(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotUserPerms(gottenPerms))
+	h.report(ctx, log, msg.InfoGotUserGroups(gottenGroups))
 }
 
-func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
+func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actPermission := "delete_user_perms"
+	actGroupission := "delete_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
 		return
 	}
 
@@ -106,14 +106,14 @@ func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
+	inputGroupIds, err := h.useCase.BindJSONGroupIds(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputPermIds) {
-		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
+	if h.useCase.IsGroupIdsRequiredEmpty(inputGroupIds) {
+		h.report(ctx, log, msg.ErrorGroupIdsCannotBeEmpty())
 		return
 	}
 
@@ -128,10 +128,10 @@ func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteUserPermissions(reqId, inputPermIds); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteUserPerms(err))
+	if err = h.useCase.DeleteUserGroups(reqId, inputGroupIds); err != nil {
+		h.report(ctx, log, msg.ErrorCannotDeleteUserGroups(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoUserPermsDeleted())
+	h.report(ctx, log, msg.InfoUserGroupsDeleted())
 }

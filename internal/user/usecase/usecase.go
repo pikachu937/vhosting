@@ -5,16 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type UserUseCase struct {
-	cfg      config_tool.Config
+	cfg      config.Config
 	userRepo user.UserRepository
 }
 
-func NewUserUseCase(cfg config_tool.Config, userRepo user.UserRepository) *UserUseCase {
+func NewUserUseCase(cfg config.Config, userRepo user.UserRepository) *UserUseCase {
 	return &UserUseCase{
 		cfg:      cfg,
 		userRepo: userRepo,

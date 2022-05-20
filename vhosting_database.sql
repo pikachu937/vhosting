@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
     id       SERIAL  NOT NULL UNIQUE,
     user_id  INTEGER NOT NULL,
     group_id INTEGER NOT NULL,
+    UNIQUE (user_id, group_id),
 	CONSTRAINT pk_user_groups PRIMARY KEY (id),
 	CONSTRAINT fk_user_groups_users FOREIGN KEY (user_id)
 		REFERENCES public.users (id) MATCH SIMPLE

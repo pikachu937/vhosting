@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type PermRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewPermRepository(cfg config_tool.Config) *PermRepository {
+func NewPermRepository(cfg config.Config) *PermRepository {
 	return &PermRepository{cfg: cfg}
 }
 
 func (r *PermRepository) GetAllPermissions() (map[int]*perm.Perm, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

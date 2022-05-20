@@ -6,22 +6,22 @@ import (
 	"reflect"
 
 	"github.com/mikerumy/vhosting/internal/group"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type GroupRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewGroupRepository(cfg config_tool.Config) *GroupRepository {
+func NewGroupRepository(cfg config.Config) *GroupRepository {
 	return &GroupRepository{cfg: cfg}
 }
 
 func (r *GroupRepository) CreateGroup(grp group.Group) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -38,8 +38,8 @@ func (r *GroupRepository) CreateGroup(grp group.Group) error {
 }
 
 func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -58,8 +58,8 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 }
 
 func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -95,8 +95,8 @@ func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
 }
 
 func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -116,8 +116,8 @@ func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
 }
 
 func (r *GroupRepository) DeleteGroup(id int) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -136,8 +136,8 @@ func (r *GroupRepository) DeleteGroup(id int) error {
 }
 
 func (r *GroupRepository) IsGroupExists(idOrName interface{}) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 	var template, col, tbl, cnd, query string

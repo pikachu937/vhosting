@@ -5,12 +5,12 @@ import (
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 func (r *PermRepository) SetGroupPermissions(values string) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", perm.GPTableName, perm.GroupId,
@@ -26,8 +26,8 @@ func (r *PermRepository) SetGroupPermissions(values string) error {
 }
 
 func (r *PermRepository) GetGroupPermissions(id int) (*perm.PermIds, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -58,8 +58,8 @@ func (r *PermRepository) GetGroupPermissions(id int) (*perm.PermIds, error) {
 }
 
 func (r *PermRepository) DeleteGroupPermissions(id int, condIds string) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

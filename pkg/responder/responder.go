@@ -24,7 +24,7 @@ func Response(ctx *gin.Context, log *logging.Log) {
 	if reflect.TypeOf(log.Message) == reflect.TypeOf("") {
 		if log.StatusCode >= 400 {
 			ctx.AbortWithStatusJSON(log.StatusCode, ErrorOutput{
-				ErrorData{ErrCode: log.ErrorCode, Statement: log.Message.(string)},
+				ErrorData{ErrCode: log.ErrCode, Statement: log.Message.(string)},
 			})
 			return
 		}

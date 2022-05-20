@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/video"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 )
 
 type VideoUseCase struct {
-	cfg       config_tool.Config
+	cfg       config.Config
 	videoRepo video.VideoRepository
 }
 
-func NewVideoUseCase(cfg config_tool.Config, videoRepo video.VideoRepository) *VideoUseCase {
+func NewVideoUseCase(cfg config.Config, videoRepo video.VideoRepository) *VideoUseCase {
 	return &VideoUseCase{
 		cfg:       cfg,
 		videoRepo: videoRepo,

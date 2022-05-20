@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	"github.com/mikerumy/vhosting/internal/info"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type InfoRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewInfoRepository(cfg config_tool.Config) *InfoRepository {
+func NewInfoRepository(cfg config.Config) *InfoRepository {
 	return &InfoRepository{cfg: cfg}
 }
 
 func (r *InfoRepository) CreateInfo(nfo info.Info) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -39,8 +39,8 @@ func (r *InfoRepository) CreateInfo(nfo info.Info) error {
 }
 
 func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -60,8 +60,8 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 }
 
 func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -100,8 +100,8 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 }
 
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -121,8 +121,8 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) DeleteInfo(id int) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -141,8 +141,8 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 }
 
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

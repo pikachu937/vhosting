@@ -23,13 +23,13 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	inputPerms, err := h.useCase.BindJSONPerms(ctx)
+	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputPerms) {
+	if h.useCase.IsRequiredEmpty(inputPermIds) {
 		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
 		return
 	}
@@ -45,7 +45,7 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.SetGroupPermissions(reqId, inputPerms); err != nil {
+	if err = h.useCase.SetGroupPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotSetGroupPerms(err))
 		return
 	}
@@ -106,13 +106,13 @@ func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	inputPerms, err := h.useCase.BindJSONPerms(ctx)
+	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputPerms) {
+	if h.useCase.IsRequiredEmpty(inputPermIds) {
 		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
 		return
 	}
@@ -128,7 +128,7 @@ func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteGroupPermissions(reqId, inputPerms); err != nil {
+	if err = h.useCase.DeleteGroupPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteGroupPerms(err))
 		return
 	}

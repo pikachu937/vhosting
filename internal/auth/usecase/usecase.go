@@ -3,17 +3,17 @@ package usecase
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/auth"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
-	"github.com/mikerumy/vhosting/pkg/cookie_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
+	"github.com/mikerumy/vhosting/pkg/cookie_manager"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type AuthUseCase struct {
-	cfg      config_tool.Config
+	cfg      config.Config
 	authRepo auth.AuthRepository
 }
 
-func NewAuthUseCase(cfg config_tool.Config, authRepo auth.AuthRepository) *AuthUseCase {
+func NewAuthUseCase(cfg config.Config, authRepo auth.AuthRepository) *AuthUseCase {
 	return &AuthUseCase{
 		cfg:      cfg,
 		authRepo: authRepo,
@@ -52,7 +52,7 @@ func (u *AuthUseCase) IsNamepassExists(username, passwordHash string) (bool, err
 }
 
 func (u *AuthUseCase) ReadCookie(ctx *gin.Context) string {
-	return cookie_tool.Read(ctx)
+	return cookie_manager.Read(ctx)
 }
 
 func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (auth.Namepass, error) {
@@ -78,7 +78,7 @@ func (u *AuthUseCase) GenerateToken(namepass auth.Namepass) (string, error) {
 }
 
 func (u *AuthUseCase) SendCookie(ctx *gin.Context, token string) {
-	cookie_tool.Send(ctx, token, u.cfg.SessionTTLHours)
+	cookie_manager.Send(ctx, token, u.cfg.SessionTTLHours)
 }
 
 func (u *AuthUseCase) ParseToken(token string) (auth.Namepass, error) {
@@ -86,5 +86,5 @@ func (u *AuthUseCase) ParseToken(token string) (auth.Namepass, error) {
 }
 
 func (u *AuthUseCase) DeleteCookie(ctx *gin.Context) {
-	cookie_tool.Delete(ctx)
+	cookie_manager.Delete(ctx)
 }

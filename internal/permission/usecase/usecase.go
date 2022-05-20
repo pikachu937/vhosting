@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	perm "github.com/mikerumy/vhosting/internal/permission"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 )
 
 type PermUseCase struct {
-	cfg      config_tool.Config
+	cfg      config.Config
 	permRepo perm.PermRepository
 }
 
-func NewPermUseCase(cfg config_tool.Config, permRepo perm.PermRepository) *PermUseCase {
+func NewPermUseCase(cfg config.Config, permRepo perm.PermRepository) *PermUseCase {
 	return &PermUseCase{
 		cfg:      cfg,
 		permRepo: permRepo,
@@ -24,13 +24,13 @@ func (u *PermUseCase) GetAllPermissions() (map[int]*perm.Perm, error) {
 	return u.permRepo.GetAllPermissions()
 }
 
-func (u *PermUseCase) BindJSONPerms(ctx *gin.Context) (perm.PermIds, error) {
+func (u *PermUseCase) BindJSONPermIds(ctx *gin.Context) (perm.PermIds, error) {
 	var err error
-	var perms perm.PermIds
-	if err = ctx.BindJSON(&perms); err != nil {
-		return perms, err
+	var permIds perm.PermIds
+	if err = ctx.BindJSON(&permIds); err != nil {
+		return permIds, err
 	}
-	return perms, nil
+	return permIds, nil
 }
 
 func (u *PermUseCase) IsRequiredEmpty(perms perm.PermIds) bool {

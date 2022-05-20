@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/group"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 )
 
 type GroupUseCase struct {
-	cfg       config_tool.Config
+	cfg       config.Config
 	groupRepo group.GroupRepository
 }
 
-func NewGroupUseCase(cfg config_tool.Config, groupRepo group.GroupRepository) *GroupUseCase {
+func NewGroupUseCase(cfg config.Config, groupRepo group.GroupRepository) *GroupUseCase {
 	return &GroupUseCase{
 		cfg:       cfg,
 		groupRepo: groupRepo,
@@ -58,7 +58,7 @@ func (u *GroupUseCase) BindJSONGroup(ctx *gin.Context) (group.Group, error) {
 	return grp, nil
 }
 
-func (u *GroupUseCase) IsRequiredEmpty(name string) bool {
+func (u *GroupUseCase) IsGroupRequiredEmpty(name string) bool {
 	if name == "" {
 		return true
 	}

@@ -18,19 +18,19 @@ const (
 
 	TypeOfPermIds = "*permission.PermIds"
 	GotUserPerms  = "Got user permissions."
+	TypeOfPerms   = "map[int]*permission.Perm"
+	GotAllPerms   = "Got all permissions."
 
-	TypeOfPerms = "map[int]*permission.Perm"
-	GotAllPerms = "Got all permissions."
-
-	TypeOfInfo = "*info.Info"
-	GotInfo    = "Got info."
-
+	TypeOfInfo  = "*info.Info"
+	GotInfo     = "Got info."
 	TypeOfInfos = "map[int]*info.Info"
 	GotAllInfos = "Got all infos."
 
-	TypeOfVideo = "*video.Video"
-	GotVideo    = "Got video."
-
+	TypeOfVideo  = "*video.Video"
+	GotVideo     = "Got video."
 	TypeOfVideos = "map[int]*video.Video"
 	GotAllVideos = "Got all videos."
+
+	TypeOfGroupIds = "*group.GroupIds"
+	GotUserGroups  = "Got user groups."
 )

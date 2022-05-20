@@ -8,5 +8,5 @@ import (
 )
 
 func ErrorCannotWriteBytesIntoInternalVariable(err error) *lg.Log {
-	return &lg.Log{ErrorCode: 40, Message: fmt.Sprintf("Cannot write bytes into internal variable. Error: %s.", err.Error()), ErrorLevel: logger.ErrLevelError}
+	return &lg.Log{ErrCode: 40, Message: fmt.Sprintf("Cannot write bytes into internal variable. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }

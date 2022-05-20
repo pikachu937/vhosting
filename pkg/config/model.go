@@ -1,4 +1,4 @@
-package config_tool
+package config
 
 type Config struct {
 	DBConnTimeoutSeconds      int

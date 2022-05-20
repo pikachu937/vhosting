@@ -48,7 +48,7 @@ func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputGroup.Name) {
+	if h.useCase.IsGroupRequiredEmpty(inputGroup.Name) {
 		h.report(ctx, log, msg.ErrorGroupNameCannotBeEmpty())
 		return
 	}

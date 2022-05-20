@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	"github.com/mikerumy/vhosting/internal/video"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type VideoRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewVideoRepository(cfg config_tool.Config) *VideoRepository {
+func NewVideoRepository(cfg config.Config) *VideoRepository {
 	return &VideoRepository{cfg: cfg}
 }
 
 func (r *VideoRepository) CreateVideo(vid video.Video) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -39,8 +39,8 @@ func (r *VideoRepository) CreateVideo(vid video.Video) error {
 }
 
 func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -60,8 +60,8 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 }
 
 func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -100,8 +100,8 @@ func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 }
 
 func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -123,8 +123,8 @@ func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) DeleteVideo(id int) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -143,8 +143,8 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 }
 
 func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

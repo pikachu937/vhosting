@@ -64,5 +64,9 @@ func (u *LogUseCase) CreateLogRecord(log *lg.Log) error {
 		log.Message = logger.GotAllVideos
 		return u.logRepo.CreateLogRecord(log)
 	}
+	if messageType == logger.TypeOfGroupIds {
+		log.Message = logger.GotUserGroups
+		return u.logRepo.CreateLogRecord(log)
+	}
 	return errors.New("Undefined type of message. Type: " + messageType)
 }

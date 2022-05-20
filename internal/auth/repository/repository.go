@@ -5,22 +5,22 @@ import (
 
 	"github.com/mikerumy/vhosting/internal/auth"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type AuthRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewAuthRepository(cfg config_tool.Config) *AuthRepository {
+func NewAuthRepository(cfg config.Config) *AuthRepository {
 	return &AuthRepository{cfg: cfg}
 }
 
 func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -39,8 +39,8 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 }
 
 func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -60,8 +60,8 @@ func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 }
 
 func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -86,8 +86,8 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 }
 
 func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

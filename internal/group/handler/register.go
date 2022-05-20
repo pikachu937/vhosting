@@ -21,4 +21,11 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc group.GroupUseCase, luc lg.Log
 		groupRoute.PATCH(":id", h.PartiallyUpdateGroup)
 		groupRoute.DELETE(":id", h.DeleteGroup)
 	}
+
+	groupSetUserRoute := router.Group("/group/user")
+	{
+		groupSetUserRoute.POST(":id", h.SetUserGroups)
+		groupSetUserRoute.GET(":id", h.GetUserGroups)
+		groupSetUserRoute.DELETE(":id", h.DeleteUserGroups)
+	}
 }

@@ -43,8 +43,8 @@ func Setup(ctx *gin.Context) *logging.Log {
 }
 
 func Complete(log1 *logging.Log, log2 *logging.Log) {
-	if log1.ErrorLevel == "" {
-		log1.ErrorLevel = log2.ErrorLevel
+	if log1.ErrLevel == "" {
+		log1.ErrLevel = log2.ErrLevel
 	}
 	if log1.SessionOwner == "" {
 		log1.SessionOwner = log2.SessionOwner
@@ -58,8 +58,8 @@ func Complete(log1 *logging.Log, log2 *logging.Log) {
 	if log1.StatusCode == 0 {
 		log1.StatusCode = log2.StatusCode
 	}
-	if log1.ErrorCode == 0 {
-		log1.ErrorCode = log2.ErrorCode
+	if log1.ErrCode == 0 {
+		log1.ErrCode = log2.ErrCode
 	}
 	if log1.CreationDate == "" {
 		log1.CreationDate = log2.CreationDate
@@ -68,7 +68,7 @@ func Complete(log1 *logging.Log, log2 *logging.Log) {
 }
 
 func Print(log *logging.Log) {
-	printLine := log.ErrorLevel + "\t"
+	printLine := log.ErrLevel + "\t"
 
 	if log.SessionOwner != "" {
 		printLine += log.SessionOwner + httpPrintIndent +
@@ -78,8 +78,8 @@ func Print(log *logging.Log) {
 	}
 
 	errorLine := ""
-	if log.ErrorLevel != ErrLevelInfo {
-		errorLine = fmt.Sprintf("ErrCode: %d. ", log.ErrorCode)
+	if log.ErrLevel != ErrLevelInfo {
+		errorLine = fmt.Sprintf("ErrCode: %d. ", log.ErrCode)
 	}
 
 	if reflect.TypeOf(log.Message) == reflect.TypeOf("") {
@@ -115,6 +115,9 @@ func Print(log *logging.Log) {
 		}
 		if messageType == TypeOfVideos {
 			printLine += GotAllVideos + "\t"
+		}
+		if messageType == TypeOfGroupIds {
+			printLine += GotUserGroups + "\t"
 		}
 	}
 

@@ -4,23 +4,23 @@ import (
 	"fmt"
 
 	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type SessRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewSessRepository(cfg config_tool.Config) *SessRepository {
+func NewSessRepository(cfg config.Config) *SessRepository {
 	return &SessRepository{cfg: cfg}
 }
 
 func (r *SessRepository) DeleteSession(token string) error {
 	var err error
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.DELETE_FROM_TBL_WHERE_CND
 	tbl := sess.TableName
@@ -37,8 +37,8 @@ func (r *SessRepository) DeleteSession(token string) error {
 }
 
 func (r *SessRepository) IsSessionExists(token string) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := sess.Content
@@ -61,8 +61,8 @@ func (r *SessRepository) IsSessionExists(token string) (bool, error) {
 }
 
 func (r *SessRepository) CreateSession(session sess.Session) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", sess.TableName, sess.Content, sess.CreationDate)

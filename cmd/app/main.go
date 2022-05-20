@@ -4,7 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/server"
 )
@@ -20,7 +20,7 @@ func main() {
 	logger.Print(msg.InfoEnvironmentVarsLoaded())
 
 	// Load config file
-	cfg, err := config_tool.LoadConfig("./configs/config.yml")
+	cfg, err := config.LoadConfig("./configs/config.yml")
 	if err != nil {
 		logger.Print(msg.FatalFailedToLoadConfigFile(err))
 		return

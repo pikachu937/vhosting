@@ -3,18 +3,18 @@ package repository
 import (
 	"fmt"
 
-	perm "github.com/mikerumy/vhosting/internal/permission"
+	"github.com/mikerumy/vhosting/internal/group"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
-func (r *PermRepository) SetUserPermissions(values string) error {
+func (r *GroupRepository) SetUserGroups(values string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s)", perm.UPTableName, perm.UserId,
-		perm.PermId)
+	tbl := fmt.Sprintf("%s (%s, %s)", group.UGTableName, group.UserId,
+		group.GroupId)
 	val := values
 	query := fmt.Sprintf(template, tbl, val)
 
@@ -25,7 +25,7 @@ func (r *PermRepository) SetUserPermissions(values string) error {
 	return nil
 }
 
-func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
+func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
@@ -33,10 +33,10 @@ func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
 
 	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND +
 		query_consts.ORDER_BY_COL
-	col := fmt.Sprintf("%s", perm.PermId)
-	tbl := perm.UPTableName
-	cnd := fmt.Sprintf("%s=$1", perm.UserId)
-	ordcol := perm.PermId
+	col := fmt.Sprintf("%s", group.GroupId)
+	tbl := group.UGTableName
+	cnd := fmt.Sprintf("%s=$1", group.UserId)
+	ordcol := group.GroupId
 	query := fmt.Sprintf(template, col, tbl, cnd, ordcol)
 
 	rows, err := db.Query(query, id)
@@ -45,27 +45,27 @@ func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
 	}
 	defer rows.Close()
 
-	var permIds perm.PermIds
-	var num int
+	var groupIds group.GroupIds
+	var grp int
 	for rows.Next() {
-		if err = rows.Scan(&num); err != nil {
+		if err = rows.Scan(&grp); err != nil {
 			return nil, err
 		}
-		permIds.Ids = append(permIds.Ids, num)
+		groupIds.Ids = append(groupIds.Ids, grp)
 	}
 
-	return &permIds, nil
+	return &groupIds, nil
 }
 
-func (r *PermRepository) DeleteUserPermissions(id int, condIds string) error {
+func (r *GroupRepository) DeleteUserGroups(id int, condIds string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
 	template := query_consts.DELETE_FROM_TBL_WHERE_CND
-	tbl := perm.UPTableName
-	cnd := fmt.Sprintf("%s=$1 AND %s IN (%s)", perm.UserId, perm.PermId,
+	tbl := group.UGTableName
+	cnd := fmt.Sprintf("%s=$1 AND %s IN (%s)", group.UserId, group.GroupId,
 		condIds)
 	query := fmt.Sprintf(template, tbl, cnd)
 

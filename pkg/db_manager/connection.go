@@ -1,4 +1,4 @@
-package db_tool
+package db_manager
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func NewDBConnection(cfg config_tool.Config) *sqlx.DB {
+func NewDBConnection(cfg config.Config) *sqlx.DB {
 	timeAtStarting := time.Now()
 
 	var db *sqlx.DB
@@ -47,7 +47,7 @@ func NewDBConnection(cfg config_tool.Config) *sqlx.DB {
 	return nil
 }
 
-func CloseDBConnection(cfg config_tool.Config, db *sqlx.DB) {
+func CloseDBConnection(cfg config.Config, db *sqlx.DB) {
 	var err error
 
 	if err = db.Close(); err != nil {

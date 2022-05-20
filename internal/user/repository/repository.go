@@ -7,22 +7,22 @@ import (
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	"github.com/mikerumy/vhosting/internal/user"
-	"github.com/mikerumy/vhosting/pkg/config_tool"
+	"github.com/mikerumy/vhosting/pkg/config"
 	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_tool"
+	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
 type UserRepository struct {
-	cfg config_tool.Config
+	cfg config.Config
 }
 
-func NewUserRepository(cfg config_tool.Config) *UserRepository {
+func NewUserRepository(cfg config.Config) *UserRepository {
 	return &UserRepository{cfg: cfg}
 }
 
 func (r *UserRepository) CreateUser(usr user.User) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -42,8 +42,8 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 }
 
 func (r *UserRepository) GetUser(id int) (*user.User, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -64,8 +64,8 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 }
 
 func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -105,8 +105,8 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 }
 
 func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -133,8 +133,8 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -153,8 +153,8 @@ func (r *UserRepository) DeleteUser(id int) error {
 }
 
 func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -181,8 +181,8 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 }
 
 func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 
@@ -209,8 +209,8 @@ func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm strin
 }
 
 func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 	var template, col, tbl, cnd, query string
@@ -244,8 +244,8 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 }
 
 func (r *UserRepository) GetUserId(username string) (int, error) {
-	db := db_tool.NewDBConnection(r.cfg)
-	defer db_tool.CloseDBConnection(r.cfg, db)
+	db := db_manager.NewDBConnection(r.cfg)
+	defer db_manager.CloseDBConnection(r.cfg, db)
 
 	var err error
 

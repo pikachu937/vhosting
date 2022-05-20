@@ -13,14 +13,14 @@ type PermCommon interface {
 type PermUseCase interface {
 	PermCommon
 
-	SetUserPermissions(id int, perms PermIds) error
-	DeleteUserPermissions(id int, perms PermIds) error
+	SetUserPermissions(id int, permIds PermIds) error
+	DeleteUserPermissions(id int, permIds PermIds) error
 
-	SetGroupPermissions(id int, perms PermIds) error
-	DeleteGroupPermissions(id int, perms PermIds) error
+	SetGroupPermissions(id int, permIds PermIds) error
+	DeleteGroupPermissions(id int, permIds PermIds) error
 
-	BindJSONPerms(ctx *gin.Context) (PermIds, error)
-	IsRequiredEmpty(perms PermIds) bool
+	BindJSONPermIds(ctx *gin.Context) (PermIds, error)
+	IsRequiredEmpty(permIds PermIds) bool
 	AtoiRequestedId(ctx *gin.Context) (int, error)
 }
 

@@ -1,4 +1,4 @@
-package cookie_tool
+package cookie_manager
 
 import (
 	"github.com/gin-gonic/gin"
