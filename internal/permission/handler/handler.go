@@ -40,7 +40,8 @@ func (h *PermHandler) GetAllPermissions(ctx *gin.Context) {
 	var err error
 	actPermission := "get_all_perms"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *PermHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 	return nil
 }
 
-func (h *PermHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
+func (h *PermHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	var err error
 
 	// Read cookie for token, check token existence, check session existence
@@ -91,11 +92,11 @@ func (h *PermHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 		}
 		if !exists {
 			h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-			return false
+			return false, -1
 		}
 	} else {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
 	// Parse token, check for user existence (also, try to delete session and cookie
@@ -103,20 +104,20 @@ func (h *PermHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 	cookieNamepass, err := h.authUseCase.ParseToken(cookieToken)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotParseToken(err))
-		return false
+		return false, -1
 	}
 
 	gottenUserId, err := h.userUseCase.GetUserId(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
-		return false
+		return false, -1
 	}
 	if gottenUserId < 0 {
 		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
-			return false
+			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
-		return false
+		return false, -1
 	}
 
 	log.SessionOwner = cookieNamepass.Username
@@ -126,19 +127,19 @@ func (h *PermHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
-		return false
+		return false, -1
 	}
 	if !firstCheck {
 		if secondCheck, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
 			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
-			return false
+			return false, -1
 		}
 	}
 
 	if !firstCheck && !secondCheck {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
-	return true
+	return true, gottenUserId
 }

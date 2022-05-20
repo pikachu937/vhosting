@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mikerumy/vhosting/internal/group"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -12,7 +12,7 @@ func (r *GroupRepository) SetUserGroups(values string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", group.UGTableName, group.UserId,
 		group.GroupId)
 	val := values
@@ -31,8 +31,8 @@ func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND +
-		query_consts.ORDER_BY_COL
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
+		qconsts.ORDER_BY_COL
 	col := fmt.Sprintf("%s", group.GroupId)
 	tbl := group.UGTableName
 	cnd := fmt.Sprintf("%s=$1", group.UserId)
@@ -63,7 +63,7 @@ func (r *GroupRepository) DeleteUserGroups(id int, condIds string) error {
 
 	var err error
 
-	template := query_consts.DELETE_FROM_TBL_WHERE_CND
+	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := group.UGTableName
 	cnd := fmt.Sprintf("%s=$1 AND %s IN (%s)", group.UserId, group.GroupId,
 		condIds)

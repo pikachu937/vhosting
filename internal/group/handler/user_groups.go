@@ -10,9 +10,10 @@ func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actGroupission := "set_user_groups"
+	actPermission := "set_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -57,9 +58,10 @@ func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actGroupission := "get_user_groups"
+	actPermission := "get_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -93,9 +95,10 @@ func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
 	var err error
-	actGroupission := "delete_user_groups"
+	actPermission := "delete_user_groups"
 
-	if !h.IsPermissionsChecked(ctx, log, actGroupission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -23,7 +23,7 @@ func (r *VideoRepository) CreateVideo(vid video.Video) error {
 
 	var err error
 
-	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s)", video.TableName,
 		video.Url, video.Filename, video.UserId, video.InfoId,
 		video.CreationDate)
@@ -44,7 +44,7 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s", video.Id, video.Url,
 		video.Filename, video.UserId, video.InfoId, video.CreationDate)
 	tbl := video.TableName
@@ -65,7 +65,7 @@ func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL
+	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := video.TableName
 	query := fmt.Sprintf(template, col, tbl)
@@ -105,7 +105,7 @@ func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := video.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", video.Url, video.Url) +
 		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", video.Filename, video.Filename) +
@@ -128,7 +128,7 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 
 	var err error
 
-	template := query_consts.DELETE_FROM_TBL_WHERE_CND
+	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := video.TableName
 	cnd := fmt.Sprintf("%s=$1", video.Id)
 	query := fmt.Sprintf(template, tbl, cnd)
@@ -148,7 +148,7 @@ func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := video.Id
 	tbl := video.TableName
 	cnd := fmt.Sprintf("%s=$1", video.Id)

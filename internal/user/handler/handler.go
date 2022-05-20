@@ -34,7 +34,8 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	var err error
 	actPermission := "post_user"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -77,7 +78,8 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 	var err error
 	actPermission := "get_user"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -113,7 +115,8 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 	var err error
 	actPermission := "get_all_users"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -138,7 +141,8 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 	var err error
 	actPermission := "patch_user"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -182,7 +186,8 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	var err error
 	actPermission := "delete_user"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -232,7 +237,7 @@ func (h *UserHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 	return nil
 }
 
-func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permission string) bool {
+func (h *UserHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	var err error
 
 	// Read cookie for token, check token existence, check session existence
@@ -244,11 +249,11 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 		}
 		if !exists {
 			h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-			return false
+			return false, -1
 		}
 	} else {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
 	// Parse token, check for user existence (also, try to delete session and cookie
@@ -256,20 +261,20 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 	cookieNamepass, err := h.authUseCase.ParseToken(cookieToken)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotParseToken(err))
-		return false
+		return false, -1
 	}
 
 	gottenUserId, err := h.useCase.GetUserId(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
-		return false
+		return false, -1
 	}
 	if gottenUserId < 0 {
 		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
-			return false
+			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
-		return false
+		return false, -1
 	}
 
 	log.SessionOwner = cookieNamepass.Username
@@ -279,19 +284,19 @@ func (h *UserHandler) IsPermissionsChecked(ctx *gin.Context, log *lg.Log, permis
 	firstCheck, err = h.useCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
-		return false
+		return false, -1
 	}
 	if !firstCheck {
 		if secondCheck, err = h.useCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
 			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
-			return false
+			return false, -1
 		}
 	}
 
 	if !firstCheck && !secondCheck {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false
+		return false, -1
 	}
 
-	return true
+	return true, gottenUserId
 }

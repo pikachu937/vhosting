@@ -12,7 +12,8 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 	var err error
 	actPermission := "set_group_perms"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -59,7 +60,8 @@ func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 	var err error
 	actPermission := "get_group_perms"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 
@@ -95,7 +97,8 @@ func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 	var err error
 	actPermission := "delete_group_perms"
 
-	if !h.IsPermissionsChecked(ctx, log, actPermission) {
+	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	if !hasPerms {
 		return
 	}
 

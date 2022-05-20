@@ -5,7 +5,7 @@ import (
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -23,7 +23,7 @@ func (r *PermRepository) GetAllPermissions() (map[int]*perm.Perm, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL
+	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := perm.TableName
 	query := fmt.Sprintf(template, col, tbl)

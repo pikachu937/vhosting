@@ -6,7 +6,7 @@ import (
 	"github.com/mikerumy/vhosting/internal/auth"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -24,7 +24,7 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", user.Username, user.PasswordHash)
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1 AND %s=$2", user.Username, user.PasswordHash)
@@ -44,7 +44,7 @@ func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", user.PasswordHash, user.PasswordHash)
 	cnd := fmt.Sprintf("%s=$2", user.Username)
@@ -65,7 +65,7 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1 AND %s=$2", user.Username, user.PasswordHash)
@@ -91,7 +91,7 @@ func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) err
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
 	val := fmt.Sprintf("%s=$1", user.LastLogin)
 	cnd := fmt.Sprintf("%s=$2", user.Username)

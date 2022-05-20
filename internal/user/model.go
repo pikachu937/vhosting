@@ -7,6 +7,7 @@ type User struct {
 	IsActive     bool   `json:"is-active"    db:"is_active"`
 	IsSuperuser  bool   `json:"is-superuser" db:"is_superuser"`
 	IsStaff      bool   `json:"is-staff"     db:"is_staff"`
+	GroupId      string `json:"group-id"     db:"group_id"`
 	FirstName    string `json:"first-name"   db:"first_name"`
 	LastName     string `json:"last-name"    db:"last_name"`
 	JoiningDate  string `json:"joining-date" db:"joining_date"`

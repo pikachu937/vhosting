@@ -5,7 +5,7 @@ import (
 
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/config"
-	qc "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -23,7 +23,7 @@ func (r *LogRepository) CreateLogRecord(log *lg.Log) error {
 
 	var err error
 
-	template := qc.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s)", lg.TableName,
 		lg.ErrLevel, lg.SessionOwner, lg.RequestMethod, lg.RequestPath,
 		lg.StatusCode, lg.ErrCode, lg.Message, lg.CreationDate)

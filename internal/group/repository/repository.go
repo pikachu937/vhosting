@@ -7,7 +7,7 @@ import (
 
 	"github.com/mikerumy/vhosting/internal/group"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -25,7 +25,7 @@ func (r *GroupRepository) CreateGroup(grp group.Group) error {
 
 	var err error
 
-	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s)", group.TableName, group.Name)
 	val := "($1)"
 	query := fmt.Sprintf(template, tbl, val)
@@ -43,7 +43,7 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", group.Id, group.Name)
 	tbl := group.TableName
 	cnd := fmt.Sprintf("%s=$1", group.Id)
@@ -63,7 +63,7 @@ func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL
+	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := group.TableName
 	query := fmt.Sprintf(template, col, tbl)
@@ -100,7 +100,7 @@ func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := group.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", group.Name, group.Name)
 	cnd := fmt.Sprintf("%s=$2", group.Id)
@@ -121,7 +121,7 @@ func (r *GroupRepository) DeleteGroup(id int) error {
 
 	var err error
 
-	template := query_consts.DELETE_FROM_TBL_WHERE_CND
+	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := group.TableName
 	cnd := fmt.Sprintf("%s=$1", group.Id)
 	query := fmt.Sprintf(template, tbl, cnd)
@@ -144,14 +144,14 @@ func (r *GroupRepository) IsGroupExists(idOrName interface{}) (bool, error) {
 	var rows *sql.Rows
 
 	if reflect.TypeOf(idOrName) == reflect.TypeOf(0) {
-		template = query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 		col = group.Id
 		tbl = group.TableName
 		cnd = fmt.Sprintf("%s=$1", group.Id)
 		query = fmt.Sprintf(template, col, tbl, cnd)
 		rows, err = db.Query(query, idOrName.(int))
 	} else {
-		template = query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 		col = group.Name
 		tbl = group.TableName
 		cnd = fmt.Sprintf("%s=$1", group.Name)

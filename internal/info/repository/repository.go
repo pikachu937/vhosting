@@ -5,7 +5,7 @@ import (
 
 	"github.com/mikerumy/vhosting/internal/info"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -23,7 +23,7 @@ func (r *InfoRepository) CreateInfo(nfo info.Info) error {
 
 	var err error
 
-	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s)", info.TableName,
 		info.Stream, info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId,
 		info.CreationDate)
@@ -44,7 +44,7 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s", info.Id, info.Stream,
 		info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId, info.CreationDate)
 	tbl := info.TableName
@@ -65,7 +65,7 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL
+	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := info.TableName
 	query := fmt.Sprintf(template, col, tbl)
@@ -105,7 +105,7 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := info.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", info.Stream, info.Stream)
 	cnd := fmt.Sprintf("%s=$2", info.Id)
@@ -126,7 +126,7 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 
 	var err error
 
-	template := query_consts.DELETE_FROM_TBL_WHERE_CND
+	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := info.TableName
 	cnd := fmt.Sprintf("%s=$1", info.Id)
 	query := fmt.Sprintf(template, tbl, cnd)
@@ -146,7 +146,7 @@ func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := info.Id
 	tbl := info.TableName
 	cnd := fmt.Sprintf("%s=$1", info.Id)

@@ -8,7 +8,7 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config"
-	query_consts "github.com/mikerumy/vhosting/pkg/constants/query"
+	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
 )
 
@@ -26,7 +26,7 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 
 	var err error
 
-	template := query_consts.INSERT_INTO_TBL_VALUES_VAL
+	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", user.TableName,
 		user.Username, user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff,
 		user.FirstName, user.LastName, user.JoiningDate, user.LastLogin)
@@ -47,7 +47,7 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", user.Id, user.Username,
 		user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff, user.FirstName,
 		user.LastName, user.JoiningDate, user.LastLogin)
@@ -69,7 +69,7 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL
+	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := user.TableName
 	query := fmt.Sprintf(template, col, tbl)
@@ -110,7 +110,7 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 
 	var err error
 
-	template := query_consts.UPDATE_TBL_SET_VAL_WHERE_CND
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", user.Username, user.Username) +
 		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", user.PasswordHash, user.PasswordHash) +
@@ -138,7 +138,7 @@ func (r *UserRepository) DeleteUser(id int) error {
 
 	var err error
 
-	template := query_consts.DELETE_FROM_TBL_WHERE_CND
+	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Id)
 	query := fmt.Sprintf(template, tbl, cnd)
@@ -158,7 +158,7 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s OR %s", user.IsSuperuser, user.IsStaff)
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Username)
@@ -186,7 +186,7 @@ func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm strin
 
 	var err error
 
-	template := query_consts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
+	template := qconsts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
 	col1 := perm.Id
 	tbl1 := perm.UPTableName
 	cnd1 := fmt.Sprintf("%s=$1 AND %s", perm.UserId, perm.PermId)
@@ -217,14 +217,14 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 	var rows *sql.Rows
 
 	if reflect.TypeOf(idOrUsername) == reflect.TypeOf(0) {
-		template = query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 		col = user.Id
 		tbl = user.TableName
 		cnd = fmt.Sprintf("%s=$1", user.Id)
 		query = fmt.Sprintf(template, col, tbl, cnd)
 		rows, err = db.Query(query, idOrUsername.(int))
 	} else {
-		template = query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 		col = user.Username
 		tbl = user.TableName
 		cnd = fmt.Sprintf("%s=$1", user.Username)
@@ -249,7 +249,7 @@ func (r *UserRepository) GetUserId(username string) (int, error) {
 
 	var err error
 
-	template := query_consts.SELECT_COL_FROM_TBL_WHERE_CND
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Username)
