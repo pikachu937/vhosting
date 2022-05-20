@@ -9,7 +9,6 @@ import (
 func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "set_user_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -46,7 +45,7 @@ func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.SetUserPermissions(reqId, inputPermIds); err != nil {
+	if err := h.useCase.SetUserPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotSetUserPerms(err))
 		return
 	}
@@ -57,7 +56,6 @@ func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_user_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -94,7 +92,6 @@ func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
 func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "delete_user_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -131,7 +128,7 @@ func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteUserPermissions(reqId, inputPermIds); err != nil {
+	if err := h.useCase.DeleteUserPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteUserPerms(err))
 		return
 	}

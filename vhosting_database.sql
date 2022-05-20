@@ -28,26 +28,29 @@ INSERT INTO public.perms (id, name, code_name) VALUES
 ( 7, 'Can get all of the Groups',        'get_all_groups'),
 ( 8, 'Can partially update a Group',     'patch_group'),
 ( 9, 'Can delete a Group',               'delete_group'),
+(10, 'Can set the user Groups',          'set_user_groups'),
+(11, 'Can get the user Groups',          'get_user_groups'),
+(12, 'Can delete the user Groups',       'delete_user_groups'),
 
-(10, 'Can get all of the Permissions',   'get_all_perms'),
-(11, 'Can set the user Permissions',     'set_user_perms'),
-(12, 'Can get the user Permissions',     'get_user_perms'),
-(13, 'Can delete the user Permissions',  'delete_user_perms'),
-(14, 'Can set the group Permissions',    'set_group_perms'),
-(15, 'Can get the group Permissions',    'get_group_perms'),
-(16, 'Can delete the group Permissions', 'delete_group_perms'),
+(13, 'Can get all of the Permissions',   'get_all_perms'),
+(14, 'Can set the user Permissions',     'set_user_perms'),
+(15, 'Can get the user Permissions',     'get_user_perms'),
+(16, 'Can delete the user Permissions',  'delete_user_perms'),
+(17, 'Can set the group Permissions',    'set_group_perms'),
+(18, 'Can get the group Permissions',    'get_group_perms'),
+(19, 'Can delete the group Permissions', 'delete_group_perms'),
 
-(17, 'Can create a Video',               'post_video'),
-(18, 'Can get a Video',                  'get_video'),
-(19, 'Can get all of the Videos',        'get_all_videos'),
-(20, 'Can partially update a Video',     'patch_video'),
-(21, 'Can delete a Video',               'delete_video'),
+(20, 'Can create a Video',               'post_video'),
+(21, 'Can get a Video',                  'get_video'),
+(22, 'Can get all of the Videos',        'get_all_videos'),
+(23, 'Can partially update a Video',     'patch_video'),
+(24, 'Can delete a Video',               'delete_video'),
 
-(22, 'Can create an Info',               'post_info'),
-(23, 'Can get an Info',                  'get_info'),
-(24, 'Can get all of the Infos',         'get_all_infos'),
-(25, 'Can partially update an Info',     'patch_info'),
-(26, 'Can delete an Info',               'delete_info');
+(26, 'Can create an Info',               'post_info'),
+(27, 'Can get an Info',                  'get_info'),
+(28, 'Can get all of the Infos',         'get_all_infos'),
+(29, 'Can partially update an Info',     'patch_info'),
+(30, 'Can delete an Info',               'delete_info');
 
 
 CREATE TABLE IF NOT EXISTS public.groups (
@@ -89,9 +92,9 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 
 CREATE TABLE IF NOT EXISTS public.logs (
     id             SERIAL                   NOT NULL UNIQUE,
-    error_level    VARCHAR(7),                              -- "info", "warning", "error", "fatal"
+    error_level    VARCHAR(7),                               -- "info", "warning", "error", "fatal"
     session_owner  VARCHAR(50),
-    request_method VARCHAR(7),                              -- "POST", "GET", "PATCH", "DELETE"
+    request_method VARCHAR(7),                               -- "POST", "GET", "PATCH", "DELETE"
     request_path   VARCHAR(100),
     status_code    INTEGER,
     error_code     INTEGER,
@@ -116,17 +119,17 @@ CREATE TABLE IF NOT EXISTS public.group_perms (
 		ON DELETE CASCADE
 );
 INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
-( 0, 0, 17),
-( 1, 0, 18),
-( 2, 0, 19),
-( 3, 0, 20),
-( 4, 0, 21),
+( 0, 0, 20),
+( 1, 0, 21),
+( 2, 0, 22),
+( 3, 0, 23),
+( 4, 0, 24),
 
-( 5, 1, 22),
-( 6, 1, 23),
-( 7, 1, 24),
-( 8, 1, 25),
-( 9, 1, 26);
+( 5, 1, 26),
+( 6, 1, 27),
+( 7, 1, 28),
+( 8, 1, 29),
+( 9, 1, 30);
 ALTER SEQUENCE group_perms_id_seq RESTART WITH 10;
 
 

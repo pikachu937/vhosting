@@ -30,9 +30,8 @@ func (u *GroupUseCase) DeleteUserGroups(id int, groupIds group.GroupIds) error {
 }
 
 func (u *GroupUseCase) BindJSONGroupIds(ctx *gin.Context) (group.GroupIds, error) {
-	var err error
 	var groupIds group.GroupIds
-	if err = ctx.BindJSON(&groupIds); err != nil {
+	if err := ctx.BindJSON(&groupIds); err != nil {
 		return groupIds, err
 	}
 	return groupIds, nil

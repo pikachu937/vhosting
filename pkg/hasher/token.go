@@ -28,7 +28,6 @@ func GenerateToken(namepass auth.Namepass, signingKey string, tokenTTLHours int)
 }
 
 func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
-	var err error
 	var namepass auth.Namepass
 	ok := false
 	token, err := jwt.ParseWithClaims(tokenContent, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {

@@ -31,12 +31,10 @@ func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase,
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
-
 	// Read cookie for token, check token existance, if token exists delete cookie and session
 	cookieToken := h.useCase.ReadCookie(ctx)
 	if h.useCase.IsTokenExists(cookieToken) {
-		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
 			return
 		}
 	}
@@ -72,7 +70,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.sessUseCase.CreateSession(ctx, inputNamepass.Username, token, log.CreationDate); err != nil {
+	if err := h.sessUseCase.CreateSession(ctx, inputNamepass.Username, token, log.CreationDate); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateSession(err))
 		return
 	}
@@ -84,8 +82,6 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	log := logger.Setup(ctx)
-
-	var err error
 
 	cookieToken := h.useCase.ReadCookie(ctx)
 	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
@@ -134,7 +130,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	// Assign session owner for report, update user password
 	log.SessionOwner = cookieNamepass.Username
 
-	if err = h.useCase.UpdateNamepassPassword(inputNamepass); err != nil {
+	if err := h.useCase.UpdateNamepassPassword(inputNamepass); err != nil {
 		h.report(ctx, log, msg.ErrorCannotUpdateNamepassPassword(err))
 		return
 	}
@@ -144,8 +140,6 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 
 func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	log := logger.Setup(ctx)
-
-	var err error
 
 	cookieToken := h.useCase.ReadCookie(ctx)
 	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
@@ -180,10 +174,9 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
-	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	if err = h.logUseCase.CreateLogRecord(log); err != nil {
+	if err := h.logUseCase.CreateLogRecord(log); err != nil {
 		logger.Complete(log, msg.ErrorCannotDoLogging(err))
 		responder.Response(ctx, log)
 	}
@@ -191,9 +184,8 @@ func (h *AuthHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 }
 
 func (h *AuthHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	var err error
 	h.useCase.DeleteCookie(ctx)
-	if err = h.sessUseCase.DeleteSession(token); err != nil {
+	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
 	}
@@ -215,7 +207,7 @@ func (h *AuthHandler) IsCookieAndSessionExists(ctx *gin.Context, log *lg.Log, to
 			h.useCase.DeleteCookie(ctx)
 			return false, nil
 		}
-		if err = h.DeleteCookieAndSession(ctx, log, token); err != nil {
+		if err := h.DeleteCookieAndSession(ctx, log, token); err != nil {
 			return false, err
 		}
 		return true, nil

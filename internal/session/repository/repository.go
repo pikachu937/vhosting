@@ -18,7 +18,6 @@ func NewSessRepository(cfg config.Config) *SessRepository {
 }
 
 func (r *SessRepository) DeleteSession(token string) error {
-	var err error
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 

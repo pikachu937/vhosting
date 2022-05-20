@@ -21,8 +21,6 @@ func (r *VideoRepository) CreateVideo(vid video.Video) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s)", video.TableName,
 		video.Url, video.Filename, video.UserId, video.InfoId,
@@ -30,7 +28,7 @@ func (r *VideoRepository) CreateVideo(vid video.Video) error {
 	val := "($1, $2, $3, $4, $5)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err = db.Query(query, vid.Url, vid.Filename, vid.UserId,
+	if _, err := db.Query(query, vid.Url, vid.Filename, vid.UserId,
 		vid.InfoId, vid.CreationDate); err != nil {
 		return err
 	}
@@ -42,8 +40,6 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s", video.Id, video.Url,
 		video.Filename, video.UserId, video.InfoId, video.CreationDate)
@@ -52,7 +48,7 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var vid video.Video
-	if err = db.Get(&vid, query, id); err != nil {
+	if err := db.Get(&vid, query, id); err != nil {
 		return nil, err
 	}
 
@@ -62,8 +58,6 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -79,7 +73,7 @@ func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 	var videos = map[int]*video.Video{}
 	var vid video.Video
 	for rows.Next() {
-		if err = rows.Scan(&vid.Id, &vid.Url, &vid.Filename, &vid.UserId,
+		if err := rows.Scan(&vid.Id, &vid.Url, &vid.Filename, &vid.UserId,
 			&vid.InfoId, &vid.CreationDate); err != nil {
 			return nil, err
 		}
@@ -88,7 +82,7 @@ func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 			InfoId: vid.InfoId, CreationDate: vid.CreationDate}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
@@ -102,8 +96,6 @@ func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
 func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := video.TableName
@@ -126,8 +118,6 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := video.TableName
 	cnd := fmt.Sprintf("%s=$1", video.Id)
@@ -145,8 +135,6 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := video.Id

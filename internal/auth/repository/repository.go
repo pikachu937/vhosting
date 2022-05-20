@@ -22,8 +22,6 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", user.Username, user.PasswordHash)
 	tbl := user.TableName
@@ -31,7 +29,7 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var newNamepass auth.Namepass
-	if err = db.Get(&newNamepass, query, namepass.Username, namepass.PasswordHash); err != nil {
+	if err := db.Get(&newNamepass, query, namepass.Username, namepass.PasswordHash); err != nil {
 		return err
 	}
 
@@ -41,8 +39,6 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
@@ -62,8 +58,6 @@ func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id
@@ -88,8 +82,6 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName

@@ -25,9 +25,8 @@ func (u *PermUseCase) GetAllPermissions() (map[int]*perm.Perm, error) {
 }
 
 func (u *PermUseCase) BindJSONPermIds(ctx *gin.Context) (perm.PermIds, error) {
-	var err error
 	var permIds perm.PermIds
-	if err = ctx.BindJSON(&permIds); err != nil {
+	if err := ctx.BindJSON(&permIds); err != nil {
 		return permIds, err
 	}
 	return permIds, nil
@@ -41,7 +40,6 @@ func (u *PermUseCase) IsRequiredEmpty(perms perm.PermIds) bool {
 }
 
 func (u *PermUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	var err error
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		return -1, err

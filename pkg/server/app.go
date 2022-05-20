@@ -83,8 +83,6 @@ func NewApp(cfg config.Config) *App {
 }
 
 func (a *App) Run() error {
-	var err error
-
 	// Debug mode
 	if a.cfg.ServerDebugMode {
 		gin.SetMode(gin.DebugMode)
@@ -119,6 +117,7 @@ func (a *App) Run() error {
 	}
 
 	// Server start
+	var err error
 	notStarted := false
 	go func() {
 		err = a.httpServer.ListenAndServe()
@@ -142,7 +141,7 @@ func (a *App) Run() error {
 	ctx, shutdown := context.WithTimeout(context.Background(), 1700*time.Millisecond)
 	defer shutdown()
 
-	if err = a.httpServer.Shutdown(ctx); err != nil {
+	if err := a.httpServer.Shutdown(ctx); err != nil {
 		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.", err.Error()))
 	}
 
@@ -152,7 +151,6 @@ func (a *App) Run() error {
 }
 
 func getOutboundIP() net.IP {
-	var err error
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		logger.Print(msg.WarningCannotGetLocalIP(err))

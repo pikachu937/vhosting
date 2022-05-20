@@ -41,9 +41,8 @@ func (u *VideoUseCase) DeleteVideo(id int) error {
 }
 
 func (u *VideoUseCase) BindJSONVideo(ctx *gin.Context) (video.Video, error) {
-	var err error
 	var vid video.Video
-	if err = ctx.BindJSON(&vid); err != nil {
+	if err := ctx.BindJSON(&vid); err != nil {
 		return vid, err
 	}
 	return vid, nil
@@ -57,7 +56,6 @@ func (u *VideoUseCase) IsRequiredEmpty(url, filename string) bool {
 }
 
 func (u *VideoUseCase) IsVideoExists(id int) (bool, error) {
-	var err error
 	exists, err := u.videoRepo.IsVideoExists(id)
 	if err != nil {
 		return false, err
@@ -66,7 +64,6 @@ func (u *VideoUseCase) IsVideoExists(id int) (bool, error) {
 }
 
 func (u *VideoUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	var err error
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		return -1, err

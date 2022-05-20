@@ -37,7 +37,6 @@ func NewPermHandler(useCase perm.PermUseCase, logUseCase lg.LogUseCase, authUseC
 func (h *PermHandler) GetAllPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_all_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -60,10 +59,9 @@ func (h *PermHandler) GetAllPermissions(ctx *gin.Context) {
 }
 
 func (h *PermHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
-	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	if err = h.logUseCase.CreateLogRecord(log); err != nil {
+	if err := h.logUseCase.CreateLogRecord(log); err != nil {
 		logger.Complete(log, msg.ErrorCannotDoLogging(err))
 		responder.Response(ctx, log)
 	}
@@ -71,9 +69,8 @@ func (h *PermHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 }
 
 func (h *PermHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	var err error
 	h.authUseCase.DeleteCookie(ctx)
-	if err = h.sessUseCase.DeleteSession(token); err != nil {
+	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
 	}
@@ -81,8 +78,6 @@ func (h *PermHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 }
 
 func (h *PermHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
-	var err error
-
 	// Read cookie for token, check token existence, check session existence
 	cookieToken := h.authUseCase.ReadCookie(ctx)
 	if h.authUseCase.IsTokenExists(cookieToken) {
@@ -113,7 +108,7 @@ func (h *PermHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, p
 		return false, -1
 	}
 	if gottenUserId < 0 {
-		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
 			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
@@ -124,8 +119,7 @@ func (h *PermHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, p
 
 	// Check superuser permissions
 	var firstCheck, secondCheck bool
-	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
-	if err != nil {
+	if firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
 		return false, -1
 	}

@@ -24,8 +24,6 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", user.TableName,
 		user.Username, user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff,
@@ -33,7 +31,7 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err = db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperuser,
+	if _, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperuser,
 		usr.IsStaff, usr.FirstName, usr.LastName, usr.JoiningDate, usr.LastLogin); err != nil {
 		return err
 	}
@@ -45,8 +43,6 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", user.Id, user.Username,
 		user.PasswordHash, user.IsActive, user.IsSuperuser, user.IsStaff, user.FirstName,
@@ -56,7 +52,7 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var usr user.User
-	if err = db.Get(&usr, query, id); err != nil {
+	if err := db.Get(&usr, query, id); err != nil {
 		return nil, err
 	}
 
@@ -66,8 +62,6 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -83,7 +77,7 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 	var users = map[int]*user.User{}
 	var usr user.User
 	for rows.Next() {
-		if err = rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperuser,
+		if err := rows.Scan(&usr.Id, &usr.Username, &usr.PasswordHash, &usr.IsActive, &usr.IsSuperuser,
 			&usr.IsStaff, &usr.FirstName, &usr.LastName, &usr.JoiningDate, &usr.LastLogin); err != nil {
 			return nil, err
 		}
@@ -93,7 +87,7 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 			LastLogin: usr.LastLogin}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
@@ -107,8 +101,6 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
@@ -136,8 +128,6 @@ func (r *UserRepository) DeleteUser(id int) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := user.TableName
 	cnd := fmt.Sprintf("%s=$1", user.Id)
@@ -156,8 +146,6 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s OR %s", user.IsSuperuser, user.IsStaff)
 	tbl := user.TableName
@@ -172,7 +160,7 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 
 	queryRes := false
 	for rows.Next() {
-		if err = rows.Scan(&queryRes); err != nil {
+		if err := rows.Scan(&queryRes); err != nil {
 			return false, err
 		}
 	}
@@ -183,8 +171,6 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
 	col1 := perm.Id
@@ -212,9 +198,9 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
 	var template, col, tbl, cnd, query string
 	var rows *sql.Rows
+	var err error
 
 	if reflect.TypeOf(idOrUsername) == reflect.TypeOf(0) {
 		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -247,8 +233,6 @@ func (r *UserRepository) GetUserId(username string) (int, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id
 	tbl := user.TableName
@@ -256,7 +240,7 @@ func (r *UserRepository) GetUserId(username string) (int, error) {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var idPtr *int
-	if err = db.Get(&idPtr, query, username); err != nil {
+	if err := db.Get(&idPtr, query, username); err != nil {
 		return -1, err
 	}
 

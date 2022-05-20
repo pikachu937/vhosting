@@ -9,12 +9,11 @@ import (
 )
 
 func GeneratePasswordHash(password, salt string) string {
-	var err error
 	if password == "" {
 		return ""
 	}
 	hash := sha256.New()
-	if _, err = hash.Write([]byte(password)); err != nil {
+	if _, err := hash.Write([]byte(password)); err != nil {
 		logger.Print(msg.ErrorCannotWriteBytesIntoInternalVariable(err))
 		return ""
 	}

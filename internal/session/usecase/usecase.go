@@ -24,11 +24,10 @@ func (u *SessUseCase) IsSessionExists(token string) (bool, error) {
 }
 
 func (u *SessUseCase) CreateSession(ctx *gin.Context, username, token, timestamp string) error {
-	var err error
 	var session sess.Session
 	session.Content = token
 	session.CreationDate = timestamp
-	if err = u.sessRepo.CreateSession(session); err != nil {
+	if err := u.sessRepo.CreateSession(session); err != nil {
 		return err
 	}
 	return u.authRepo.UpdateNamepassLastLogin(username, session.CreationDate)

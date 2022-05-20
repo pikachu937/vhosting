@@ -29,8 +29,6 @@ func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
 		qconsts.ORDER_BY_COL
 	col := fmt.Sprintf("%s", group.GroupId)
@@ -48,7 +46,7 @@ func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
 	var groupIds group.GroupIds
 	var grp int
 	for rows.Next() {
-		if err = rows.Scan(&grp); err != nil {
+		if err := rows.Scan(&grp); err != nil {
 			return nil, err
 		}
 		groupIds.Ids = append(groupIds.Ids, grp)
@@ -60,8 +58,6 @@ func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
 func (r *GroupRepository) DeleteUserGroups(id int, condIds string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := group.UGTableName

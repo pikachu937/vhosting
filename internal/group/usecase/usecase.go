@@ -41,7 +41,6 @@ func (u *GroupUseCase) DeleteGroup(id int) error {
 }
 
 func (u *GroupUseCase) IsGroupExists(idOrName interface{}) (bool, error) {
-	var err error
 	exists, err := u.groupRepo.IsGroupExists(idOrName)
 	if err != nil {
 		return false, err
@@ -50,9 +49,8 @@ func (u *GroupUseCase) IsGroupExists(idOrName interface{}) (bool, error) {
 }
 
 func (u *GroupUseCase) BindJSONGroup(ctx *gin.Context) (group.Group, error) {
-	var err error
 	var grp group.Group
-	if err = ctx.BindJSON(&grp); err != nil {
+	if err := ctx.BindJSON(&grp); err != nil {
 		return grp, err
 	}
 	return grp, nil
@@ -66,7 +64,6 @@ func (u *GroupUseCase) IsGroupRequiredEmpty(name string) bool {
 }
 
 func (u *GroupUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	var err error
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		return -1, err

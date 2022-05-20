@@ -9,7 +9,6 @@ import (
 func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "set_user_groups"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -46,7 +45,7 @@ func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.SetUserGroups(reqId, inputGroupIds); err != nil {
+	if err := h.useCase.SetUserGroups(reqId, inputGroupIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotSetUserGroups(err))
 		return
 	}
@@ -57,7 +56,6 @@ func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_user_groups"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -94,7 +92,6 @@ func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "delete_user_groups"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -131,7 +128,7 @@ func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteUserGroups(reqId, inputGroupIds); err != nil {
+	if err := h.useCase.DeleteUserGroups(reqId, inputGroupIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteUserGroups(err))
 		return
 	}

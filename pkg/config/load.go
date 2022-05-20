@@ -10,9 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func LoadConfig(path string) (Config, error) {
-	var err error
-
+func Load(path string) (Config, error) {
 	// Parse config file path
 	path = path[:len(path)-4]
 	lastDirIndex := strings.LastIndex(path, "/")
@@ -21,7 +19,7 @@ func LoadConfig(path string) (Config, error) {
 
 	// Load data from config file
 	var cfg Config
-	if err = viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		return cfg, err
 	}
 

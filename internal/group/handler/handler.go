@@ -34,7 +34,6 @@ func NewGroupHandler(useCase group.GroupUseCase, logUseCase lg.LogUseCase, authU
 func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "post_group"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -65,7 +64,7 @@ func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 	}
 
 	// Create group
-	if err = h.useCase.CreateGroup(inputGroup); err != nil {
+	if err := h.useCase.CreateGroup(inputGroup); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateGroup(err))
 		return
 	}
@@ -76,7 +75,6 @@ func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 func (h *GroupHandler) GetGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_group"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -112,7 +110,6 @@ func (h *GroupHandler) GetGroup(ctx *gin.Context) {
 func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_all_groups"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -137,7 +134,6 @@ func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
 func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "patch_group"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -171,7 +167,7 @@ func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
 
 	inputGroup.Id = reqId
 
-	if err = h.useCase.PartiallyUpdateGroup(&inputGroup); err != nil {
+	if err := h.useCase.PartiallyUpdateGroup(&inputGroup); err != nil {
 		h.report(ctx, log, msg.ErrorCannotPartiallyUpdateGroup(err))
 		return
 	}
@@ -182,7 +178,6 @@ func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
 func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "delete_group"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -206,7 +201,7 @@ func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteGroup(reqId); err != nil {
+	if err := h.useCase.DeleteGroup(reqId); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteGroup(err))
 		return
 	}
@@ -215,10 +210,9 @@ func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
-	var err error
 	logger.Complete(log, messageLog)
 	responder.Response(ctx, log)
-	if err = h.logUseCase.CreateLogRecord(log); err != nil {
+	if err := h.logUseCase.CreateLogRecord(log); err != nil {
 		logger.Complete(log, msg.ErrorCannotDoLogging(err))
 		responder.Response(ctx, log)
 	}
@@ -226,9 +220,8 @@ func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log)
 }
 
 func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	var err error
 	h.authUseCase.DeleteCookie(ctx)
-	if err = h.sessUseCase.DeleteSession(token); err != nil {
+	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
 	}
@@ -236,8 +229,6 @@ func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, tok
 }
 
 func (h *GroupHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
-	var err error
-
 	// Read cookie for token, check token existence, check session existence
 	cookieToken := h.authUseCase.ReadCookie(ctx)
 	if h.authUseCase.IsTokenExists(cookieToken) {
@@ -268,7 +259,7 @@ func (h *GroupHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, 
 		return false, -1
 	}
 	if gottenUserId < 0 {
-		if err = h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
+		if err := h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
 			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
@@ -279,8 +270,7 @@ func (h *GroupHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, 
 
 	// Check superuser permissions
 	var firstCheck, secondCheck bool
-	firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username)
-	if err != nil {
+	if firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
 		return false, -1
 	}

@@ -43,7 +43,6 @@ func (u *AuthUseCase) UpdateNamepassPassword(namepass auth.Namepass) error {
 }
 
 func (u *AuthUseCase) IsNamepassExists(username, passwordHash string) (bool, error) {
-	var err error
 	exists, err := u.authRepo.IsNamepassExists(username, passwordHash)
 	if err != nil {
 		return false, err
@@ -56,9 +55,8 @@ func (u *AuthUseCase) ReadCookie(ctx *gin.Context) string {
 }
 
 func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (auth.Namepass, error) {
-	var err error
 	var namepass auth.Namepass
-	if err = ctx.BindJSON(&namepass); err != nil {
+	if err := ctx.BindJSON(&namepass); err != nil {
 		return namepass, err
 	}
 	if namepass.PasswordHash != "" {
@@ -68,7 +66,6 @@ func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (auth.Namepass, error) 
 }
 
 func (u *AuthUseCase) GenerateToken(namepass auth.Namepass) (string, error) {
-	var err error
 	namepass.PasswordHash = hasher.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
 	token, err := hasher.GenerateToken(namepass, u.cfg.HashingTokenSigningKey, u.cfg.SessionTTLHours)
 	if err != nil {

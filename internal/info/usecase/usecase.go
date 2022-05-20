@@ -41,9 +41,8 @@ func (u *InfoUseCase) DeleteInfo(id int) error {
 }
 
 func (u *InfoUseCase) BindJSONInfo(ctx *gin.Context) (info.Info, error) {
-	var err error
 	var nfo info.Info
-	if err = ctx.BindJSON(&nfo); err != nil {
+	if err := ctx.BindJSON(&nfo); err != nil {
 		return nfo, err
 	}
 	return nfo, nil
@@ -57,7 +56,6 @@ func (u *InfoUseCase) IsRequiredEmpty(stream string) bool {
 }
 
 func (u *InfoUseCase) IsInfoExists(id int) (bool, error) {
-	var err error
 	exists, err := u.infoRepo.IsInfoExists(id)
 	if err != nil {
 		return false, err
@@ -66,7 +64,6 @@ func (u *InfoUseCase) IsInfoExists(id int) (bool, error) {
 }
 
 func (u *InfoUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	var err error
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		return -1, err

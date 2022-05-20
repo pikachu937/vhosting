@@ -29,8 +29,6 @@ func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
 		qconsts.ORDER_BY_COL
 	col := fmt.Sprintf("%s", perm.PermId)
@@ -48,7 +46,7 @@ func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
 	var permIds perm.PermIds
 	var num int
 	for rows.Next() {
-		if err = rows.Scan(&num); err != nil {
+		if err := rows.Scan(&num); err != nil {
 			return nil, err
 		}
 		permIds.Ids = append(permIds.Ids, num)
@@ -60,8 +58,6 @@ func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
 func (r *PermRepository) DeleteUserPermissions(id int, condIds string) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := perm.UPTableName

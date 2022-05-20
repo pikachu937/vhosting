@@ -9,7 +9,6 @@ import (
 func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "set_group_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -46,7 +45,7 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.SetGroupPermissions(reqId, inputPermIds); err != nil {
+	if err := h.useCase.SetGroupPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotSetGroupPerms(err))
 		return
 	}
@@ -57,7 +56,6 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "get_group_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -94,7 +92,6 @@ func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 	log := logger.Setup(ctx)
 
-	var err error
 	actPermission := "delete_group_perms"
 
 	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
@@ -131,7 +128,7 @@ func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.useCase.DeleteGroupPermissions(reqId, inputPermIds); err != nil {
+	if err := h.useCase.DeleteGroupPermissions(reqId, inputPermIds); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteGroupPerms(err))
 		return
 	}

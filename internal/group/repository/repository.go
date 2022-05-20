@@ -23,14 +23,12 @@ func (r *GroupRepository) CreateGroup(grp group.Group) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s)", group.TableName, group.Name)
 	val := "($1)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err = db.Query(query, grp.Name); err != nil {
+	if _, err := db.Query(query, grp.Name); err != nil {
 		return err
 	}
 
@@ -41,8 +39,6 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", group.Id, group.Name)
 	tbl := group.TableName
@@ -50,7 +46,7 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var grp group.Group
-	if err = db.Get(&grp, query, id); err != nil {
+	if err := db.Get(&grp, query, id); err != nil {
 		return nil, err
 	}
 
@@ -60,8 +56,6 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -77,13 +71,13 @@ func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
 	var groups = map[int]*group.Group{}
 	var grp group.Group
 	for rows.Next() {
-		if err = rows.Scan(&grp.Id, &grp.Name); err != nil {
+		if err := rows.Scan(&grp.Id, &grp.Name); err != nil {
 			return nil, err
 		}
 		groups[grp.Id] = &group.Group{Id: grp.Id, Name: grp.Name}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
@@ -97,8 +91,6 @@ func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
 func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := group.TableName
@@ -119,8 +111,6 @@ func (r *GroupRepository) DeleteGroup(id int) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := group.TableName
 	cnd := fmt.Sprintf("%s=$1", group.Id)
@@ -139,9 +129,9 @@ func (r *GroupRepository) IsGroupExists(idOrName interface{}) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
 	var template, col, tbl, cnd, query string
 	var rows *sql.Rows
+	var err error
 
 	if reflect.TypeOf(idOrName) == reflect.TypeOf(0) {
 		template = qconsts.SELECT_COL_FROM_TBL_WHERE_CND

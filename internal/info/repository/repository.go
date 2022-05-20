@@ -21,8 +21,6 @@ func (r *InfoRepository) CreateInfo(nfo info.Info) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s)", info.TableName,
 		info.Stream, info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId,
@@ -30,7 +28,7 @@ func (r *InfoRepository) CreateInfo(nfo info.Info) error {
 	val := "($1, $2, $3, $4, $5, $6)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err = db.Query(query, nfo.Stream, nfo.StartPeriod, nfo.StopPeriod,
+	if _, err := db.Query(query, nfo.Stream, nfo.StartPeriod, nfo.StopPeriod,
 		nfo.LifeTime, nfo.UserId, nfo.CreationDate); err != nil {
 		return err
 	}
@@ -42,8 +40,6 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s", info.Id, info.Stream,
 		info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId, info.CreationDate)
@@ -52,7 +48,7 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var nfo info.Info
-	if err = db.Get(&nfo, query, id); err != nil {
+	if err := db.Get(&nfo, query, id); err != nil {
 		return nil, err
 	}
 
@@ -62,8 +58,6 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -79,7 +73,7 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 	var infos = map[int]*info.Info{}
 	var nfo info.Info
 	for rows.Next() {
-		if err = rows.Scan(&nfo.Id, &nfo.Stream, &nfo.StartPeriod, &nfo.StopPeriod,
+		if err := rows.Scan(&nfo.Id, &nfo.Stream, &nfo.StartPeriod, &nfo.StopPeriod,
 			&nfo.LifeTime, &nfo.UserId, &nfo.CreationDate); err != nil {
 			return nil, err
 		}
@@ -88,7 +82,7 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 			LifeTime: nfo.LifeTime, UserId: nfo.UserId, CreationDate: nfo.CreationDate}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
@@ -102,8 +96,6 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := info.TableName
@@ -124,8 +116,6 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := info.TableName
 	cnd := fmt.Sprintf("%s=$1", info.Id)
@@ -143,8 +133,6 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
-
-	var err error
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := info.Id

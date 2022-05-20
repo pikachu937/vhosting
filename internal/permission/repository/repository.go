@@ -21,8 +21,6 @@ func (r *PermRepository) GetAllPermissions() (map[int]*perm.Perm, error) {
 	db := db_manager.NewDBConnection(r.cfg)
 	defer db_manager.CloseDBConnection(r.cfg, db)
 
-	var err error
-
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
 	tbl := perm.TableName
@@ -37,13 +35,13 @@ func (r *PermRepository) GetAllPermissions() (map[int]*perm.Perm, error) {
 	var perms = map[int]*perm.Perm{}
 	var prm perm.Perm
 	for rows.Next() {
-		if err = rows.Scan(&prm.Id, &prm.Name, &prm.Codename); err != nil {
+		if err := rows.Scan(&prm.Id, &prm.Name, &prm.Codename); err != nil {
 			return nil, err
 		}
 		perms[prm.Id] = &perm.Perm{Id: prm.Id, Name: prm.Name, Codename: prm.Codename}
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
