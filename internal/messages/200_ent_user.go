@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	lg "github.com/mikerumy/vhosting/internal/logging"
-	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func ErrorCannotBindInputData(err error) *lg.Log {

@@ -2,15 +2,15 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/auth"
 	"github.com/mikerumy/vhosting/internal/group"
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type PermHandler struct {

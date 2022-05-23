@@ -4,9 +4,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/user"
 	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/hasher"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type UserUseCase struct {

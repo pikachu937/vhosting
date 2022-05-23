@@ -3,11 +3,11 @@ package repository
 import (
 	"fmt"
 
-	"github.com/mikerumy/vhosting/internal/auth"
-	"github.com/mikerumy/vhosting/internal/user"
+	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type AuthRepository struct {

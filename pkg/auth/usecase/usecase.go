@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/auth"
+	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/cookie_manager"
 	"github.com/mikerumy/vhosting/pkg/hasher"
