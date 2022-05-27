@@ -9,11 +9,11 @@ import (
 )
 
 type VideoUseCase struct {
-	cfg       config.Config
+	cfg       *config.Config
 	videoRepo video.VideoRepository
 }
 
-func NewVideoUseCase(cfg config.Config, videoRepo video.VideoRepository) *VideoUseCase {
+func NewVideoUseCase(cfg *config.Config, videoRepo video.VideoRepository) *VideoUseCase {
 	return &VideoUseCase{
 		cfg:       cfg,
 		videoRepo: videoRepo,

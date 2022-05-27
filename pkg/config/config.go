@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Load(path string) (Config, error) {
+func Load(path string) (*Config, error) {
 	// Parse config file path
 	path = path[:len(path)-4]
 	lastDirIndex := strings.LastIndex(path, "/")
@@ -20,7 +20,7 @@ func Load(path string) (Config, error) {
 	// Load data from config file
 	var cfg Config
 	if err := viper.ReadInConfig(); err != nil {
-		return cfg, err
+		return &cfg, err
 	}
 
 	var cvarName string
@@ -105,5 +105,5 @@ func Load(path string) (Config, error) {
 		SessionTTLHours: sessionTTLHours,
 	}
 
-	return cfg, nil
+	return &cfg, nil
 }

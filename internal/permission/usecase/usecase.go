@@ -9,11 +9,11 @@ import (
 )
 
 type PermUseCase struct {
-	cfg      config.Config
+	cfg      *config.Config
 	permRepo perm.PermRepository
 }
 
-func NewPermUseCase(cfg config.Config, permRepo perm.PermRepository) *PermUseCase {
+func NewPermUseCase(cfg *config.Config, permRepo perm.PermRepository) *PermUseCase {
 	return &PermUseCase{
 		cfg:      cfg,
 		permRepo: permRepo,

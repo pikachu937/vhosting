@@ -5,12 +5,12 @@ import (
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 )
 
 func (r *PermRepository) SetGroupPermissions(values string) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", perm.GPTableName, perm.GroupId,
@@ -26,8 +26,8 @@ func (r *PermRepository) SetGroupPermissions(values string) error {
 }
 
 func (r *PermRepository) GetGroupPermissions(id int) (*perm.PermIds, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
 		qconsts.ORDER_BY_COL
@@ -56,8 +56,8 @@ func (r *PermRepository) GetGroupPermissions(id int) (*perm.PermIds, error) {
 }
 
 func (r *PermRepository) DeleteGroupPermissions(id int, condIds string) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := perm.GPTableName

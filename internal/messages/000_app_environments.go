@@ -11,6 +11,6 @@ func FatalFailedToLoadEnvironmentFile(err error) *lg.Log {
 	return &lg.Log{ErrCode: 0, Message: fmt.Sprintf("Failed to load environment file. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelFatal}
 }
 
-func InfoEnvironmentVarsLoaded() *lg.Log {
-	return &lg.Log{Message: "Environment vars loaded.", ErrLevel: logger.ErrLevelInfo}
+func InfoEnvironmentsLoaded() *lg.Log {
+	return &lg.Log{Message: "Environments loaded.", ErrLevel: logger.ErrLevelInfo}
 }

@@ -6,21 +6,21 @@ import (
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type AuthRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewAuthRepository(cfg config.Config) *AuthRepository {
+func NewAuthRepository(cfg *config.Config) *AuthRepository {
 	return &AuthRepository{cfg: cfg}
 }
 
 func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s", user.Username, user.PasswordHash)
@@ -37,8 +37,8 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 }
 
 func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
@@ -56,8 +56,8 @@ func (r *AuthRepository) UpdateNamepassPassword(namepass auth.Namepass) error {
 }
 
 func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id
@@ -80,8 +80,8 @@ func (r *AuthRepository) IsNamepassExists(usename, passwordHash string) (bool, e
 }
 
 func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName

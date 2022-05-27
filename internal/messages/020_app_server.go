@@ -2,17 +2,18 @@ package messages
 
 import (
 	"fmt"
+	"os"
 
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func InfoServerWasSuccessfullyStartedAtLocalIP(host, port string) *lg.Log {
-	return &lg.Log{Message: fmt.Sprintf("Server was successfully started at local IP: %s:%s.", host, port), ErrLevel: logger.ErrLevelInfo}
+func InfoServerStartedSuccessfullyAtLocalAddress(host, port string) *lg.Log {
+	return &lg.Log{Message: fmt.Sprintf("Server started successfully at local address: %s:%s.", host, port), ErrLevel: logger.ErrLevelInfo}
 }
 
-func InfoServerWasGracefullyShutDown() *lg.Log {
-	return &lg.Log{Message: "Server was correctly shuted down.", ErrLevel: logger.ErrLevelInfo}
+func InfoServerShutedDownCorrectly() *lg.Log {
+	return &lg.Log{Message: "Server shuted down correctly.", ErrLevel: logger.ErrLevelInfo}
 }
 
 func FatalFailureOnServerRunning(err error) *lg.Log {
@@ -21,4 +22,8 @@ func FatalFailureOnServerRunning(err error) *lg.Log {
 
 func WarningCannotGetLocalIP(err error) *lg.Log {
 	return &lg.Log{ErrCode: 21, Message: fmt.Sprintf("Cannot get local IP. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelWarning}
+}
+
+func InfoRecivedSignal(signal os.Signal) *lg.Log {
+	return &lg.Log{Message: fmt.Sprintf("Recived signal: %s.", signal), ErrLevel: logger.ErrLevelInfo}
 }

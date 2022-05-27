@@ -6,20 +6,20 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 )
 
 type PermRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewPermRepository(cfg config.Config) *PermRepository {
+func NewPermRepository(cfg *config.Config) *PermRepository {
 	return &PermRepository{cfg: cfg}
 }
 
 func (r *PermRepository) GetAllPermissions() (map[int]*perm.Perm, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"

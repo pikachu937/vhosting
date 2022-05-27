@@ -6,20 +6,20 @@ import (
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 )
 
 type LogRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewLogRepository(cfg config.Config) *LogRepository {
+func NewLogRepository(cfg *config.Config) *LogRepository {
 	return &LogRepository{cfg: cfg}
 }
 
 func (r *LogRepository) CreateLogRecord(log *lg.Log) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s)", lg.TableName,

@@ -6,20 +6,20 @@ import (
 	"github.com/mikerumy/vhosting/internal/info"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 )
 
 type InfoRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewInfoRepository(cfg config.Config) *InfoRepository {
+func NewInfoRepository(cfg *config.Config) *InfoRepository {
 	return &InfoRepository{cfg: cfg}
 }
 
 func (r *InfoRepository) CreateInfo(nfo info.Info) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s)", info.TableName,
@@ -37,8 +37,8 @@ func (r *InfoRepository) CreateInfo(nfo info.Info) error {
 }
 
 func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s", info.Id, info.Stream,
@@ -56,8 +56,8 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 }
 
 func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -94,8 +94,8 @@ func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
 }
 
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := info.TableName
@@ -113,8 +113,8 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) DeleteInfo(id int) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := info.TableName
@@ -131,8 +131,8 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 }
 
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := info.Id

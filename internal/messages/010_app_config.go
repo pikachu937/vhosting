@@ -15,6 +15,6 @@ func FatalFailedToLoadConfigFile(err error) *lg.Log {
 	return &lg.Log{ErrCode: 11, Message: fmt.Sprintf("Failed to load config file. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelFatal}
 }
 
-func InfoConfigVarsLoaded() *lg.Log {
-	return &lg.Log{Message: "Config vars loaded.", ErrLevel: logger.ErrLevelInfo}
+func InfoConfigLoaded() *lg.Log {
+	return &lg.Log{Message: "Config loaded.", ErrLevel: logger.ErrLevelInfo}
 }

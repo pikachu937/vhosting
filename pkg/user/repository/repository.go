@@ -8,21 +8,21 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type UserRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewUserRepository(cfg config.Config) *UserRepository {
+func NewUserRepository(cfg *config.Config) *UserRepository {
 	return &UserRepository{cfg: cfg}
 }
 
 func (r *UserRepository) CreateUser(usr user.User) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", user.TableName,
@@ -40,8 +40,8 @@ func (r *UserRepository) CreateUser(usr user.User) error {
 }
 
 func (r *UserRepository) GetUser(id int) (*user.User, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", user.Id, user.Username,
@@ -60,8 +60,8 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 }
 
 func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL
 	col := "*"
@@ -99,8 +99,8 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 }
 
 func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
@@ -125,8 +125,8 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := user.TableName
@@ -143,8 +143,8 @@ func (r *UserRepository) DeleteUser(id int) error {
 }
 
 func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s OR %s", user.IsSuperuser, user.IsStaff)
@@ -169,8 +169,8 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 }
 
 func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
 	col1 := perm.Id
@@ -195,8 +195,8 @@ func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm strin
 }
 
 func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	var template, col, tbl, cnd, query string
 	var rows *sql.Rows
@@ -230,8 +230,8 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 }
 
 func (r *UserRepository) GetUserId(username string) (int, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := user.Id

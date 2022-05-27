@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ import (
 	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
 	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
+	"github.com/mikerumy/vhosting/internal/models"
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	permhandler "github.com/mikerumy/vhosting/internal/permission/handler"
 	permrepo "github.com/mikerumy/vhosting/internal/permission/repository"
@@ -40,6 +42,9 @@ import (
 	authusecase "github.com/mikerumy/vhosting/pkg/auth/usecase"
 	"github.com/mikerumy/vhosting/pkg/config"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/mikerumy/vhosting/pkg/stream"
+	streamhandler "github.com/mikerumy/vhosting/pkg/stream/handler"
+	streamusecase "github.com/mikerumy/vhosting/pkg/stream/usecase"
 	"github.com/mikerumy/vhosting/pkg/user"
 	userhandler "github.com/mikerumy/vhosting/pkg/user/handler"
 	userrepo "github.com/mikerumy/vhosting/pkg/user/repository"
@@ -48,7 +53,9 @@ import (
 
 type App struct {
 	httpServer   *http.Server
-	cfg          config.Config
+	cfg          *config.Config
+	scfg         *models.ConfigST
+	StreamUC     stream.StreamUseCase
 	userUseCase  user.UserUseCase
 	authUseCase  auth.AuthUseCase
 	sessUseCase  sess.SessUseCase
@@ -59,7 +66,7 @@ type App struct {
 	videoUseCase video.VideoUseCase
 }
 
-func NewApp(cfg config.Config) *App {
+func NewApp(cfg *config.Config, scfg *models.ConfigST) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
 	sessRepo := sessrepo.NewSessRepository(cfg)
@@ -71,6 +78,7 @@ func NewApp(cfg config.Config) *App {
 
 	return &App{
 		cfg:          cfg,
+		scfg:         scfg,
 		userUseCase:  userusecase.NewUserUseCase(cfg, userRepo),
 		authUseCase:  authusecase.NewAuthUseCase(cfg, authRepo),
 		sessUseCase:  sessusecase.NewSessUseCase(sessRepo, authRepo),
@@ -79,6 +87,7 @@ func NewApp(cfg config.Config) *App {
 		permUseCase:  permusecase.NewPermUseCase(cfg, permRepo),
 		infoUseCase:  infousecase.NewInfoUseCase(cfg, infoRepo),
 		videoUseCase: videousecase.NewVideoUseCase(cfg, videoRepo),
+		StreamUC:     streamusecase.NewStreamUseCase(scfg),
 	}
 }
 
@@ -90,8 +99,19 @@ func (a *App) Run() error {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Init handlers
+	// Init engine
 	router := gin.New()
+
+	// Init middleware
+	router.Use(CORSMiddleware())
+
+	// Check for web directory exists and register routes
+	if _, err := os.Stat("./web"); !os.IsNotExist(err) {
+		router.LoadHTMLGlob("./web/templates/*")
+		streamhandler.RegisterTemplateHTTPEndpoints(router, a.StreamUC, a.scfg)
+	}
+
+	router.StaticFS("/static", http.Dir("./web/static"))
 
 	// Register routes
 	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase,
@@ -106,6 +126,7 @@ func (a *App) Run() error {
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
+	streamhandler.RegisterStreamingHTTPEndpoints(router, a.StreamUC, a.scfg)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
@@ -118,34 +139,35 @@ func (a *App) Run() error {
 
 	// Server start
 	var err error
-	notStarted := false
 	go func() {
 		err = a.httpServer.ListenAndServe()
-		if err != nil {
-			notStarted = true
-		}
 	}()
 	time.Sleep(50 * time.Millisecond)
-	if notStarted {
+	if err != nil {
 		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.", err.Error()))
 	}
-	logger.Print(msg.InfoServerWasSuccessfullyStartedAtLocalIP(getOutboundIP().String(), a.cfg.ServerPort))
+	logger.Print(msg.InfoServerStartedSuccessfullyAtLocalAddress(getOutboundIP().String(), a.cfg.ServerPort))
+
+	// Listening for interrupt signal
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigs
+		logger.Print(msg.InfoRecivedSignal(sig))
+		done <- true
+	}()
+	<-done
 
 	// Server shut down
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, os.Interrupt)
-	<-quit
-
-	time.Sleep(2 * time.Second)
-
-	ctx, shutdown := context.WithTimeout(context.Background(), 1700*time.Millisecond)
+	ctx, shutdown := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdown()
 
 	if err := a.httpServer.Shutdown(ctx); err != nil {
 		return errors.New(fmt.Sprintf("Cannot shut down the server correctly. Error: %s.", err.Error()))
 	}
 
-	logger.Print(msg.InfoServerWasGracefullyShutDown())
+	logger.Print(msg.InfoServerShutedDownCorrectly())
 
 	return nil
 }

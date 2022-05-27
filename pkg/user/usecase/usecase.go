@@ -10,11 +10,11 @@ import (
 )
 
 type UserUseCase struct {
-	cfg      config.Config
+	cfg      *config.Config
 	userRepo user.UserRepository
 }
 
-func NewUserUseCase(cfg config.Config, userRepo user.UserRepository) *UserUseCase {
+func NewUserUseCase(cfg *config.Config, userRepo user.UserRepository) *UserUseCase {
 	return &UserUseCase{
 		cfg:      cfg,
 		userRepo: userRepo,

@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/cookie_manager"
+	"github.com/mikerumy/vhosting/pkg/cookie"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 )
 
 type AuthUseCase struct {
-	cfg      config.Config
+	cfg      *config.Config
 	authRepo auth.AuthRepository
 }
 
-func NewAuthUseCase(cfg config.Config, authRepo auth.AuthRepository) *AuthUseCase {
+func NewAuthUseCase(cfg *config.Config, authRepo auth.AuthRepository) *AuthUseCase {
 	return &AuthUseCase{
 		cfg:      cfg,
 		authRepo: authRepo,

@@ -9,11 +9,11 @@ import (
 )
 
 type GroupUseCase struct {
-	cfg       config.Config
+	cfg       *config.Config
 	groupRepo group.GroupRepository
 }
 
-func NewGroupUseCase(cfg config.Config, groupRepo group.GroupRepository) *GroupUseCase {
+func NewGroupUseCase(cfg *config.Config, groupRepo group.GroupRepository) *GroupUseCase {
 	return &GroupUseCase{
 		cfg:       cfg,
 		groupRepo: groupRepo,

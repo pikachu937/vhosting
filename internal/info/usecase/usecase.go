@@ -9,11 +9,11 @@ import (
 )
 
 type InfoUseCase struct {
-	cfg      config.Config
+	cfg      *config.Config
 	infoRepo info.InfoRepository
 }
 
-func NewInfoUseCase(cfg config.Config, infoRepo info.InfoRepository) *InfoUseCase {
+func NewInfoUseCase(cfg *config.Config, infoRepo info.InfoRepository) *InfoUseCase {
 	return &InfoUseCase{
 		cfg:      cfg,
 		infoRepo: infoRepo,

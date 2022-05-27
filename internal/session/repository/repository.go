@@ -6,20 +6,20 @@ import (
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_manager"
+	"github.com/mikerumy/vhosting/pkg/db_connect"
 )
 
 type SessRepository struct {
-	cfg config.Config
+	cfg *config.Config
 }
 
-func NewSessRepository(cfg config.Config) *SessRepository {
+func NewSessRepository(cfg *config.Config) *SessRepository {
 	return &SessRepository{cfg: cfg}
 }
 
 func (r *SessRepository) DeleteSession(token string) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := sess.TableName
@@ -36,8 +36,8 @@ func (r *SessRepository) DeleteSession(token string) error {
 }
 
 func (r *SessRepository) IsSessionExists(token string) (bool, error) {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := sess.Content
@@ -60,8 +60,8 @@ func (r *SessRepository) IsSessionExists(token string) (bool, error) {
 }
 
 func (r *SessRepository) CreateSession(session sess.Session) error {
-	db := db_manager.NewDBConnection(r.cfg)
-	defer db_manager.CloseDBConnection(r.cfg, db)
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s)", sess.TableName, sess.Content, sess.CreationDate)

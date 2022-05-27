@@ -1,4 +1,4 @@
-package db_manager
+package db_connect
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func NewDBConnection(cfg config.Config) *sqlx.DB {
+func NewDBConnection(cfg *config.Config) *sqlx.DB {
 	timeAtStarting := time.Now()
 
 	var db *sqlx.DB
@@ -47,7 +47,7 @@ func NewDBConnection(cfg config.Config) *sqlx.DB {
 	return nil
 }
 
-func CloseDBConnection(cfg config.Config, db *sqlx.DB) {
+func CloseDBConnection(cfg *config.Config, db *sqlx.DB) {
 	if err := db.Close(); err != nil {
 		logger.Print(msg.ErrorCannotCloseDBConnection(err))
 		return
