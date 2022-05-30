@@ -41,6 +41,7 @@ import (
 	authrepo "github.com/mikerumy/vhosting/pkg/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/pkg/auth/usecase"
 	"github.com/mikerumy/vhosting/pkg/config"
+	downloadhandler "github.com/mikerumy/vhosting/pkg/download/handler"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
 	streamhandler "github.com/mikerumy/vhosting/pkg/stream/handler"
@@ -127,6 +128,7 @@ func (a *App) Run() error {
 	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	streamhandler.RegisterStreamingHTTPEndpoints(router, a.StreamUC, a.scfg)
+	downloadhandler.RegisterHTTPEndpoints(router)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
