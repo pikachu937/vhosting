@@ -33,4 +33,7 @@ const (
 
 	TypeOfGroupIds = "*group.GroupIds"
 	GotUserGroups  = "Got user groups."
+
+	TypeOfDownload = "*download.Download"
+	GotDownload    = "Got download link."
 )

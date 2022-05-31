@@ -41,7 +41,7 @@ func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
 	}
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return namepass, errors.New("Token claims have a wrong type.")
+		return namepass, errors.New("Token claims has wrong type.")
 	}
 	namepass.Username = claims.Username
 	namepass.PasswordHash = claims.Password

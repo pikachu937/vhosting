@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Load(path string) (*Config, error) {
+func LoadConfig(path string) (*Config, error) {
 	// Parse config file path
 	path = path[:len(path)-4]
 	lastDirIndex := strings.LastIndex(path, "/")

@@ -2,10 +2,11 @@ package usecase
 
 import (
 	"github.com/gin-gonic/gin"
+	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/cookie"
 	"github.com/mikerumy/vhosting/pkg/hasher"
+	"github.com/mikerumy/vhosting/pkg/headers"
 )
 
 type AuthUseCase struct {
@@ -27,6 +28,20 @@ func (u *AuthUseCase) IsTokenExists(token string) bool {
 	return false
 }
 
+func (u *AuthUseCase) IsRequiredEmpty(namepass *auth.Namepass) bool {
+	if namepass.PasswordHash == "" {
+		return true
+	}
+	return false
+}
+
+func (u *AuthUseCase) IsSessionExists(session *sess.Session) bool {
+	if session != nil {
+		return true
+	}
+	return false
+}
+
 func (u *AuthUseCase) IsMatched(username_1, username_2 string) bool {
 	if username_1 == username_2 {
 		return true
@@ -38,20 +53,20 @@ func (u *AuthUseCase) GetNamepass(namepass auth.Namepass) error {
 	return u.authRepo.GetNamepass(namepass)
 }
 
-func (u *AuthUseCase) UpdateNamepassPassword(namepass auth.Namepass) error {
-	return u.authRepo.UpdateNamepassPassword(namepass)
+func (u *AuthUseCase) UpdateUserPassword(namepass auth.Namepass) error {
+	return u.authRepo.UpdateUserPassword(namepass)
 }
 
-func (u *AuthUseCase) IsNamepassExists(username, passwordHash string) (bool, error) {
-	exists, err := u.authRepo.IsNamepassExists(username, passwordHash)
+func (u *AuthUseCase) IsUsernameAndPasswordExists(username, passwordHash string) (bool, error) {
+	exists, err := u.authRepo.IsUsernameAndPasswordExists(username, passwordHash)
 	if err != nil {
 		return false, err
 	}
 	return exists, nil
 }
 
-func (u *AuthUseCase) ReadCookie(ctx *gin.Context) string {
-	return cookie_manager.Read(ctx)
+func (u *AuthUseCase) ReadHeader(ctx *gin.Context) string {
+	return headers.ReadHeader(ctx)
 }
 
 func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (auth.Namepass, error) {
@@ -74,14 +89,6 @@ func (u *AuthUseCase) GenerateToken(namepass auth.Namepass) (string, error) {
 	return token, nil
 }
 
-func (u *AuthUseCase) SendCookie(ctx *gin.Context, token string) {
-	cookie_manager.Send(ctx, token, u.cfg.SessionTTLHours)
-}
-
 func (u *AuthUseCase) ParseToken(token string) (auth.Namepass, error) {
 	return hasher.ParseToken(token, u.cfg.HashingTokenSigningKey)
-}
-
-func (u *AuthUseCase) DeleteCookie(ctx *gin.Context) {
-	cookie_manager.Delete(ctx)
 }

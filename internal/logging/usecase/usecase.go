@@ -68,5 +68,9 @@ func (u *LogUseCase) CreateLogRecord(log *lg.Log) error {
 		log.Message = logger.GotUserGroups
 		return u.logRepo.CreateLogRecord(log)
 	}
+	if messageType == logger.TypeOfDownload {
+		log.Message = logger.GotDownload
+		return u.logRepo.CreateLogRecord(log)
+	}
 	return errors.New("Undefined type of message. Type: " + messageType)
 }

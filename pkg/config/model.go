@@ -22,4 +22,6 @@ type Config struct {
 	ServerWriteTimeoutSeconds int
 
 	SessionTTLHours int
+
+	ServerIP string
 }

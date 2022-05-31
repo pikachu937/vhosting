@@ -41,7 +41,9 @@ import (
 	authrepo "github.com/mikerumy/vhosting/pkg/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/pkg/auth/usecase"
 	"github.com/mikerumy/vhosting/pkg/config"
+	"github.com/mikerumy/vhosting/pkg/download"
 	downloadhandler "github.com/mikerumy/vhosting/pkg/download/handler"
+	downloadusecase "github.com/mikerumy/vhosting/pkg/download/usecase"
 	logger "github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
 	streamhandler "github.com/mikerumy/vhosting/pkg/stream/handler"
@@ -53,18 +55,19 @@ import (
 )
 
 type App struct {
-	httpServer   *http.Server
-	cfg          *config.Config
-	scfg         *models.ConfigST
-	StreamUC     stream.StreamUseCase
-	userUseCase  user.UserUseCase
-	authUseCase  auth.AuthUseCase
-	sessUseCase  sess.SessUseCase
-	logUseCase   lg.LogUseCase
-	groupUseCase group.GroupUseCase
-	permUseCase  perm.PermUseCase
-	infoUseCase  info.InfoUseCase
-	videoUseCase video.VideoUseCase
+	httpServer      *http.Server
+	cfg             *config.Config
+	scfg            *models.ConfigST
+	userUseCase     user.UserUseCase
+	authUseCase     auth.AuthUseCase
+	sessUseCase     sess.SessUseCase
+	logUseCase      lg.LogUseCase
+	groupUseCase    group.GroupUseCase
+	permUseCase     perm.PermUseCase
+	infoUseCase     info.InfoUseCase
+	videoUseCase    video.VideoUseCase
+	StreamUC        stream.StreamUseCase
+	downloadUseCase download.DownloadUseCase
 }
 
 func NewApp(cfg *config.Config, scfg *models.ConfigST) *App {
@@ -78,17 +81,18 @@ func NewApp(cfg *config.Config, scfg *models.ConfigST) *App {
 	videoRepo := videorepo.NewVideoRepository(cfg)
 
 	return &App{
-		cfg:          cfg,
-		scfg:         scfg,
-		userUseCase:  userusecase.NewUserUseCase(cfg, userRepo),
-		authUseCase:  authusecase.NewAuthUseCase(cfg, authRepo),
-		sessUseCase:  sessusecase.NewSessUseCase(sessRepo, authRepo),
-		logUseCase:   logusecase.NewLogUseCase(logRepo),
-		groupUseCase: groupusecase.NewGroupUseCase(cfg, groupRepo),
-		permUseCase:  permusecase.NewPermUseCase(cfg, permRepo),
-		infoUseCase:  infousecase.NewInfoUseCase(cfg, infoRepo),
-		videoUseCase: videousecase.NewVideoUseCase(cfg, videoRepo),
-		StreamUC:     streamusecase.NewStreamUseCase(scfg),
+		cfg:             cfg,
+		scfg:            scfg,
+		userUseCase:     userusecase.NewUserUseCase(cfg, userRepo),
+		authUseCase:     authusecase.NewAuthUseCase(cfg, authRepo),
+		sessUseCase:     sessusecase.NewSessUseCase(sessRepo, authRepo),
+		logUseCase:      logusecase.NewLogUseCase(logRepo),
+		groupUseCase:    groupusecase.NewGroupUseCase(cfg, groupRepo),
+		permUseCase:     permusecase.NewPermUseCase(cfg, permRepo),
+		infoUseCase:     infousecase.NewInfoUseCase(cfg, infoRepo),
+		videoUseCase:    videousecase.NewVideoUseCase(cfg, videoRepo),
+		StreamUC:        streamusecase.NewStreamUseCase(scfg),
+		downloadUseCase: downloadusecase.NewDownloadUseCase(cfg),
 	}
 }
 
@@ -128,7 +132,7 @@ func (a *App) Run() error {
 	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	streamhandler.RegisterStreamingHTTPEndpoints(router, a.StreamUC, a.scfg)
-	downloadhandler.RegisterHTTPEndpoints(router)
+	downloadhandler.RegisterHTTPEndpoints(router, a.downloadUseCase, a.logUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
@@ -148,7 +152,8 @@ func (a *App) Run() error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("Cannot start server. Error: %s.", err.Error()))
 	}
-	logger.Print(msg.InfoServerStartedSuccessfullyAtLocalAddress(getOutboundIP().String(), a.cfg.ServerPort))
+	a.cfg.ServerIP = getOutboundIP()
+	logger.Print(msg.InfoServerStartedSuccessfullyAtLocalAddress(a.cfg.ServerIP, a.cfg.ServerPort))
 
 	// Listening for interrupt signal
 	sigs := make(chan os.Signal, 1)
@@ -174,12 +179,12 @@ func (a *App) Run() error {
 	return nil
 }
 
-func getOutboundIP() net.IP {
+func getOutboundIP() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		logger.Print(msg.WarningCannotGetLocalIP(err))
 	}
 	defer conn.Close()
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP
+	return localAddr.IP.String()
 }

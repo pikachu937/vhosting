@@ -19,7 +19,7 @@ func main() {
 	logger.Print(msg.InfoEnvironmentsLoaded())
 
 	// Load config
-	cfg, err := config.Load("./configs/config.yml")
+	cfg, err := config.LoadConfig("./configs/config.yml")
 	if err != nil {
 		logger.Print(msg.FatalFailedToLoadConfigFile(err))
 		return
@@ -27,7 +27,7 @@ func main() {
 	logger.Print(msg.InfoConfigLoaded())
 
 	// Load stream config
-	scfg, err := config_stream.Load("./configs/stream_config.json")
+	scfg, err := config_stream.LoadConfig("./configs/stream_config.json")
 	if err != nil {
 		logger.Print(msg.FatalFailedToLoadStreamConfigFile(err))
 		return

@@ -1,5 +1,5 @@
 package download
 
 type Download struct {
-	Url string `json:"url"`
+	DownloadLink string `json:"download-link"`
 }

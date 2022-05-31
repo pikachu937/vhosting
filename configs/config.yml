@@ -3,7 +3,7 @@ db:
   connLatencyMilliseconds: 50
   host: "127.0.0.1"
   logConnStatus: false
-  name: "vhosting"
+  name: "vhosting2"
   port: "5432"
   sslMode: "disable"
   username: "postgres"
@@ -11,9 +11,9 @@ db:
 server:
   debugMode: true
   maxHeaderBytes: 1048576 # 1 megabyte
-  port: "8000"
+  port: "8001"
   readTimeoutSeconds: 15
   writeTimeoutSeconds: 15
 
 session:
-  ttlHours: 336 # 2 weeks
+  ttlHours: 168 # 1 week

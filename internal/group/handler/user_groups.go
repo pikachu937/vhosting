@@ -7,7 +7,7 @@ import (
 )
 
 func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "set_user_groups"
 
@@ -54,7 +54,7 @@ func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_user_groups"
 
@@ -90,7 +90,7 @@ func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "delete_user_groups"
 

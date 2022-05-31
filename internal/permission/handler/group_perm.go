@@ -7,7 +7,7 @@ import (
 )
 
 func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "set_group_perms"
 
@@ -54,7 +54,7 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 }
 
 func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_group_perms"
 
@@ -90,7 +90,7 @@ func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 }
 
 func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "delete_group_perms"
 

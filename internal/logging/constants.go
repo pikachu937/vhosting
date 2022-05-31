@@ -3,6 +3,7 @@ package logging
 const (
 	TableName     = "public.logs"
 	Id            = "id"
+	ClientID      = "client_id"
 	ErrLevel      = "error_level"
 	SessionOwner  = "session_owner"
 	RequestMethod = "request_method"

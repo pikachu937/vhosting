@@ -29,7 +29,7 @@ func NewUserHandler(useCase user.UserUseCase, logUseCase lg.LogUseCase, authUseC
 }
 
 func (h *UserHandler) CreateUser(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "post_user"
 
@@ -72,7 +72,7 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_user"
 
@@ -108,7 +108,7 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_all_users"
 
@@ -133,7 +133,7 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 }
 
 func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "patch_user"
 
@@ -177,7 +177,7 @@ func (h *UserHandler) PartiallyUpdateUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "delete_user"
 
@@ -222,7 +222,7 @@ func (h *UserHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 }
 
 func (h *UserHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	h.authUseCase.DeleteCookie(ctx)
+	// h.authUseCase.DeleteCookie(ctx)
 	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
@@ -232,7 +232,7 @@ func (h *UserHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 
 func (h *UserHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	// Read cookie for token, check token existence, check session existence
-	cookieToken := h.authUseCase.ReadCookie(ctx)
+	cookieToken := h.authUseCase.ReadHeader(ctx)
 	if h.authUseCase.IsTokenExists(cookieToken) {
 		exists, err := h.sessUseCase.IsSessionExists(cookieToken)
 		if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
+	"github.com/mikerumy/vhosting/pkg/timedate"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
@@ -29,17 +30,16 @@ func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase,
 }
 
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
-	// Read cookie for token, check token existance, if token exists delete cookie and session
-	cookieToken := h.useCase.ReadCookie(ctx)
-	if h.useCase.IsTokenExists(cookieToken) {
-		if err := h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
+	headerToken := h.useCase.ReadHeader(ctx)
+	if h.useCase.IsTokenExists(headerToken) {
+		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
+			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return
 		}
 	}
 
-	// Bind input, check it for correct, check username for existence
 	inputNamepass, err := h.useCase.BindJSONNamepass(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
@@ -51,7 +51,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := h.useCase.IsNamepassExists(inputNamepass.Username, inputNamepass.PasswordHash)
+	exists, err := h.useCase.IsUsernameAndPasswordExists(inputNamepass.Username, inputNamepass.PasswordHash)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return
@@ -61,77 +61,67 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	// Assign session owner for report, make token and session, send cookie with token
 	log.SessionOwner = inputNamepass.Username
 
-	token, err := h.useCase.GenerateToken(inputNamepass)
+	newToken, err := h.useCase.GenerateToken(inputNamepass)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGenerateToken(err))
 		return
 	}
 
-	if err := h.sessUseCase.CreateSession(ctx, inputNamepass.Username, token, log.CreationDate); err != nil {
+	if err := h.sessUseCase.CreateSession(ctx, inputNamepass.Username, newToken, log.CreationDate); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCreateSession(err))
 		return
 	}
 
-	h.useCase.SendCookie(ctx, token)
-
-	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedIn())
+	h.reportWithToken(ctx, log, msg.InfoYouHaveSuccessfullySignedIn(), newToken)
 }
 
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
-	cookieToken := h.useCase.ReadCookie(ctx)
-	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
+	session, err := h.getValidSession_deleteSession(ctx, log)
 	if err != nil {
 		return
 	}
-	if !exists {
+	if session == nil {
 		h.report(ctx, log, msg.ErrorYouMustBeSignedInForChangingPassword())
 		return
 	}
 
-	// Bind input, check it for correct
+	sessionNamepass, err := h.useCase.ParseToken(session.Content)
+	if err != nil {
+		h.report(ctx, log, msg.ErrorCannotParseToken(err))
+		return
+	}
+
 	inputNamepass, err := h.useCase.BindJSONNamepass(ctx)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
-	if h.userUseCase.IsRequiredEmpty(inputNamepass.Username, inputNamepass.PasswordHash) {
-		h.report(ctx, log, msg.ErrorUsernameAndPasswordCannotBeEmpty())
+	if h.useCase.IsRequiredEmpty(&inputNamepass) {
+		h.report(ctx, log, msg.ErrorPasswordCannotBeEmpty())
 		return
 	}
 
-	// Parse token, match between input and token, check user for existence
-	cookieNamepass, err := h.useCase.ParseToken(cookieToken)
-	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotParseToken(err))
-		return
-	}
+	inputNamepass.Username = sessionNamepass.Username
 
-	if !h.useCase.IsMatched(inputNamepass.Username, cookieNamepass.Username) {
-		h.report(ctx, log, msg.ErrorEnteredUsernameIsIncorrect())
-		return
-	}
-
-	exists, err = h.userUseCase.IsUserExists(inputNamepass.Username)
+	exists, err := h.userUseCase.IsUserExists(inputNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorUserWithEnteredUsernameIsNotExist())
+		h.report(ctx, log, msg.ErrorUserWithSuchUsernameOrPasswordDoesNotExist())
 		return
 	}
 
-	// Assign session owner for report, update user password
-	log.SessionOwner = cookieNamepass.Username
+	log.SessionOwner = sessionNamepass.Username
 
-	if err := h.useCase.UpdateNamepassPassword(inputNamepass); err != nil {
-		h.report(ctx, log, msg.ErrorCannotUpdateNamepassPassword(err))
+	if err := h.useCase.UpdateUserPassword(inputNamepass); err != nil {
+		h.report(ctx, log, msg.ErrorCannotUpdateUserPassword(err))
 		return
 	}
 
@@ -139,26 +129,24 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) SignOut(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
-	cookieToken := h.useCase.ReadCookie(ctx)
-	exists, err := h.IsCookieAndSessionExists(ctx, log, cookieToken)
+	session, err := h.getValidSession_deleteSession(ctx, log)
 	if err != nil {
 		return
 	}
-	if !exists {
+	if session == nil {
 		h.report(ctx, log, msg.ErrorYouMustBeSignedInForSigningOut())
 		return
 	}
 
-	// Parse token, check user for existence, assign session owner for report
-	cookieNamepass, err := h.useCase.ParseToken(cookieToken)
+	sessionNamepass, err := h.useCase.ParseToken(session.Content)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotParseToken(err))
 		return
 	}
 
-	exists, err = h.userUseCase.IsUserExists(cookieNamepass.Username)
+	exists, err := h.userUseCase.IsUserExists(sessionNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return
@@ -168,7 +156,7 @@ func (h *AuthHandler) SignOut(ctx *gin.Context) {
 		return
 	}
 
-	log.SessionOwner = cookieNamepass.Username
+	log.SessionOwner = sessionNamepass.Username
 
 	h.report(ctx, log, msg.InfoYouHaveSuccessfullySignedOut())
 }
@@ -183,35 +171,34 @@ func (h *AuthHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 	logger.Print(log)
 }
 
-func (h *AuthHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	h.useCase.DeleteCookie(ctx)
-	if err := h.sessUseCase.DeleteSession(token); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
-		return err
+func (h *AuthHandler) reportWithToken(ctx *gin.Context, log *lg.Log, messageLog *lg.Log, token string) {
+	logger.Complete(log, messageLog)
+	responder.ResponseToken(ctx, log, token)
+	if err := h.logUseCase.CreateLogRecord(log); err != nil {
+		logger.Complete(log, msg.ErrorCannotDoLogging(err))
+		responder.ResponseToken(ctx, log, token)
 	}
-	return nil
+	logger.Print(log)
 }
 
-func (h *AuthHandler) IsCookieAndSessionExists(ctx *gin.Context, log *lg.Log, token string) (bool, error) {
-	// Read cookie for token, check token existance
-	// if token exists - check session existance.
-	// If cookie exists but session don't - delete cookie only.
-	// If cookie and session exists - delete cookie and session, pass forward
-	if h.useCase.IsTokenExists(token) {
-		exists, err := h.sessUseCase.IsSessionExists(token)
+func (h *AuthHandler) getValidSession_deleteSession(ctx *gin.Context, log *lg.Log) (*sess.Session, error) {
+	headerToken := h.useCase.ReadHeader(ctx)
+	if h.useCase.IsTokenExists(headerToken) {
+		session, err := h.sessUseCase.GetSessionAndDate(headerToken)
 		if err != nil {
-			h.report(ctx, log, msg.ErrorCannotCheckSessionExistence(err))
-			return false, err
+			h.report(ctx, log, msg.ErrorCannotGetSessionAndDate(err))
+			return nil, err
 		}
-		if !exists {
-			h.useCase.DeleteCookie(ctx)
-			return false, nil
+		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
+			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
+			return nil, err
 		}
-		if err := h.DeleteCookieAndSession(ctx, log, token); err != nil {
-			return false, err
+		if h.useCase.IsSessionExists(session) {
+			if timedate.IsDateExpired(session.CreationDate) {
+				return nil, nil
+			}
+			return session, nil
 		}
-		return true, nil
-	} else {
-		return false, nil
 	}
+	return nil, nil
 }

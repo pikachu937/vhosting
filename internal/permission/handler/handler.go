@@ -35,7 +35,7 @@ func NewPermHandler(useCase perm.PermUseCase, logUseCase lg.LogUseCase, authUseC
 }
 
 func (h *PermHandler) GetAllPermissions(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_all_perms"
 
@@ -69,7 +69,7 @@ func (h *PermHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) 
 }
 
 func (h *PermHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	h.authUseCase.DeleteCookie(ctx)
+	// h.authUseCase.DeleteCookie(ctx)
 	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
@@ -79,7 +79,7 @@ func (h *PermHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, toke
 
 func (h *PermHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	// Read cookie for token, check token existence, check session existence
-	cookieToken := h.authUseCase.ReadCookie(ctx)
+	cookieToken := h.authUseCase.ReadHeader(ctx)
 	if h.authUseCase.IsTokenExists(cookieToken) {
 		exists, err := h.sessUseCase.IsSessionExists(cookieToken)
 		if err != nil {

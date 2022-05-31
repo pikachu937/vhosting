@@ -22,13 +22,13 @@ func (r *LogRepository) CreateLogRecord(log *lg.Log) error {
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s)", lg.TableName,
-		lg.ErrLevel, lg.SessionOwner, lg.RequestMethod, lg.RequestPath,
+	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", lg.TableName,
+		lg.ErrLevel, lg.ClientID, lg.SessionOwner, lg.RequestMethod, lg.RequestPath,
 		lg.StatusCode, lg.ErrCode, lg.Message, lg.CreationDate)
-	val := "($1, $2, $3, $4, $5, $6, $7, $8)"
+	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err := db.Query(query, log.ErrLevel, log.SessionOwner,
+	if _, err := db.Query(query, log.ErrLevel, log.ClientIP, log.SessionOwner,
 		log.RequestMethod, log.RequestPath, log.StatusCode, log.ErrCode,
 		log.Message.(string), log.CreationDate); err != nil {
 		return err

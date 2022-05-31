@@ -84,7 +84,7 @@ ALTER SEQUENCE users_id_seq RESTART WITH 1;
 
 CREATE TABLE IF NOT EXISTS public.sessions (
     id            SERIAL                   NOT NULL UNIQUE,
-    content       VARCHAR(512)             NOT NULL,
+    content       VARCHAR(640)             NOT NULL,
     creation_date TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT pk_sessions PRIMARY KEY (id)
 );
@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 CREATE TABLE IF NOT EXISTS public.logs (
     id             SERIAL                   NOT NULL UNIQUE,
     error_level    VARCHAR(7),                               -- "info", "warning", "error", "fatal"
+    client_id      VARCHAR(15),
     session_owner  VARCHAR(50),
     request_method VARCHAR(7),                               -- "POST", "GET", "PATCH", "DELETE"
     request_path   VARCHAR(100),

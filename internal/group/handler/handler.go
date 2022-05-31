@@ -32,7 +32,7 @@ func NewGroupHandler(useCase group.GroupUseCase, logUseCase lg.LogUseCase, authU
 }
 
 func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "post_group"
 
@@ -73,7 +73,7 @@ func (h *GroupHandler) CreateGroup(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) GetGroup(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_group"
 
@@ -108,7 +108,7 @@ func (h *GroupHandler) GetGroup(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "get_all_groups"
 
@@ -132,7 +132,7 @@ func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "patch_group"
 
@@ -176,7 +176,7 @@ func (h *GroupHandler) PartiallyUpdateGroup(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) DeleteGroup(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
 	actPermission := "delete_group"
 
@@ -220,7 +220,7 @@ func (h *GroupHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log)
 }
 
 func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	h.authUseCase.DeleteCookie(ctx)
+	// h.authUseCase.DeleteCookie(ctx)
 	if err := h.sessUseCase.DeleteSession(token); err != nil {
 		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 		return err
@@ -230,7 +230,7 @@ func (h *GroupHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, tok
 
 func (h *GroupHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
 	// Read cookie for token, check token existence, check session existence
-	cookieToken := h.authUseCase.ReadCookie(ctx)
+	cookieToken := h.authUseCase.ReadHeader(ctx)
 	if h.authUseCase.IsTokenExists(cookieToken) {
 		exists, err := h.sessUseCase.IsSessionExists(cookieToken)
 		if err != nil {

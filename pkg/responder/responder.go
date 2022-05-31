@@ -11,6 +11,11 @@ type MessageOutput struct {
 	Message string `json:"message"`
 }
 
+type MessageTokenOutput struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}
+
 type ErrorOutput struct {
 	Error interface{} `json:"error"`
 }
@@ -18,6 +23,10 @@ type ErrorOutput struct {
 type ErrorData struct {
 	ErrCode   int    `json:"err-code"`
 	Statement string `json:"statement"`
+}
+
+func ResponseToken(ctx *gin.Context, log *logging.Log, token string) {
+	ctx.AbortWithStatusJSON(log.StatusCode, MessageTokenOutput{Message: log.Message.(string), Token: token})
 }
 
 func Response(ctx *gin.Context, log *logging.Log) {

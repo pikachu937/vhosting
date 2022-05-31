@@ -31,15 +31,15 @@ func ErrorCannotParseToken(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrCode: 103, Message: fmt.Sprintf("Cannot parse token. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }
 
-func ErrorUserWithEnteredUsernameIsNotExist() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 104, Message: "User with entered username is not exist.", ErrLevel: logger.ErrLevelError}
+func ErrorUserWithSuchUsernameOrPasswordDoesNotExist() *lg.Log {
+	return &lg.Log{StatusCode: 400, ErrCode: 104, Message: "User with such username or password does not exist.", ErrLevel: logger.ErrLevelError}
 }
 
-func ErrorEnteredUsernameIsIncorrect() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 105, Message: "Entered username is incorrect.", ErrLevel: logger.ErrLevelError}
+func ErrorPasswordCannotBeEmpty() *lg.Log {
+	return &lg.Log{StatusCode: 400, ErrCode: 105, Message: fmt.Sprintf("Password cannot be empty.")}
 }
 
-func ErrorCannotUpdateNamepassPassword(err error) *lg.Log {
+func ErrorCannotUpdateUserPassword(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrCode: 106, Message: fmt.Sprintf("Cannot update user password. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }
 
@@ -57,4 +57,8 @@ func ErrorYouMustBeSignedInForSigningOut() *lg.Log {
 
 func ErrorUserWithThisUsernameIsNotExist() *lg.Log {
 	return &lg.Log{StatusCode: 400, ErrCode: 109, Message: "User with this username is not exist.", ErrLevel: logger.ErrLevelError}
+}
+
+func ErrorCannotGetSessionAndDate(err error) *lg.Log {
+	return &lg.Log{StatusCode: 500, ErrCode: 110, Message: fmt.Sprintf("Cannot get session and date. Error: %s.", err.Error())}
 }

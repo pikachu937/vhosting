@@ -1,37 +1,49 @@
 package handler
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/gin-gonic/gin"
+	lg "github.com/mikerumy/vhosting/internal/logging"
+	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/download"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 )
 
-type DownloadHandler struct{}
+type DownloadHandler struct {
+	useCase    download.DownloadUseCase
+	logUseCase lg.LogUseCase
+}
 
-func NewDownloadHandler() *DownloadHandler {
-	return &DownloadHandler{}
+func NewDownloadHandler(useCase download.DownloadUseCase,
+	logUseCase lg.LogUseCase) *DownloadHandler {
+	return &DownloadHandler{
+		useCase:    useCase,
+		logUseCase: logUseCase,
+	}
 }
 
 func (h *DownloadHandler) DownloadFile(ctx *gin.Context) {
-	log := logger.Setup(ctx)
+	log := logger.Init(ctx)
 
-	fmt.Println(ctx.ClientIP())
+	fileName := ctx.Param("file_name")
 
-	var filename download.Download
-	filename.Url = ctx.Param("file_name")
-
-	extension := filename.Url[len(filename.Url)-4:]
-	strings.ToLower(extension)
-	if extension != ".mp4" {
-		log.Message = "extension not mp4"
-		fmt.Println(log.Message)
-		responder.Response(ctx, log)
-		return
+	if !h.useCase.IsValidExtension(fileName) {
+		h.report(ctx, log, msg.ErrorExtensionNotMp4())
 	}
-	ctx.File("./files/" + filename.Url)
 
+	fileDir := ctx.Param("file_dir")
+
+	download := h.useCase.CreateDownloadLink(fileDir + "/" + fileName)
+
+	h.report(ctx, log, msg.InfoPutDownloadLink(download))
+}
+
+func (h *DownloadHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log) {
+	logger.Complete(log, messageLog)
+	responder.Response(ctx, log)
+	if err := h.logUseCase.CreateLogRecord(log); err != nil {
+		logger.Complete(log, msg.ErrorCannotDoLogging(err))
+		responder.Response(ctx, log)
+	}
+	logger.Print(log)
 }

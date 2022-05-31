@@ -8,7 +8,7 @@ import (
 	"github.com/mikerumy/vhosting/internal/models"
 )
 
-func Load(path string) (*models.ConfigST, error) {
+func LoadConfig(path string) (*models.ConfigST, error) {
 	var cfg models.ConfigST
 
 	data, err := ioutil.ReadFile(path)
