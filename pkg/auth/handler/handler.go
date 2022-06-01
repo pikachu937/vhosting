@@ -114,7 +114,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorUserWithSuchUsernameOrPasswordDoesNotExist())
+		h.report(ctx, log, msg.ErrorUserWithSuchUsernameOrPasswordIsNotExist())
 		return
 	}
 

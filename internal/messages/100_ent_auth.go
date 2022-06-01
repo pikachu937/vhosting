@@ -31,8 +31,8 @@ func ErrorCannotParseToken(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrCode: 103, Message: fmt.Sprintf("Cannot parse token. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }
 
-func ErrorUserWithSuchUsernameOrPasswordDoesNotExist() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 104, Message: "User with such username or password does not exist.", ErrLevel: logger.ErrLevelError}
+func ErrorUserWithSuchUsernameOrPasswordIsNotExist() *lg.Log {
+	return &lg.Log{StatusCode: 400, ErrCode: 104, Message: "User with such username or password is not exist.", ErrLevel: logger.ErrLevelError}
 }
 
 func ErrorPasswordCannotBeEmpty() *lg.Log {
@@ -53,8 +53,4 @@ func ErrorYouMustBeSignedInForSigningOut() *lg.Log {
 
 func ErrorUserWithThisUsernameIsNotExist() *lg.Log {
 	return &lg.Log{StatusCode: 400, ErrCode: 108, Message: "User with this username is not exist.", ErrLevel: logger.ErrLevelError}
-}
-
-func ErrorCannotGetSessionAndDate(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrCode: 109, Message: fmt.Sprintf("Cannot get session and date. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelInfo}
 }
