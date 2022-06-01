@@ -7,11 +7,11 @@ import (
 )
 
 func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "set_user_perms"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -54,11 +54,11 @@ func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {
 }
 
 func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "get_user_perms"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -90,11 +90,11 @@ func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
 }
 
 func (h *PermHandler) DeleteUserPermissions(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "delete_user_perms"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}

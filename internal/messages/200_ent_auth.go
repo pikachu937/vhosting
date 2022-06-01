@@ -36,7 +36,7 @@ func ErrorUserWithSuchUsernameOrPasswordDoesNotExist() *lg.Log {
 }
 
 func ErrorPasswordCannotBeEmpty() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 105, Message: fmt.Sprintf("Password cannot be empty.")}
+	return &lg.Log{StatusCode: 400, ErrCode: 105, Message: fmt.Sprintf("Password cannot be empty."), ErrLevel: logger.ErrLevelInfo}
 }
 
 func ErrorCannotUpdateUserPassword(err error) *lg.Log {
@@ -47,18 +47,14 @@ func InfoYouHaveSuccessfullyChangedPassword() *lg.Log {
 	return &lg.Log{StatusCode: 202, Message: "You have successfully changed password.", ErrLevel: logger.ErrLevelInfo}
 }
 
-func ErrorYouMustBeSignedIn() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 107, Message: "You must be signed-in.", ErrLevel: logger.ErrLevelError}
-}
-
 func ErrorYouMustBeSignedInForSigningOut() *lg.Log {
-	return &lg.Log{StatusCode: 401, ErrCode: 108, Message: "You must be signed-in for signing-out.", ErrLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 401, ErrCode: 107, Message: "You must be signed-in for signing-out.", ErrLevel: logger.ErrLevelError}
 }
 
 func ErrorUserWithThisUsernameIsNotExist() *lg.Log {
-	return &lg.Log{StatusCode: 400, ErrCode: 109, Message: "User with this username is not exist.", ErrLevel: logger.ErrLevelError}
+	return &lg.Log{StatusCode: 400, ErrCode: 108, Message: "User with this username is not exist.", ErrLevel: logger.ErrLevelError}
 }
 
 func ErrorCannotGetSessionAndDate(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrCode: 110, Message: fmt.Sprintf("Cannot get session and date. Error: %s.", err.Error())}
+	return &lg.Log{StatusCode: 500, ErrCode: 109, Message: fmt.Sprintf("Cannot get session and date. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelInfo}
 }

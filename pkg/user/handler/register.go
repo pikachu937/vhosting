@@ -17,7 +17,7 @@ func RegisterHTTPEndpoints(router *gin.Engine, uc user.UserUseCase, luc lg.LogUs
 		userRoute.POST("", h.CreateUser)
 		userRoute.GET(":id", h.GetUser)
 		userRoute.GET("all", h.GetAllUsers)
-		// userRoute.POST(":id", h.UpdateUserPassword)
+		userRoute.POST("/change_password", h.UpdateUserPassword)
 		userRoute.PATCH(":id", h.PartiallyUpdateUser)
 		userRoute.DELETE(":id", h.DeleteUser)
 	}

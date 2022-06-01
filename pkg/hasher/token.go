@@ -14,7 +14,7 @@ type tokenClaims struct {
 	Password string `json:"password"`
 }
 
-func GenerateToken(namepass auth.Namepass, signingKey string, tokenTTLHours int) (string, error) {
+func GenerateToken(namepass *auth.Namepass, signingKey string, tokenTTLHours int) (string, error) {
 	tokenTTL := time.Duration(tokenTTLHours) * time.Hour
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
@@ -27,7 +27,7 @@ func GenerateToken(namepass auth.Namepass, signingKey string, tokenTTLHours int)
 	return token.SignedString([]byte(signingKey))
 }
 
-func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
+func ParseToken(tokenContent, signingKey string) (*auth.Namepass, error) {
 	var namepass auth.Namepass
 	ok := false
 	token, err := jwt.ParseWithClaims(tokenContent, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -37,13 +37,13 @@ func ParseToken(tokenContent, signingKey string) (auth.Namepass, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
-		return namepass, err
+		return &namepass, err
 	}
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return namepass, errors.New("Token claims has wrong type.")
+		return &namepass, errors.New("Token claims has wrong type.")
 	}
 	namepass.Username = claims.Username
 	namepass.PasswordHash = claims.Password
-	return namepass, nil
+	return &namepass, nil
 }

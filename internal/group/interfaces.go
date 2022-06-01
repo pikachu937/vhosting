@@ -3,7 +3,7 @@ package group
 import "github.com/gin-gonic/gin"
 
 type GroupCommon interface {
-	CreateGroup(grp Group) error
+	CreateGroup(grp *Group) error
 	GetGroup(id int) (*Group, error)
 	GetAllGroups() (map[int]*Group, error)
 	PartiallyUpdateGroup(grp *Group) error
@@ -17,13 +17,13 @@ type GroupCommon interface {
 type GroupUseCase interface {
 	GroupCommon
 
-	SetUserGroups(id int, groupIds GroupIds) error
-	DeleteUserGroups(id int, groupIds GroupIds) error
+	SetUserGroups(id int, groupIds *GroupIds) error
+	DeleteUserGroups(id int, groupIds *GroupIds) error
 
-	BindJSONGroup(ctx *gin.Context) (Group, error)
-	BindJSONGroupIds(ctx *gin.Context) (GroupIds, error)
+	BindJSONGroup(ctx *gin.Context) (*Group, error)
+	BindJSONGroupIds(ctx *gin.Context) (*GroupIds, error)
 	IsGroupRequiredEmpty(name string) bool
-	IsGroupIdsRequiredEmpty(groupIds GroupIds) bool
+	IsGroupIdsRequiredEmpty(groupIds *GroupIds) bool
 	AtoiRequestedId(ctx *gin.Context) (int, error)
 }
 

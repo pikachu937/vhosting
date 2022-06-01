@@ -17,7 +17,7 @@ func NewVideoRepository(cfg *config.Config) *VideoRepository {
 	return &VideoRepository{cfg: cfg}
 }
 
-func (r *VideoRepository) CreateVideo(vid video.Video) error {
+func (r *VideoRepository) CreateVideo(vid *video.Video) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 

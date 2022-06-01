@@ -7,11 +7,11 @@ import (
 )
 
 func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "set_user_groups"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -54,11 +54,11 @@ func (h *GroupHandler) SetUserGroups(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "get_user_groups"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -90,11 +90,11 @@ func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 }
 
 func (h *GroupHandler) DeleteUserGroups(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "delete_user_groups"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}

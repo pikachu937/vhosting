@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
+	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
@@ -20,7 +21,7 @@ func NewUserRepository(cfg *config.Config) *UserRepository {
 	return &UserRepository{cfg: cfg}
 }
 
-func (r *UserRepository) CreateUser(usr user.User) error {
+func (r *UserRepository) CreateUser(usr *user.User) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
@@ -98,6 +99,25 @@ func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
 	return users, nil
 }
 
+func (r *UserRepository) UpdateUserPassword(namepass *auth.Namepass) error {
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
+
+	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
+	tbl := user.TableName
+	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", auth.PasswordHash, auth.PasswordHash)
+	cnd := fmt.Sprintf("%s=$2", auth.Username)
+	query := fmt.Sprintf(template, tbl, val, cnd)
+
+	rows, err := db.Query(query, namepass.PasswordHash, namepass.Username)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	return nil
+}
+
 func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
@@ -105,17 +125,16 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := user.TableName
 	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", user.Username, user.Username) +
-		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", user.PasswordHash, user.PasswordHash) +
-		fmt.Sprintf("%s=$3, ", user.IsActive) +
-		fmt.Sprintf("%s=$4, ", user.IsSuperuser) +
-		fmt.Sprintf("%s=$5, ", user.IsStaff) +
-		fmt.Sprintf("%s=CASE WHEN $6 <> '' THEN $6 ELSE %s END, ", user.FirstName, user.FirstName) +
-		fmt.Sprintf("%s=CASE WHEN $7 <> '' THEN $7 ELSE %s END", user.LastName, user.LastName)
-	cnd := fmt.Sprintf("%s=$8", user.Id)
+		fmt.Sprintf("%s=$2, ", user.IsActive) +
+		fmt.Sprintf("%s=$3, ", user.IsSuperuser) +
+		fmt.Sprintf("%s=$4, ", user.IsStaff) +
+		fmt.Sprintf("%s=CASE WHEN $5 <> '' THEN $5 ELSE %s END, ", user.FirstName, user.FirstName) +
+		fmt.Sprintf("%s=CASE WHEN $6 <> '' THEN $6 ELSE %s END", user.LastName, user.LastName)
+	cnd := fmt.Sprintf("%s=$7", user.Id)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
-	rows, err := db.Query(query, usr.Username, usr.PasswordHash, usr.IsActive, usr.IsSuperuser,
-		usr.IsStaff, usr.FirstName, usr.LastName, usr.Id)
+	rows, err := db.Query(query, usr.Username, usr.IsActive, usr.IsSuperuser, usr.IsStaff,
+		usr.FirstName, usr.LastName, usr.Id)
 	if err != nil {
 		return err
 	}

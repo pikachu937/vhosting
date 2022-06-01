@@ -17,7 +17,7 @@ func NewInfoRepository(cfg *config.Config) *InfoRepository {
 	return &InfoRepository{cfg: cfg}
 }
 
-func (r *InfoRepository) CreateInfo(nfo info.Info) error {
+func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 

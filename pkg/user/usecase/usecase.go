@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/hasher"
 	"github.com/mikerumy/vhosting/pkg/user"
@@ -21,7 +22,7 @@ func NewUserUseCase(cfg *config.Config, userRepo user.UserRepository) *UserUseCa
 	}
 }
 
-func (u *UserUseCase) CreateUser(usr user.User) error {
+func (u *UserUseCase) CreateUser(usr *user.User) error {
 	usr.IsActive = true
 	usr.IsSuperuser = false
 	usr.IsStaff = false
@@ -35,6 +36,10 @@ func (u *UserUseCase) GetUser(id int) (*user.User, error) {
 
 func (u *UserUseCase) GetAllUsers() (map[int]*user.User, error) {
 	return u.userRepo.GetAllUsers()
+}
+
+func (u *UserUseCase) UpdateUserPassword(namepass *auth.Namepass) error {
+	return u.userRepo.UpdateUserPassword(namepass)
 }
 
 func (u *UserUseCase) PartiallyUpdateUser(usr *user.User) error {
@@ -65,15 +70,15 @@ func (u *UserUseCase) GetUserId(username string) (int, error) {
 	return u.userRepo.GetUserId(username)
 }
 
-func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (user.User, error) {
+func (u *UserUseCase) BindJSONUser(ctx *gin.Context) (*user.User, error) {
 	var usr user.User
 	if err := ctx.BindJSON(&usr); err != nil {
-		return usr, err
+		return &usr, err
 	}
 	if usr.PasswordHash != "" {
 		usr.PasswordHash = hasher.GeneratePasswordHash(usr.PasswordHash, u.cfg.HashingPasswordSalt)
 	}
-	return usr, nil
+	return &usr, nil
 }
 
 func (u *UserUseCase) IsRequiredEmpty(username, password string) bool {

@@ -20,7 +20,7 @@ func NewGroupUseCase(cfg *config.Config, groupRepo group.GroupRepository) *Group
 	}
 }
 
-func (u *GroupUseCase) CreateGroup(grp group.Group) error {
+func (u *GroupUseCase) CreateGroup(grp *group.Group) error {
 	return u.groupRepo.CreateGroup(grp)
 }
 
@@ -48,12 +48,12 @@ func (u *GroupUseCase) IsGroupExists(idOrName interface{}) (bool, error) {
 	return exists, nil
 }
 
-func (u *GroupUseCase) BindJSONGroup(ctx *gin.Context) (group.Group, error) {
+func (u *GroupUseCase) BindJSONGroup(ctx *gin.Context) (*group.Group, error) {
 	var grp group.Group
 	if err := ctx.BindJSON(&grp); err != nil {
-		return grp, err
+		return &grp, err
 	}
-	return grp, nil
+	return &grp, nil
 }
 
 func (u *GroupUseCase) IsGroupRequiredEmpty(name string) bool {

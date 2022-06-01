@@ -1,11 +1,15 @@
 package user
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/auth"
+)
 
 type UserCommon interface {
-	CreateUser(usr User) error
+	CreateUser(usr *User) error
 	GetUser(id int) (*User, error)
 	GetAllUsers() (map[int]*User, error)
+	UpdateUserPassword(namepass *auth.Namepass) error
 	PartiallyUpdateUser(usr *User) error
 	DeleteUser(id int) error
 
@@ -18,7 +22,7 @@ type UserCommon interface {
 type UserUseCase interface {
 	UserCommon
 
-	BindJSONUser(ctx *gin.Context) (User, error)
+	BindJSONUser(ctx *gin.Context) (*User, error)
 	IsRequiredEmpty(username, password string) bool
 	AtoiRequestedId(ctx *gin.Context) (int, error)
 }

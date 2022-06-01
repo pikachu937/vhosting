@@ -36,7 +36,26 @@ func (r *SessRepository) DeleteSession(token string) error {
 }
 
 func (r *SessRepository) IsSessionExists(token string) (bool, error) {
-	fmt.Printf("delete method")
+	db := db_connect.NewDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, db)
+
+	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
+	col := sess.Content
+	tbl := sess.TableName
+	cnd := fmt.Sprintf("%s=$1", sess.Content)
+	query := fmt.Sprintf(template, col, tbl, cnd)
+	rows, err := db.Query(query, token)
+
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	rowIsPresent := rows.Next()
+	if !rowIsPresent {
+		return false, nil
+	}
+
 	return true, nil
 }
 
@@ -70,7 +89,7 @@ func (r *SessRepository) GetSessionAndDate(token string) (*sess.Session, error) 
 	return &session, nil
 }
 
-func (r *SessRepository) CreateSession(session sess.Session) error {
+func (r *SessRepository) CreateSession(session *sess.Session) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 

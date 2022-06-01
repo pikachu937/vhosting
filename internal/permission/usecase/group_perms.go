@@ -6,7 +6,7 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 )
 
-func (u *PermUseCase) SetGroupPermissions(id int, permIds perm.PermIds) error {
+func (u *PermUseCase) SetGroupPermissions(id int, permIds *perm.PermIds) error {
 	values := ""
 	for _, val := range permIds.Ids {
 		values += fmt.Sprintf("(%d,%d),", id, val)
@@ -19,7 +19,7 @@ func (u *PermUseCase) GetGroupPermissions(id int) (*perm.PermIds, error) {
 	return u.permRepo.GetGroupPermissions(id)
 }
 
-func (u *PermUseCase) DeleteGroupPermissions(id int, permIds perm.PermIds) error {
+func (u *PermUseCase) DeleteGroupPermissions(id int, permIds *perm.PermIds) error {
 	condIds := ""
 	for _, val := range permIds.Ids {
 		condIds += fmt.Sprintf("%d,", val)

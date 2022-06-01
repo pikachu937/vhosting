@@ -11,7 +11,7 @@ const notExpiredHours = 168 // 7 days
 func IsDateExpired(date string) bool {
 	expirationDate, err := time.Parse(time.RFC3339Nano, date)
 	if err != nil {
-		fmt.Printf("Cannot parse data %s.\n", date)
+		fmt.Printf("Cannot parse date. Date: %s.\n", date)
 	}
 
 	expirationDate = expirationDate.Add(notExpiredHours * time.Hour)

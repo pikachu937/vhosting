@@ -18,7 +18,7 @@ func NewAuthRepository(cfg *config.Config) *AuthRepository {
 	return &AuthRepository{cfg: cfg}
 }
 
-func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
+func (r *AuthRepository) GetNamepass(namepass *auth.Namepass) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
@@ -36,7 +36,7 @@ func (r *AuthRepository) GetNamepass(namepass auth.Namepass) error {
 	return nil
 }
 
-func (r *AuthRepository) UpdateUserPassword(namepass auth.Namepass) error {
+func (r *AuthRepository) UpdateUserPassword(namepass *auth.Namepass) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 

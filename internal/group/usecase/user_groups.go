@@ -7,7 +7,7 @@ import (
 	"github.com/mikerumy/vhosting/internal/group"
 )
 
-func (u *GroupUseCase) SetUserGroups(id int, permIds group.GroupIds) error {
+func (u *GroupUseCase) SetUserGroups(id int, permIds *group.GroupIds) error {
 	values := ""
 	for _, val := range permIds.Ids {
 		values += fmt.Sprintf("(%d,%d),", id, val)
@@ -20,7 +20,7 @@ func (u *GroupUseCase) GetUserGroups(id int) (*group.GroupIds, error) {
 	return u.groupRepo.GetUserGroups(id)
 }
 
-func (u *GroupUseCase) DeleteUserGroups(id int, groupIds group.GroupIds) error {
+func (u *GroupUseCase) DeleteUserGroups(id int, groupIds *group.GroupIds) error {
 	condIds := ""
 	for _, val := range groupIds.Ids {
 		condIds += fmt.Sprintf("%d,", val)
@@ -29,15 +29,15 @@ func (u *GroupUseCase) DeleteUserGroups(id int, groupIds group.GroupIds) error {
 	return u.groupRepo.DeleteUserGroups(id, condIds)
 }
 
-func (u *GroupUseCase) BindJSONGroupIds(ctx *gin.Context) (group.GroupIds, error) {
+func (u *GroupUseCase) BindJSONGroupIds(ctx *gin.Context) (*group.GroupIds, error) {
 	var groupIds group.GroupIds
 	if err := ctx.BindJSON(&groupIds); err != nil {
-		return groupIds, err
+		return &groupIds, err
 	}
-	return groupIds, nil
+	return &groupIds, nil
 }
 
-func (u *GroupUseCase) IsGroupIdsRequiredEmpty(groupIds group.GroupIds) bool {
+func (u *GroupUseCase) IsGroupIdsRequiredEmpty(groupIds *group.GroupIds) bool {
 	if len(groupIds.Ids) == 0 {
 		return true
 	}

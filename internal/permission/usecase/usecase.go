@@ -24,15 +24,15 @@ func (u *PermUseCase) GetAllPermissions() (map[int]*perm.Perm, error) {
 	return u.permRepo.GetAllPermissions()
 }
 
-func (u *PermUseCase) BindJSONPermIds(ctx *gin.Context) (perm.PermIds, error) {
+func (u *PermUseCase) BindJSONPermIds(ctx *gin.Context) (*perm.PermIds, error) {
 	var permIds perm.PermIds
 	if err := ctx.BindJSON(&permIds); err != nil {
-		return permIds, err
+		return &permIds, err
 	}
-	return permIds, nil
+	return &permIds, nil
 }
 
-func (u *PermUseCase) IsRequiredEmpty(perms perm.PermIds) bool {
+func (u *PermUseCase) IsRequiredEmpty(perms *perm.PermIds) bool {
 	if len(perms.Ids) == 0 {
 		return true
 	}

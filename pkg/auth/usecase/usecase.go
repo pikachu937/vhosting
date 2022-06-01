@@ -36,7 +36,7 @@ func (u *AuthUseCase) IsRequiredEmpty(namepass *auth.Namepass) bool {
 }
 
 func (u *AuthUseCase) IsSessionExists(session *sess.Session) bool {
-	if session != nil {
+	if session.Content != "" {
 		return true
 	}
 	return false
@@ -49,11 +49,11 @@ func (u *AuthUseCase) IsMatched(username_1, username_2 string) bool {
 	return false
 }
 
-func (u *AuthUseCase) GetNamepass(namepass auth.Namepass) error {
+func (u *AuthUseCase) GetNamepass(namepass *auth.Namepass) error {
 	return u.authRepo.GetNamepass(namepass)
 }
 
-func (u *AuthUseCase) UpdateUserPassword(namepass auth.Namepass) error {
+func (u *AuthUseCase) UpdateUserPassword(namepass *auth.Namepass) error {
 	return u.authRepo.UpdateUserPassword(namepass)
 }
 
@@ -69,18 +69,18 @@ func (u *AuthUseCase) ReadHeader(ctx *gin.Context) string {
 	return headers.ReadHeader(ctx)
 }
 
-func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (auth.Namepass, error) {
+func (u *AuthUseCase) BindJSONNamepass(ctx *gin.Context) (*auth.Namepass, error) {
 	var namepass auth.Namepass
 	if err := ctx.BindJSON(&namepass); err != nil {
-		return namepass, err
+		return &namepass, err
 	}
 	if namepass.PasswordHash != "" {
 		namepass.PasswordHash = hasher.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
 	}
-	return namepass, nil
+	return &namepass, nil
 }
 
-func (u *AuthUseCase) GenerateToken(namepass auth.Namepass) (string, error) {
+func (u *AuthUseCase) GenerateToken(namepass *auth.Namepass) (string, error) {
 	namepass.PasswordHash = hasher.GeneratePasswordHash(namepass.PasswordHash, u.cfg.HashingPasswordSalt)
 	token, err := hasher.GenerateToken(namepass, u.cfg.HashingTokenSigningKey, u.cfg.SessionTTLHours)
 	if err != nil {
@@ -89,6 +89,6 @@ func (u *AuthUseCase) GenerateToken(namepass auth.Namepass) (string, error) {
 	return token, nil
 }
 
-func (u *AuthUseCase) ParseToken(token string) (auth.Namepass, error) {
+func (u *AuthUseCase) ParseToken(token string) (*auth.Namepass, error) {
 	return hasher.ParseToken(token, u.cfg.HashingTokenSigningKey)
 }

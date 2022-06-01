@@ -28,7 +28,7 @@ func (h *DownloadHandler) DownloadFile(ctx *gin.Context) {
 	fileName := ctx.Param("file_name")
 
 	if !h.useCase.IsValidExtension(fileName) {
-		h.report(ctx, log, msg.ErrorExtensionNotMp4())
+		h.report(ctx, log, msg.ErrorExtensionIsNotMp4())
 	}
 
 	fileDir := ctx.Param("file_dir")

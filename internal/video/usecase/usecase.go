@@ -20,7 +20,7 @@ func NewVideoUseCase(cfg *config.Config, videoRepo video.VideoRepository) *Video
 	}
 }
 
-func (u *VideoUseCase) CreateVideo(nfo video.Video) error {
+func (u *VideoUseCase) CreateVideo(nfo *video.Video) error {
 	return u.videoRepo.CreateVideo(nfo)
 }
 
@@ -40,12 +40,12 @@ func (u *VideoUseCase) DeleteVideo(id int) error {
 	return u.videoRepo.DeleteVideo(id)
 }
 
-func (u *VideoUseCase) BindJSONVideo(ctx *gin.Context) (video.Video, error) {
+func (u *VideoUseCase) BindJSONVideo(ctx *gin.Context) (*video.Video, error) {
 	var vid video.Video
 	if err := ctx.BindJSON(&vid); err != nil {
-		return vid, err
+		return &vid, err
 	}
-	return vid, nil
+	return &vid, nil
 }
 
 func (u *VideoUseCase) IsRequiredEmpty(url, filename string) bool {

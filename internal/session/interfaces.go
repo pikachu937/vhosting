@@ -17,5 +17,5 @@ type SessUseCase interface {
 type SessRepository interface {
 	SessCommon
 
-	CreateSession(session Session) error
+	CreateSession(session *Session) error
 }

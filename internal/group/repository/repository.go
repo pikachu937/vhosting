@@ -19,7 +19,7 @@ func NewGroupRepository(cfg *config.Config) *GroupRepository {
 	return &GroupRepository{cfg: cfg}
 }
 
-func (r *GroupRepository) CreateGroup(grp group.Group) error {
+func (r *GroupRepository) CreateGroup(grp *group.Group) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 

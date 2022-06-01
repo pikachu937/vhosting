@@ -80,7 +80,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 	log := logger.Init(ctx)
 
-	session, err := h.getValidSession_deleteSession(ctx, log)
+	session, err := h.getValidSessionAndDeleteSession(ctx, log)
 	if err != nil {
 		return
 	}
@@ -101,7 +101,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(&inputNamepass) {
+	if h.useCase.IsRequiredEmpty(inputNamepass) {
 		h.report(ctx, log, msg.ErrorPasswordCannotBeEmpty())
 		return
 	}
@@ -131,7 +131,7 @@ func (h *AuthHandler) ChangePassword(ctx *gin.Context) {
 func (h *AuthHandler) SignOut(ctx *gin.Context) {
 	log := logger.Init(ctx)
 
-	session, err := h.getValidSession_deleteSession(ctx, log)
+	session, err := h.getValidSessionAndDeleteSession(ctx, log)
 	if err != nil {
 		return
 	}
@@ -181,24 +181,29 @@ func (h *AuthHandler) reportWithToken(ctx *gin.Context, log *lg.Log, messageLog 
 	logger.Print(log)
 }
 
-func (h *AuthHandler) getValidSession_deleteSession(ctx *gin.Context, log *lg.Log) (*sess.Session, error) {
+func (h *AuthHandler) getValidSessionAndDeleteSession(ctx *gin.Context, log *lg.Log) (*sess.Session, error) {
 	headerToken := h.useCase.ReadHeader(ctx)
-	if h.useCase.IsTokenExists(headerToken) {
-		session, err := h.sessUseCase.GetSessionAndDate(headerToken)
-		if err != nil {
-			h.report(ctx, log, msg.ErrorCannotGetSessionAndDate(err))
-			return nil, err
-		}
-		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
-			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
-			return nil, err
-		}
-		if h.useCase.IsSessionExists(session) {
-			if timedate.IsDateExpired(session.CreationDate) {
-				return nil, nil
-			}
-			return session, nil
-		}
+	if !h.useCase.IsTokenExists(headerToken) {
+		return nil, nil
 	}
-	return nil, nil
+
+	session, err := h.sessUseCase.GetSessionAndDate(headerToken)
+	if err != nil {
+		h.report(ctx, log, msg.ErrorCannotGetSessionAndDate(err))
+		return nil, err
+	}
+	if !h.useCase.IsSessionExists(session) {
+		return nil, nil
+	}
+
+	if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
+		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
+		return nil, err
+	}
+
+	if timedate.IsDateExpired(session.CreationDate) {
+		return nil, nil
+	}
+
+	return session, nil
 }

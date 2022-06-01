@@ -20,7 +20,7 @@ func NewInfoUseCase(cfg *config.Config, infoRepo info.InfoRepository) *InfoUseCa
 	}
 }
 
-func (u *InfoUseCase) CreateInfo(nfo info.Info) error {
+func (u *InfoUseCase) CreateInfo(nfo *info.Info) error {
 	return u.infoRepo.CreateInfo(nfo)
 }
 
@@ -40,12 +40,12 @@ func (u *InfoUseCase) DeleteInfo(id int) error {
 	return u.infoRepo.DeleteInfo(id)
 }
 
-func (u *InfoUseCase) BindJSONInfo(ctx *gin.Context) (info.Info, error) {
+func (u *InfoUseCase) BindJSONInfo(ctx *gin.Context) (*info.Info, error) {
 	var nfo info.Info
 	if err := ctx.BindJSON(&nfo); err != nil {
-		return nfo, err
+		return &nfo, err
 	}
-	return nfo, nil
+	return &nfo, nil
 }
 
 func (u *InfoUseCase) IsRequiredEmpty(stream string) bool {

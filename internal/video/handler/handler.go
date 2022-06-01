@@ -9,6 +9,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
+	"github.com/mikerumy/vhosting/pkg/timedate"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
@@ -32,11 +33,11 @@ func NewVideoHandler(useCase video.VideoUseCase, logUseCase lg.LogUseCase, authU
 }
 
 func (h *VideoHandler) CreateVideo(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "post_video"
 
-	hasPerms, userId := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, userId := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -66,11 +67,11 @@ func (h *VideoHandler) CreateVideo(ctx *gin.Context) {
 }
 
 func (h *VideoHandler) GetVideo(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "get_video"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -102,11 +103,11 @@ func (h *VideoHandler) GetVideo(ctx *gin.Context) {
 }
 
 func (h *VideoHandler) GetAllVideos(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "get_all_videos"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -127,11 +128,11 @@ func (h *VideoHandler) GetAllVideos(ctx *gin.Context) {
 }
 
 func (h *VideoHandler) PartiallyUpdateVideo(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "patch_video"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -162,7 +163,7 @@ func (h *VideoHandler) PartiallyUpdateVideo(ctx *gin.Context) {
 
 	inputVideo.Id = reqId
 
-	if err := h.useCase.PartiallyUpdateVideo(&inputVideo); err != nil {
+	if err := h.useCase.PartiallyUpdateVideo(inputVideo); err != nil {
 		h.report(ctx, log, msg.ErrorCannotPartiallyUpdateVideo(err))
 		return
 	}
@@ -171,11 +172,11 @@ func (h *VideoHandler) PartiallyUpdateVideo(ctx *gin.Context) {
 }
 
 func (h *VideoHandler) DeleteVideo(ctx *gin.Context) {
-	log := logger.Init(ctx)
-
 	actPermission := "delete_video"
 
-	hasPerms, _ := h.IsPermissionsCheckedGetId(ctx, log, actPermission)
+	log := logger.Init(ctx)
+
+	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
 	if !hasPerms {
 		return
 	}
@@ -215,69 +216,68 @@ func (h *VideoHandler) report(ctx *gin.Context, log *lg.Log, messageLog *lg.Log)
 	logger.Print(log)
 }
 
-func (h *VideoHandler) DeleteCookieAndSession(ctx *gin.Context, log *lg.Log, token string) error {
-	// h.authUseCase.DeleteCookie(ctx)
-	if err := h.sessUseCase.DeleteSession(token); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
-		return err
-	}
-	return nil
-}
-
-func (h *VideoHandler) IsPermissionsCheckedGetId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
-	// Read cookie for token, check token existence, check session existence
-	cookieToken := h.authUseCase.ReadHeader(ctx)
-	if h.authUseCase.IsTokenExists(cookieToken) {
-		exists, err := h.sessUseCase.IsSessionExists(cookieToken)
-		if err != nil {
-			h.report(ctx, log, msg.ErrorCannotCheckSessionExistence(err))
-		}
-		if !exists {
-			h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-			return false, -1
-		}
-	} else {
+func (h *VideoHandler) isPermsGranted_getUserId(ctx *gin.Context, log *lg.Log, permission string) (bool, int) {
+	headerToken := h.authUseCase.ReadHeader(ctx)
+	if !h.authUseCase.IsTokenExists(headerToken) {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
 		return false, -1
 	}
 
-	// Parse token, check for user existence (also, try to delete session and cookie
-	// if user not exist), assign session owner for report
-	cookieNamepass, err := h.authUseCase.ParseToken(cookieToken)
+	session, err := h.sessUseCase.GetSessionAndDate(headerToken)
+	if err != nil {
+		h.report(ctx, log, msg.ErrorCannotGetSessionAndDate(err))
+		return false, -1
+	}
+	if !h.authUseCase.IsSessionExists(session) {
+		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
+		return false, -1
+	}
+
+	if timedate.IsDateExpired(session.CreationDate) {
+		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
+			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
+			return false, -1
+		}
+		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
+		return false, -1
+	}
+
+	headerNamepass, err := h.authUseCase.ParseToken(headerToken)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotParseToken(err))
 		return false, -1
 	}
 
-	gottenUserId, err := h.userUseCase.GetUserId(cookieNamepass.Username)
+	gottenUserId, err := h.userUseCase.GetUserId(headerNamepass.Username)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
 		return false, -1
 	}
 	if gottenUserId < 0 {
-		if err := h.DeleteCookieAndSession(ctx, log, cookieToken); err != nil {
+		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
+			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return false, -1
 		}
 		h.report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
 		return false, -1
 	}
 
-	log.SessionOwner = cookieNamepass.Username
+	log.SessionOwner = headerNamepass.Username
 
-	// Check superuser permissions
-	var firstCheck, secondCheck bool
-	if firstCheck, err = h.userUseCase.IsUserSuperuserOrStaff(cookieNamepass.Username); err != nil {
+	isSUorStaff := false
+	hasPersonalPerm := false
+	if isSUorStaff, err = h.userUseCase.IsUserSuperuserOrStaff(headerNamepass.Username); err != nil {
 		h.report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
 		return false, -1
 	}
-	if !firstCheck {
-		if secondCheck, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
+	if !isSUorStaff {
+		if hasPersonalPerm, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
 			h.report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
 			return false, -1
 		}
 	}
 
-	if !firstCheck && !secondCheck {
+	if !isSUorStaff && !hasPersonalPerm {
 		h.report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
 		return false, -1
 	}

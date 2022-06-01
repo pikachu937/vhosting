@@ -87,3 +87,11 @@ func ErrorCannotCheckSuperuserStaffPermissions(err error) *lg.Log {
 func ErrorCannotCheckPersonalPermission(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrCode: 213, Message: fmt.Sprintf("Cannot check personal permission. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }
+
+func ErrorUserWithEnteredUsernameIsNotExist() *lg.Log {
+	return &lg.Log{StatusCode: 400, ErrCode: 214, Message: "User with entered username is not exist.", ErrLevel: logger.ErrLevelError}
+}
+
+func InfoUserPasswordChanged() *lg.Log {
+	return &lg.Log{StatusCode: 200, Message: "User password changed.", ErrLevel: logger.ErrLevelInfo}
+}

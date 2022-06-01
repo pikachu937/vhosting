@@ -17,40 +17,41 @@ CREATE TABLE IF NOT EXISTS public.perms (
 	CONSTRAINT pk_perms PRIMARY KEY (id)
 );
 INSERT INTO public.perms (id, name, code_name) VALUES
-( 0, 'Can create a User',                'post_user'),
-( 1, 'Can get a User',                   'get_user'),
-( 2, 'Can get all of the Users',         'get_all_users'),
-( 3, 'Can partially update a User',      'patch_user'),
-( 4, 'Can delete a User',                'delete_user'),
+(  0, 'Can create a User',                'post_user'),
+(  1, 'Can get a User',                   'get_user'),
+(  2, 'Can get all of the Users',         'get_all_users'),
+(  3, 'Can update user password',         'post_user_pass'),
+(  4, 'Can partially update a User',      'patch_user'),
+(  5, 'Can delete a User',                'delete_user'),
 
-( 5, 'Can create a Group',               'post_group'),
-( 6, 'Can get a Group',                  'get_group'),
-( 7, 'Can get all of the Groups',        'get_all_groups'),
-( 8, 'Can partially update a Group',     'patch_group'),
-( 9, 'Can delete a Group',               'delete_group'),
-(10, 'Can set the user Groups',          'set_user_groups'),
-(11, 'Can get the user Groups',          'get_user_groups'),
-(12, 'Can delete the user Groups',       'delete_user_groups'),
+( 10, 'Can create a Group',               'post_group'),
+( 11, 'Can get a Group',                  'get_group'),
+( 12, 'Can get all of the Groups',        'get_all_groups'),
+( 13, 'Can partially update a Group',     'patch_group'),
+( 14, 'Can delete a Group',               'delete_group'),
+( 15, 'Can set the user Groups',          'set_user_groups'),
+( 16, 'Can get the user Groups',          'get_user_groups'),
+( 17, 'Can delete the user Groups',       'delete_user_groups'),
 
-(13, 'Can get all of the Permissions',   'get_all_perms'),
-(14, 'Can set the user Permissions',     'set_user_perms'),
-(15, 'Can get the user Permissions',     'get_user_perms'),
-(16, 'Can delete the user Permissions',  'delete_user_perms'),
-(17, 'Can set the group Permissions',    'set_group_perms'),
-(18, 'Can get the group Permissions',    'get_group_perms'),
-(19, 'Can delete the group Permissions', 'delete_group_perms'),
+( 20, 'Can get all of the Permissions',   'get_all_perms'),
+( 21, 'Can set the user Permissions',     'set_user_perms'),
+( 22, 'Can get the user Permissions',     'get_user_perms'),
+( 23, 'Can delete the user Permissions',  'delete_user_perms'),
+( 24, 'Can set the group Permissions',    'set_group_perms'),
+( 25, 'Can get the group Permissions',    'get_group_perms'),
+( 26, 'Can delete the group Permissions', 'delete_group_perms'),
 
-(20, 'Can create a Video',               'post_video'),
-(21, 'Can get a Video',                  'get_video'),
-(22, 'Can get all of the Videos',        'get_all_videos'),
-(23, 'Can partially update a Video',     'patch_video'),
-(24, 'Can delete a Video',               'delete_video'),
+( 30, 'Can create a Video',               'post_video'),
+( 31, 'Can get a Video',                  'get_video'),
+( 32, 'Can get all of the Videos',        'get_all_videos'),
+( 33, 'Can partially update a Video',     'patch_video'),
+( 34, 'Can delete a Video',               'delete_video'),
 
-(26, 'Can create an Info',               'post_info'),
-(27, 'Can get an Info',                  'get_info'),
-(28, 'Can get all of the Infos',         'get_all_infos'),
-(29, 'Can partially update an Info',     'patch_info'),
-(30, 'Can delete an Info',               'delete_info');
+( 40, 'Can create an Info',               'post_info'),
+( 41, 'Can get an Info',                  'get_info'),
+( 42, 'Can get all of the Infos',         'get_all_infos'),
+( 43, 'Can partially update an Info',     'patch_info'),
+( 44, 'Can delete an Info',               'delete_info');
 
 
 CREATE TABLE IF NOT EXISTS public.groups (
@@ -120,17 +121,17 @@ CREATE TABLE IF NOT EXISTS public.group_perms (
 		ON DELETE CASCADE
 );
 INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
-( 0, 0, 20),
-( 1, 0, 21),
-( 2, 0, 22),
-( 3, 0, 23),
-( 4, 0, 24),
+( 0, 0, 30),
+( 1, 0, 31),
+( 2, 0, 32),
+( 3, 0, 33),
+( 4, 0, 34),
 
-( 5, 1, 26),
-( 6, 1, 27),
-( 7, 1, 28),
-( 8, 1, 29),
-( 9, 1, 30);
+( 5, 1, 40),
+( 6, 1, 41),
+( 7, 1, 42),
+( 8, 1, 43),
+( 9, 1, 44);
 ALTER SEQUENCE group_perms_id_seq RESTART WITH 10;
 
 

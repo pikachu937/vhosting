@@ -6,8 +6,8 @@ import (
 )
 
 type AuthCommon interface {
-	GetNamepass(namepass Namepass) error
-	UpdateUserPassword(namepass Namepass) error
+	GetNamepass(namepass *Namepass) error
+	UpdateUserPassword(namepass *Namepass) error
 	IsUsernameAndPasswordExists(username, passwordHash string) (bool, error)
 }
 
@@ -19,9 +19,9 @@ type AuthUseCase interface {
 	IsMatched(username_1, username_2 string) bool
 	IsRequiredEmpty(namepass *Namepass) bool
 	IsSessionExists(session *sess.Session) bool
-	BindJSONNamepass(ctx *gin.Context) (Namepass, error)
-	GenerateToken(namepass Namepass) (string, error)
-	ParseToken(token string) (Namepass, error)
+	BindJSONNamepass(ctx *gin.Context) (*Namepass, error)
+	GenerateToken(namepass *Namepass) (string, error)
+	ParseToken(token string) (*Namepass, error)
 }
 
 type AuthRepository interface {

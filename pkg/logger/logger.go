@@ -56,17 +56,9 @@ func Complete(log1 *logging.Log, log2 *logging.Log) {
 }
 
 func Print(log *logging.Log) {
-	if log.ErrLevel == "" {
-		log.ErrLevel = ErrLevelInfo
-	}
-
 	printLine := log.ErrLevel + "\t"
 
-	if log.SessionOwner != "" {
-		if log.StatusCode == 0 {
-			log.StatusCode = 200
-		}
-
+	if log.ClientIP != "" {
 		printLine += log.ClientIP + httpPrintIndent +
 			log.SessionOwner + httpPrintIndent +
 			log.RequestMethod + httpPrintIndent +

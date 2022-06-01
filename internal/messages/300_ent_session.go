@@ -14,7 +14,3 @@ func ErrorCannotDeleteSession(err error) *lg.Log {
 func ErrorCannotCreateSession(err error) *lg.Log {
 	return &lg.Log{StatusCode: 500, ErrCode: 301, Message: fmt.Sprintf("Cannot create session. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
 }
-
-func ErrorCannotCheckSessionExistence(err error) *lg.Log {
-	return &lg.Log{StatusCode: 500, ErrCode: 302, Message: fmt.Sprintf("Cannot check session existence. Error: %s.", err.Error()), ErrLevel: logger.ErrLevelError}
-}
