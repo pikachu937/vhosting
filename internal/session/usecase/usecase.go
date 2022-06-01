@@ -19,14 +19,6 @@ func NewSessUseCase(sessRepo sess.SessRepository,
 	}
 }
 
-func (u *SessUseCase) IsSessionExists(token string) (bool, error) {
-	return u.sessRepo.IsSessionExists(token)
-}
-
-func (u *SessUseCase) GetSessionAndDate(token string) (*sess.Session, error) {
-	return u.sessRepo.GetSessionAndDate(token)
-}
-
 func (u *SessUseCase) CreateSession(ctx *gin.Context, username, token, timestamp string) error {
 	var session sess.Session
 	session.Content = token
@@ -35,6 +27,10 @@ func (u *SessUseCase) CreateSession(ctx *gin.Context, username, token, timestamp
 		return err
 	}
 	return u.authRepo.UpdateNamepassLastLogin(username, session.CreationDate)
+}
+
+func (u *SessUseCase) GetSessionAndDate(token string) (*sess.Session, error) {
+	return u.sessRepo.GetSessionAndDate(token)
 }
 
 func (u *SessUseCase) DeleteSession(token string) error {
