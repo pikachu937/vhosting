@@ -16,13 +16,13 @@ const (
 	ON_CONFLICT_DO_NOTHING = " ON CONFLICT DO NOTHING"
 	ORDER_BY_COL           = " ORDER BY %s"
 
-	PAGINATION_SELECT_COL_FROM_TBL_LIM_PAG = `
+	PAGINATION_COL_TBL_PAG_TBL_PAG_LIM = `
 	SELECT %s
 	FROM %s
 	WHERE id > (CASE WHEN %d > 0 THEN
 				   (SELECT max(id)
 					FROM (SELECT id
-						  FROM logs
+						  FROM %s
 						  LIMIT %d)
 					as foo)
 				ELSE

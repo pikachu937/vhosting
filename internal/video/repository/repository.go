@@ -7,6 +7,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type VideoRepository struct {
@@ -55,14 +56,16 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 	return &vid, nil
 }
 
-func (r *VideoRepository) GetAllVideos() (map[int]*video.Video, error) {
+func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL
+	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := video.TableName
-	query := fmt.Sprintf(template, col, tbl)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

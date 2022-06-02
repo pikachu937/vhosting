@@ -1,11 +1,14 @@
 package video
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/user"
+)
 
 type VideoCommon interface {
 	CreateVideo(vid *Video) error
 	GetVideo(id int) (*Video, error)
-	GetAllVideos() (map[int]*Video, error)
+	GetAllVideos(urlparams *user.Pagin) (map[int]*Video, error)
 	PartiallyUpdateVideo(vid *Video) error
 	DeleteVideo(id int) error
 

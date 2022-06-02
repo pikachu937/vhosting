@@ -7,6 +7,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type InfoRepository struct {
@@ -55,14 +56,16 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 	return &nfo, nil
 }
 
-func (r *InfoRepository) GetAllInfos() (map[int]*info.Info, error) {
+func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL
+	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := info.TableName
-	query := fmt.Sprintf(template, col, tbl)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

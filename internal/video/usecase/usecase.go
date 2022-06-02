@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/config"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type VideoUseCase struct {
@@ -28,8 +29,12 @@ func (u *VideoUseCase) GetVideo(id int) (*video.Video, error) {
 	return u.videoRepo.GetVideo(id)
 }
 
-func (u *VideoUseCase) GetAllVideos() (map[int]*video.Video, error) {
-	return u.videoRepo.GetAllVideos()
+func (u *VideoUseCase) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
+	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
+	if urlparams.Limit == 0 {
+		urlparams.Limit = 100
+	}
+	return u.videoRepo.GetAllVideos(urlparams)
 }
 
 func (u *VideoUseCase) PartiallyUpdateVideo(nfo *video.Video) error {

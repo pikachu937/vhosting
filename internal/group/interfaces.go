@@ -1,11 +1,14 @@
 package group
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/user"
+)
 
 type GroupCommon interface {
 	CreateGroup(grp *Group) error
 	GetGroup(id int) (*Group, error)
-	GetAllGroups() (map[int]*Group, error)
+	GetAllGroups(urlparams *user.Pagin) (map[int]*Group, error)
 	PartiallyUpdateGroup(grp *Group) error
 	DeleteGroup(id int) error
 

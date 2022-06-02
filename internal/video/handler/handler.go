@@ -112,8 +112,10 @@ func (h *VideoHandler) GetAllVideos(ctx *gin.Context) {
 		return
 	}
 
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
 	// Get all infos. If gotten is nothing - send such a message
-	gottenVideos, err := h.useCase.GetAllVideos()
+	gottenVideos, err := h.useCase.GetAllVideos(urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetAllVideos(err))
 		return

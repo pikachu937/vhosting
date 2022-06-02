@@ -8,7 +8,7 @@ import (
 type UserCommon interface {
 	CreateUser(usr *User) error
 	GetUser(id int) (*User, error)
-	GetAllUsers() (map[int]*User, error)
+	GetAllUsers(urlparams *Pagin) (map[int]*User, error)
 	UpdateUserPassword(namepass *auth.Namepass) error
 	PartiallyUpdateUser(usr *User) error
 	DeleteUser(id int) error
@@ -25,6 +25,7 @@ type UserUseCase interface {
 	BindJSONUser(ctx *gin.Context) (*User, error)
 	IsRequiredEmpty(username, password string) bool
 	AtoiRequestedId(ctx *gin.Context) (int, error)
+	ParseURLParams(ctx *gin.Context) *Pagin
 }
 
 type UserRepository interface {

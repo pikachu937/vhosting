@@ -9,6 +9,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type GroupRepository struct {
@@ -53,14 +54,16 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 	return &grp, nil
 }
 
-func (r *GroupRepository) GetAllGroups() (map[int]*group.Group, error) {
+func (r *GroupRepository) GetAllGroups(urlparams *user.Pagin) (map[int]*group.Group, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL
+	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := group.TableName
-	query := fmt.Sprintf(template, col, tbl)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

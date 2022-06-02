@@ -45,7 +45,9 @@ func (h *PermHandler) GetAllPermissions(ctx *gin.Context) {
 		return
 	}
 
-	gottenPerms, err := h.useCase.GetAllPermissions()
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
+	gottenPerms, err := h.useCase.GetAllPermissions(urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetAllPerms(err))
 		return

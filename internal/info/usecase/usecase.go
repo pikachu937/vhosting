@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/info"
 	"github.com/mikerumy/vhosting/pkg/config"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type InfoUseCase struct {
@@ -28,8 +29,12 @@ func (u *InfoUseCase) GetInfo(id int) (*info.Info, error) {
 	return u.infoRepo.GetInfo(id)
 }
 
-func (u *InfoUseCase) GetAllInfos() (map[int]*info.Info, error) {
-	return u.infoRepo.GetAllInfos()
+func (u *InfoUseCase) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
+	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
+	if urlparams.Limit == 0 {
+		urlparams.Limit = 100
+	}
+	return u.infoRepo.GetAllInfos(urlparams)
 }
 
 func (u *InfoUseCase) PartiallyUpdateInfo(nfo *info.Info) error {

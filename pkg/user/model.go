@@ -12,3 +12,8 @@ type User struct {
 	JoiningDate  string `json:"joining-date" db:"joining_date"`
 	LastLogin    string `json:"last-login"   db:"last_login"`
 }
+
+type Pagin struct {
+	Limit int
+	Page  int
+}

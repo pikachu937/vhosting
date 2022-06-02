@@ -118,8 +118,10 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
+	urlparams := h.useCase.ParseURLParams(ctx)
+
 	// Get all users. If gotten is nothing - send such a message
-	gottenUsers, err := h.useCase.GetAllUsers()
+	gottenUsers, err := h.useCase.GetAllUsers(urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetAllUsers(err))
 		return

@@ -112,8 +112,10 @@ func (h *InfoHandler) GetAllInfos(ctx *gin.Context) {
 		return
 	}
 
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
 	// Get all infos. If gotten is nothing - send such a message
-	gottenInfos, err := h.useCase.GetAllInfos()
+	gottenInfos, err := h.useCase.GetAllInfos(urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetAllInfos(err))
 		return

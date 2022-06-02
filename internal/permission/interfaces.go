@@ -2,10 +2,11 @@ package permission
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type PermCommon interface {
-	GetAllPermissions() (map[int]*Perm, error)
+	GetAllPermissions(urlparams *user.Pagin) (map[int]*Perm, error)
 	GetUserPermissions(id int) (*PermIds, error)
 	GetGroupPermissions(id int) (*PermIds, error)
 }

@@ -118,7 +118,9 @@ func (h *GroupHandler) GetAllGroups(ctx *gin.Context) {
 		return
 	}
 
-	gottenGroups, err := h.useCase.GetAllGroups()
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
+	gottenGroups, err := h.useCase.GetAllGroups(urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetAllGroups(err))
 		return

@@ -1,11 +1,14 @@
 package info
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/mikerumy/vhosting/pkg/user"
+)
 
 type InfoCommon interface {
 	CreateInfo(nfo *Info) error
 	GetInfo(id int) (*Info, error)
-	GetAllInfos() (map[int]*Info, error)
+	GetAllInfos(urlparams *user.Pagin) (map[int]*Info, error)
 	PartiallyUpdateInfo(nfo *Info) error
 	DeleteInfo(id int) error
 

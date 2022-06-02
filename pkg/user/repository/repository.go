@@ -60,14 +60,16 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 	return &usr, nil
 }
 
-func (r *UserRepository) GetAllUsers() (map[int]*user.User, error) {
+func (r *UserRepository) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL
+	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := user.TableName
-	query := fmt.Sprintf(template, col, tbl)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

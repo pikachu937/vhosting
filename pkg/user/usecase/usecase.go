@@ -34,8 +34,24 @@ func (u *UserUseCase) GetUser(id int) (*user.User, error) {
 	return u.userRepo.GetUser(id)
 }
 
-func (u *UserUseCase) GetAllUsers() (map[int]*user.User, error) {
-	return u.userRepo.GetAllUsers()
+func (u *UserUseCase) ParseURLParams(ctx *gin.Context) *user.Pagin {
+	urlparams := ctx.Request.URL.Query()
+	var pagin user.Pagin
+	if lim := urlparams.Get("_limit"); lim != "" {
+		pagin.Limit, _ = strconv.Atoi(lim)
+	}
+	if pg := urlparams.Get("_page"); pg != "" {
+		pagin.Page, _ = strconv.Atoi(pg)
+	}
+	return &pagin
+}
+
+func (u *UserUseCase) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User, error) {
+	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
+	if urlparams.Limit == 0 {
+		urlparams.Limit = 100
+	}
+	return u.userRepo.GetAllUsers(urlparams)
 }
 
 func (u *UserUseCase) UpdateUserPassword(namepass *auth.Namepass) error {
