@@ -8,6 +8,9 @@ db:
   sslMode: "disable"
   username: "postgres"
 
+pagination:
+  getLimitDefault: 100
+
 server:
   debugMode: false
   maxHeaderBytes: 1048576 # 1 megabyte
@@ -16,4 +19,4 @@ server:
   writeTimeoutSeconds: 15
 
 session:
-  ttlHours: 168 # 1 week
+  ttlHours: 168 # 7 days

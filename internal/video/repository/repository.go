@@ -60,12 +60,13 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
+	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := video.TableName
+	cnd := video.Id
 	lim := urlparams.Limit
 	pag := urlparams.Page
-	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
+	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

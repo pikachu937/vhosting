@@ -30,10 +30,6 @@ func (u *InfoUseCase) GetInfo(id int) (*info.Info, error) {
 }
 
 func (u *InfoUseCase) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
-	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
-	if urlparams.Limit == 0 {
-		urlparams.Limit = 100
-	}
 	return u.infoRepo.GetAllInfos(urlparams)
 }
 

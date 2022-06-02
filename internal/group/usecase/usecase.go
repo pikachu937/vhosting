@@ -30,10 +30,6 @@ func (u *GroupUseCase) GetGroup(id int) (*group.Group, error) {
 }
 
 func (u *GroupUseCase) GetAllGroups(urlparams *user.Pagin) (map[int]*group.Group, error) {
-	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
-	if urlparams.Limit == 0 {
-		urlparams.Limit = 100
-	}
 	return u.groupRepo.GetAllGroups(urlparams)
 }
 

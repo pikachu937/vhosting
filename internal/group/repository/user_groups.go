@@ -6,6 +6,7 @@ import (
 	"github.com/mikerumy/vhosting/internal/group"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func (r *GroupRepository) SetUserGroups(values string) error {
@@ -25,17 +26,17 @@ func (r *GroupRepository) SetUserGroups(values string) error {
 	return nil
 }
 
-func (r *GroupRepository) GetUserGroups(id int) (*group.GroupIds, error) {
+func (r *GroupRepository) GetUserGroups(id int, urlparams *user.Pagin) (*group.GroupIds, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
-		qconsts.ORDER_BY_COL
-	col := fmt.Sprintf("%s", group.GroupId)
+	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
+	col := group.GroupId
 	tbl := group.UGTableName
-	cnd := fmt.Sprintf("%s=$1", group.UserId)
-	ordcol := group.GroupId
-	query := fmt.Sprintf(template, col, tbl, cnd, ordcol)
+	cnd := fmt.Sprintf("%s=$1 AND %s", group.UserId, group.Id)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query, id)
 	if err != nil {

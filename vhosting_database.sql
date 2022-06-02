@@ -60,9 +60,22 @@ CREATE TABLE IF NOT EXISTS public.groups (
 	CONSTRAINT pk_groups PRIMARY KEY (id)
 );
 INSERT INTO public.groups (id, name) VALUES
-(0, 'Video Creators'),
-(1, 'Info Creators');
-ALTER SEQUENCE groups_id_seq RESTART WITH 2;
+(0, 'Video 1'),
+(1, 'Video 2'),
+(2, 'Video 3'),
+(3, 'Video 7'),
+(4, 'Video 8'),
+(5, 'Video 9'),
+(6, 'Video 10'),
+(7, 'Video 11'),
+(8, 'Info 1'),
+(9, 'Info 2'),
+(10, 'Info 3'),
+(11, 'Info 4'),
+(12, 'Info 6'),
+(13, 'Info 8'),
+(14, 'Info 9');
+ALTER SEQUENCE groups_id_seq RESTART WITH 15;
 
 
 CREATE TABLE IF NOT EXISTS public.users (
@@ -79,8 +92,22 @@ CREATE TABLE IF NOT EXISTS public.users (
 	CONSTRAINT pk_users PRIMARY KEY (id)
 );
 INSERT INTO public.users (id, username, password_hash, is_active, is_superuser, is_staff, first_name, last_name, joining_date, last_login) VALUES
-(0, 'admin', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03');
-ALTER SEQUENCE users_id_seq RESTART WITH 1;
+(0, 'admin', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(1, 'admin2', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(2, 'admin3', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(3, 'admin4', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(4, 'admin5', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(5, 'admin6', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(6, 'admin7', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(7, 'admin8', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(8, 'admin9', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(9, 'admin11', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(10, 'admin13', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(11, 'admin17', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(12, 'admin18', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(13, 'admin19', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03'),
+(14, 'admin20', '614240232425318c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', True, True, False, '', '', '2022-05-11 09:32:41.115644+03', '2022-05-11 09:32:41.115644+03');
+ALTER SEQUENCE users_id_seq RESTART WITH 15;
 
 
 CREATE TABLE IF NOT EXISTS public.sessions (
@@ -121,18 +148,22 @@ CREATE TABLE IF NOT EXISTS public.group_perms (
 		ON DELETE CASCADE
 );
 INSERT INTO public.group_perms (id, group_id, perm_id) VALUES
-( 0, 0, 30),
-( 1, 0, 31),
-( 2, 0, 32),
-( 3, 0, 33),
-( 4, 0, 34),
-
-( 5, 1, 40),
-( 6, 1, 41),
-( 7, 1, 42),
-( 8, 1, 43),
-( 9, 1, 44);
-ALTER SEQUENCE group_perms_id_seq RESTART WITH 10;
+( 0,  0, 30),
+( 1,  0, 31),
+( 2,  0, 32),
+( 3,  0, 33),
+( 4,  0, 34),
+( 5,  0, 40),
+( 6,  0, 41),
+( 7,  0, 42),
+( 8,  0, 43),
+( 9,  0, 44),
+(10,  0, 20),
+(11,  0, 21),
+(12,  0, 22),
+(13,  0, 23),
+(14,  0, 24);
+ALTER SEQUENCE group_perms_id_seq RESTART WITH 15;
 
 
 CREATE TABLE IF NOT EXISTS public.user_perms (
@@ -150,6 +181,23 @@ CREATE TABLE IF NOT EXISTS public.user_perms (
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
 );
+INSERT INTO public.user_perms (id, user_id, perm_id) VALUES
+( 0,  0, 30),
+( 1,  0, 31),
+( 2,  0, 32),
+( 3,  0, 33),
+( 4,  0, 34),
+( 5,  0, 40),
+( 6,  0, 41),
+( 7,  0, 42),
+( 8,  0, 43),
+( 9,  0, 44),
+(10,  0, 20),
+(11,  0, 21),
+(12,  0, 22),
+(13,  0, 23),
+(14,  0, 24);
+ALTER SEQUENCE user_perms_id_seq RESTART WITH 15;
 
 
 CREATE TABLE IF NOT EXISTS public.user_groups (
@@ -167,6 +215,23 @@ CREATE TABLE IF NOT EXISTS public.user_groups (
 		ON UPDATE NO ACTION
 		ON DELETE CASCADE
 );
+INSERT INTO public.user_groups (id, user_id, group_id) VALUES
+( 0,  0,  0),
+( 1,  0,  1),
+( 2,  0,  2),
+( 3,  0,  3),
+( 4,  0,  4),
+( 5,  0,  5),
+( 6,  0,  6),
+( 7,  0,  7),
+( 8,  0,  8),
+( 9,  0,  9),
+(10,  0, 10),
+(11,  0, 11),
+(12,  0, 12),
+(13,  0, 13),
+(14,  0, 14);
+ALTER SEQUENCE user_groups_id_seq RESTART WITH 15;
 
 
 CREATE TABLE IF NOT EXISTS public.infos (

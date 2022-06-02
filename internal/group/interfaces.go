@@ -12,7 +12,7 @@ type GroupCommon interface {
 	PartiallyUpdateGroup(grp *Group) error
 	DeleteGroup(id int) error
 
-	GetUserGroups(id int) (*GroupIds, error)
+	GetUserGroups(id int, urlparams *user.Pagin) (*GroupIds, error)
 
 	IsGroupExists(idOrName interface{}) (bool, error)
 }

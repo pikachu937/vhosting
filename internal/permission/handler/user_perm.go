@@ -80,7 +80,9 @@ func (h *PermHandler) GetUserPermissions(ctx *gin.Context) {
 		return
 	}
 
-	gottenPerms, err := h.useCase.GetUserPermissions(reqId)
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
+	gottenPerms, err := h.useCase.GetUserPermissions(reqId, urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetUserPerms(err))
 		return

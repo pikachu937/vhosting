@@ -46,6 +46,13 @@ func LoadConfig(path string) (*Config, error) {
 		logger.Print(msg.WarningCannotConvertCvar(cvarName, dbLogConnStatus, err))
 	}
 
+	cvarName = "pagination.getLimitDefault"
+	paginationGetLimitDefault, err := strconv.Atoi(viper.GetString(cvarName))
+	if err != nil {
+		paginationGetLimitDefault = 30
+		logger.Print(msg.WarningCannotConvertCvar(cvarName, paginationGetLimitDefault, err))
+	}
+
 	cvarName = "server.debugMode"
 	serverDebugMode, err := strconv.ParseBool(viper.GetString(cvarName))
 	if err != nil {
@@ -77,7 +84,7 @@ func LoadConfig(path string) (*Config, error) {
 	cvarName = "session.ttlHours"
 	sessionTTLHours, err := strconv.Atoi(viper.GetString(cvarName))
 	if err != nil {
-		sessionTTLHours = 336 // 2 weeks
+		sessionTTLHours = 336 // 14 days
 		logger.Print(msg.WarningCannotConvertCvar(cvarName, sessionTTLHours, err))
 	}
 
@@ -95,6 +102,8 @@ func LoadConfig(path string) (*Config, error) {
 
 		HashingPasswordSalt:    os.Getenv("HASHING_PASSWORD_SALT"),
 		HashingTokenSigningKey: os.Getenv("HASHING_TOKEN_SIGNING_KEY"),
+
+		PaginationGetLimitDefault: paginationGetLimitDefault,
 
 		ServerDebugMode:           serverDebugMode,
 		ServerMaxHeaderBytes:      serverMaxHeaderBytes,

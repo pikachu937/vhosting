@@ -30,10 +30,6 @@ func (u *VideoUseCase) GetVideo(id int) (*video.Video, error) {
 }
 
 func (u *VideoUseCase) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
-	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
-	if urlparams.Limit == 0 {
-		urlparams.Limit = 100
-	}
 	return u.videoRepo.GetAllVideos(urlparams)
 }
 

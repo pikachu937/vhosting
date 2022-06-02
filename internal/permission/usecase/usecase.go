@@ -22,10 +22,6 @@ func NewPermUseCase(cfg *config.Config, permRepo perm.PermRepository) *PermUseCa
 }
 
 func (u *PermUseCase) GetAllPermissions(urlparams *user.Pagin) (map[int]*perm.Perm, error) {
-	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
-	if urlparams.Limit == 0 {
-		urlparams.Limit = 100
-	}
 	return u.permRepo.GetAllPermissions(urlparams)
 }
 

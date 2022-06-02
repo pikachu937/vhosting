@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	perm "github.com/mikerumy/vhosting/internal/permission"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func (u *PermUseCase) SetUserPermissions(id int, permIds *perm.PermIds) error {
@@ -15,8 +16,8 @@ func (u *PermUseCase) SetUserPermissions(id int, permIds *perm.PermIds) error {
 	return u.permRepo.SetUserPermissions(values)
 }
 
-func (u *PermUseCase) GetUserPermissions(id int) (*perm.PermIds, error) {
-	return u.permRepo.GetUserPermissions(id)
+func (u *PermUseCase) GetUserPermissions(id int, urlparams *user.Pagin) (*perm.PermIds, error) {
+	return u.permRepo.GetUserPermissions(id, urlparams)
 }
 
 func (u *PermUseCase) DeleteUserPermissions(id int, permIds *perm.PermIds) error {

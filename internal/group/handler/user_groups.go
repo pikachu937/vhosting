@@ -80,7 +80,9 @@ func (h *GroupHandler) GetUserGroups(ctx *gin.Context) {
 		return
 	}
 
-	gottenGroups, err := h.useCase.GetUserGroups(reqId)
+	urlparams := h.userUseCase.ParseURLParams(ctx)
+
+	gottenGroups, err := h.useCase.GetUserGroups(reqId, urlparams)
 	if err != nil {
 		h.report(ctx, log, msg.ErrorCannotGetUserGroups(err))
 		return

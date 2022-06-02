@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/group"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func (u *GroupUseCase) SetUserGroups(id int, permIds *group.GroupIds) error {
@@ -16,8 +17,8 @@ func (u *GroupUseCase) SetUserGroups(id int, permIds *group.GroupIds) error {
 	return u.groupRepo.SetUserGroups(values)
 }
 
-func (u *GroupUseCase) GetUserGroups(id int) (*group.GroupIds, error) {
-	return u.groupRepo.GetUserGroups(id)
+func (u *GroupUseCase) GetUserGroups(id int, urlparams *user.Pagin) (*group.GroupIds, error) {
+	return u.groupRepo.GetUserGroups(id, urlparams)
 }
 
 func (u *GroupUseCase) DeleteUserGroups(id int, groupIds *group.GroupIds) error {

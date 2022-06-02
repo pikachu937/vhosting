@@ -7,8 +7,8 @@ import (
 
 type PermCommon interface {
 	GetAllPermissions(urlparams *user.Pagin) (map[int]*Perm, error)
-	GetUserPermissions(id int) (*PermIds, error)
-	GetGroupPermissions(id int) (*PermIds, error)
+	GetUserPermissions(id int, urlparams *user.Pagin) (*PermIds, error)
+	GetGroupPermissions(id int, urlparams *user.Pagin) (*PermIds, error)
 }
 
 type PermUseCase interface {

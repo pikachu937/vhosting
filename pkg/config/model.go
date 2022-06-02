@@ -15,6 +15,8 @@ type Config struct {
 	HashingPasswordSalt    string
 	HashingTokenSigningKey string
 
+	PaginationGetLimitDefault int
+
 	ServerDebugMode           bool
 	ServerMaxHeaderBytes      int
 	ServerPort                string

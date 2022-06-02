@@ -64,12 +64,13 @@ func (r *UserRepository) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User,
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.PAGINATION_COL_TBL_PAG_TBL_PAG_LIM
+	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
 	col := "*"
 	tbl := user.TableName
+	cnd := user.Id
 	lim := urlparams.Limit
 	pag := urlparams.Page
-	query := fmt.Sprintf(template, col, tbl, pag, tbl, pag, lim)
+	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query)
 	if err != nil {

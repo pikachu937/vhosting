@@ -6,6 +6,7 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func (r *PermRepository) SetUserPermissions(values string) error {
@@ -25,17 +26,17 @@ func (r *PermRepository) SetUserPermissions(values string) error {
 	return nil
 }
 
-func (r *PermRepository) GetUserPermissions(id int) (*perm.PermIds, error) {
+func (r *PermRepository) GetUserPermissions(id int, urlparams *user.Pagin) (*perm.PermIds, error) {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
-	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND +
-		qconsts.ORDER_BY_COL
-	col := fmt.Sprintf("%s", perm.PermId)
+	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
+	col := perm.PermId
 	tbl := perm.UPTableName
-	cnd := fmt.Sprintf("%s=$1", perm.UserId)
-	ordcol := perm.PermId
-	query := fmt.Sprintf(template, col, tbl, cnd, ordcol)
+	cnd := fmt.Sprintf("%s=$1 AND %s", perm.UserId, perm.Id)
+	lim := urlparams.Limit
+	pag := urlparams.Page
+	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
 	rows, err := db.Query(query, id)
 	if err != nil {

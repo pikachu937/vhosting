@@ -43,14 +43,14 @@ func (u *UserUseCase) ParseURLParams(ctx *gin.Context) *user.Pagin {
 	if pg := urlparams.Get("_page"); pg != "" {
 		pagin.Page, _ = strconv.Atoi(pg)
 	}
+	pagin.Page = pagin.Page*pagin.Limit - pagin.Limit
+	if pagin.Limit == 0 {
+		pagin.Limit = u.cfg.PaginationGetLimitDefault
+	}
 	return &pagin
 }
 
 func (u *UserUseCase) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User, error) {
-	urlparams.Page = urlparams.Page*urlparams.Limit - urlparams.Limit
-	if urlparams.Limit == 0 {
-		urlparams.Limit = 100
-	}
 	return u.userRepo.GetAllUsers(urlparams)
 }
 
