@@ -30,14 +30,17 @@ func NewStreamUseCase(cfg *models.ConfigST) *StreamUseCase {
 }
 
 func (u *StreamUseCase) ServeStreams() {
+	fmt.Printf("    - ServeStreams()    [%d streams]\n", len(u.cfg.Streams))
 	for key, val := range u.cfg.Streams {
 		if !val.OnDemand {
 			go u.rtspWorkerLoop(key, val.URL, val.OnDemand, val.DisableAudio, val.Debug)
 		}
 	}
+	fmt.Printf("    - ServeStreams()    [quit function]\n")
 }
 
 func (u *StreamUseCase) RunIfNotRun(uuid string) {
+	fmt.Printf("    - RunIfNotRun(uuid string)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	if cfg, ok := u.cfg.Streams[uuid]; ok {
@@ -50,36 +53,42 @@ func (u *StreamUseCase) RunIfNotRun(uuid string) {
 }
 
 func (u *StreamUseCase) GetICEServers() []string {
+	fmt.Printf("    - GetICEServers() []string\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	return u.cfg.Server.ICEServers
 }
 
 func (u *StreamUseCase) GetICEUsername() string {
+	fmt.Printf("    - GetICEUsername() string\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	return u.cfg.Server.ICEUsername
 }
 
 func (u *StreamUseCase) GetICECredential() string {
+	fmt.Printf("    - GetICECredential() string\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	return u.cfg.Server.ICECredential
 }
 
 func (u *StreamUseCase) GetWebRTCPortMin() uint16 {
+	fmt.Printf("    - GetWebRTCPortMin() uint16\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	return u.cfg.Server.WebRTCPortMin
 }
 
 func (u *StreamUseCase) GetWebRTCPortMax() uint16 {
+	fmt.Printf("    - GetWebRTCPortMax() uint16\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	return u.cfg.Server.WebRTCPortMax
 }
 
 func (u *StreamUseCase) List() (string, []string) {
+	fmt.Printf("    - List() (string, []string)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	var res []string
@@ -94,6 +103,7 @@ func (u *StreamUseCase) List() (string, []string) {
 }
 
 func (u *StreamUseCase) Exit(suuid string) bool {
+	fmt.Printf("    - Exit(suuid string) bool\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	_, ok := u.cfg.Streams[suuid]
@@ -101,6 +111,7 @@ func (u *StreamUseCase) Exit(suuid string) bool {
 }
 
 func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
+	fmt.Printf("    - CodecGet(suuid string) []av.CodecData\n")
 	for i := 0; i < 100; i++ {
 		u.cfg.Mutex.RLock()
 		cfg, ok := u.cfg.Streams[suuid]
@@ -130,6 +141,7 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 }
 
 func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
+	fmt.Printf("    - CastListAdd(suuid string) (string, chan av.Packet)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	cuuid := u.pseudoUUID()
@@ -139,12 +151,14 @@ func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
 }
 
 func (u *StreamUseCase) CastListDelete(suuid, cuuid string) {
+	fmt.Printf("    - CastListDelete(suuid, cuuid string)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	delete(u.cfg.Streams[suuid].ClientList, cuuid)
 }
 
 func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool) {
+	fmt.Printf("    - rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool)\n")
 	defer u.runUnlock(name)
 	for {
 		log.Println("Stream Try Connect", name)
@@ -162,6 +176,7 @@ func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio,
 }
 
 func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, debug bool) error {
+	fmt.Printf("    - rtspWorker(name, url string, onDemand, disableAudio, debug bool) error\n")
 	keyTest := time.NewTimer(20 * time.Second)
 	clientTest := time.NewTimer(20 * time.Second)
 	// add next timeout
@@ -206,6 +221,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 }
 
 func (u *StreamUseCase) runUnlock(uuid string) {
+	fmt.Printf("    - runUnlock(uuid string)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	if cfg, ok := u.cfg.Streams[uuid]; ok {
@@ -217,6 +233,7 @@ func (u *StreamUseCase) runUnlock(uuid string) {
 }
 
 func (u *StreamUseCase) isHasViewer(uuid string) bool {
+	fmt.Printf("    - isHasViewer(uuid string) bool\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	if cfg, ok := u.cfg.Streams[uuid]; ok && len(cfg.ClientList) > 0 {
@@ -226,6 +243,7 @@ func (u *StreamUseCase) isHasViewer(uuid string) bool {
 }
 
 func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
+	fmt.Printf("    - cast(uuid string, pck av.Packet)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	for _, val := range u.cfg.Streams[uuid].ClientList {
@@ -236,6 +254,7 @@ func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
 }
 
 func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {
+	fmt.Printf("    - codecAdd(suuid string, codecs []av.CodecData)\n")
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
 	t := u.cfg.Streams[suuid]
@@ -244,6 +263,7 @@ func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {
 }
 
 func (u *StreamUseCase) pseudoUUID() (uuid string) {
+	fmt.Printf("    - pseudoUUID() (uuid string)\n")
 	bytes := make([]byte, 16)
 	_, err := rand.Read(bytes)
 	if err != nil {

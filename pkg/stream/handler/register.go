@@ -9,11 +9,8 @@ import (
 func RegisterTemplateHTTPEndpoints(router *gin.Engine, uc stream.StreamUseCase, cfg *models.ConfigST) {
 	h := NewStreamHandler(uc, cfg)
 
-	streamRoute := router.Group("/stream")
-	{
-		streamRoute.GET("/", h.ServeIndex)
-		streamRoute.GET("/player/:uuid", h.ServeStreamPlayer)
-	}
+	router.GET("/", h.ServeIndex)
+	router.GET("/stream/player/:uuid", h.ServeStreamPlayer)
 }
 
 func RegisterStreamingHTTPEndpoints(router *gin.Engine, uc stream.StreamUseCase, cfg *models.ConfigST) {

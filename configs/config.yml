@@ -9,7 +9,7 @@ db:
   username: "postgres"
 
 server:
-  debugMode: true
+  debugMode: false
   maxHeaderBytes: 1048576 # 1 megabyte
   port: "8001"
   readTimeoutSeconds: 15

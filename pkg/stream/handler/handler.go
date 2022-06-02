@@ -30,7 +30,7 @@ func NewStreamHandler(useCase stream.StreamUseCase, cfg *models.ConfigST) *Strea
 }
 
 func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
-	fmt.Printf(" ServeIndex()\n")
+	fmt.Printf("  * ServeIndex(ctx *gin.Context)\n")
 	_, list := h.useCase.List()
 	if len(list) > 0 {
 		ctx.Header("Cache-Control", "no-cache, max-age=0, must-revalidate, no-store")
@@ -45,7 +45,7 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
-	fmt.Printf(" ServeStreamPlayer()\n")
+	fmt.Printf("  * ServeStreamPlayer(ctx *gin.Context)\n")
 	_, list := h.useCase.List()
 	sort.Strings(list)
 	ctx.HTML(http.StatusOK, "player.tmpl", gin.H{
@@ -57,7 +57,7 @@ func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
-	fmt.Printf(" ServeStreamCodec()\n")
+	fmt.Printf("  * ServeStreamCodec(ctx *gin.Context)\n")
 	if h.useCase.Exit(ctx.Param("uuid")) {
 		h.useCase.RunIfNotRun(ctx.Param("uuid"))
 		codecs := h.useCase.CodecGet(ctx.Param("uuid"))
@@ -89,7 +89,7 @@ func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
 
 // stream video over WebRTC
 func (h *StreamHandler) ServeStreamWebRTC(ctx *gin.Context) {
-	fmt.Printf(" ServeStreamWebRTC()\n")
+	fmt.Printf("  * ServeStreamWebRTC(ctx *gin.Context)\n")
 	if !h.useCase.Exit(ctx.PostForm("suuid")) {
 		log.Println("Stream Not Found")
 		return
@@ -120,7 +120,7 @@ func (h *StreamHandler) ServeStreamWebRTC(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
-	fmt.Printf(" ServeStreamWebRTC2()\n")
+	fmt.Printf("  * ServeStreamWebRTC2(ctx *gin.Context)\n")
 	url := ctx.PostForm("url")
 	if _, ok := h.cfg.Streams[url]; !ok {
 		h.cfg.Streams[url] = models.Stream{
@@ -182,7 +182,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) writePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool) {
-	fmt.Printf(" writePackets()\n")
+	fmt.Printf("  * writePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool)\n")
 	cid, ch := h.useCase.CastListAdd(url)
 	defer h.useCase.CastListDelete(url, cid)
 	defer muxerWebRTC.Close()

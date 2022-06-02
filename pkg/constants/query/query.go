@@ -16,6 +16,21 @@ const (
 	ON_CONFLICT_DO_NOTHING = " ON CONFLICT DO NOTHING"
 	ORDER_BY_COL           = " ORDER BY %s"
 
+	PAGINATION_SELECT_COL_FROM_TBL_LIM_PAG = `
+	SELECT %s
+	FROM %s
+	WHERE id > (CASE WHEN %d > 0 THEN
+				   (SELECT max(id)
+					FROM (SELECT id
+						  FROM logs
+						  LIMIT %d)
+					as foo)
+				ELSE
+					-1
+				END)
+	LIMIT %d;
+	`
+
 	// INSERT_INTO_TBL1_SELECT_COL_FROM_TBL2_WHERE_CND = `
 	// INSERT INTO %s
 	// SELECT %s FROM %s WHERE %s
