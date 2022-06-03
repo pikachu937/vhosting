@@ -67,7 +67,7 @@ func Print(log *logging.Log) {
 	}
 
 	errorLine := ""
-	if log.StatusCode >= 400 {
+	if log.ErrCode != 0 {
 		errorLine = fmt.Sprintf("ErrCode: %d. ", log.ErrCode)
 	}
 

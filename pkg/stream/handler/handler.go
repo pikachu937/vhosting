@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -15,22 +14,21 @@ import (
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
-const videoTimeoutSeconds = 80
-
 type StreamHandler struct {
-	useCase stream.StreamUseCase
 	cfg     *models.ConfigST
+	useCase stream.StreamUseCase
 }
 
-func NewStreamHandler(useCase stream.StreamUseCase, cfg *models.ConfigST) *StreamHandler {
+func NewStreamHandler(cfg *models.ConfigST, useCase stream.StreamUseCase) *StreamHandler {
 	return &StreamHandler{
-		useCase: useCase,
 		cfg:     cfg,
+		useCase: useCase,
 	}
 }
 
 func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
-	fmt.Printf("  * ServeIndex(ctx *gin.Context)\n")
+	fmt.Println("  * ServeIndex(ctx *gin.Context)")
+
 	_, list := h.useCase.List()
 	if len(list) > 0 {
 		ctx.Header("Cache-Control", "no-cache, max-age=0, must-revalidate, no-store")
@@ -45,7 +43,8 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
-	fmt.Printf("  * ServeStreamPlayer(ctx *gin.Context)\n")
+	fmt.Println("  * ServeStreamPlayer(ctx *gin.Context)")
+
 	_, list := h.useCase.List()
 	sort.Strings(list)
 	ctx.HTML(http.StatusOK, "player.tmpl", gin.H{
@@ -57,70 +56,84 @@ func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
-	fmt.Printf("  * ServeStreamCodec(ctx *gin.Context)\n")
-	if h.useCase.Exit(ctx.Param("uuid")) {
-		h.useCase.RunIfNotRun(ctx.Param("uuid"))
-		codecs := h.useCase.CodecGet(ctx.Param("uuid"))
+	fmt.Println("  * ServeStreamCodec(ctx *gin.Context)")
+
+	uuid := ctx.Param("uuid")
+	if h.useCase.Exit(uuid) {
+		h.useCase.RunIfNotRun(uuid)
+
+		codecs := h.useCase.CodecGet(uuid)
 		if codecs == nil {
 			return
 		}
-		var tmpCodec []models.JCodec
+
+		var tmpCodec []stream.JCodec
 		for _, codec := range codecs {
 			if codec.Type() != av.H264 && codec.Type() != av.PCM_ALAW && codec.Type() != av.PCM_MULAW && codec.Type() != av.OPUS {
-				log.Println("Codec Not Supported WebRTC ignore this track", codec.Type())
+				fmt.Println("    error: track is ignored - codec not supported WebRTC. codec type:", codec.Type())
 				continue
 			}
+
 			if codec.Type().IsVideo() {
-				tmpCodec = append(tmpCodec, models.JCodec{Type: "video"})
+				tmpCodec = append(tmpCodec, stream.JCodec{Type: "video"})
 			} else {
-				tmpCodec = append(tmpCodec, models.JCodec{Type: "audio"})
+				tmpCodec = append(tmpCodec, stream.JCodec{Type: "audio"})
 			}
 		}
+
 		b, err := json.Marshal(tmpCodec)
 		if err == nil {
 			_, err = ctx.Writer.Write(b)
 			if err != nil {
-				log.Printf("Write Codec Info error. Error: %s.\n", err.Error())
+				fmt.Println("    error: writing of codec info. error:", err.Error())
 				return
 			}
 		}
 	}
 }
 
-// stream video over WebRTC
-func (h *StreamHandler) ServeStreamWebRTC(ctx *gin.Context) {
-	fmt.Printf("  * ServeStreamWebRTC(ctx *gin.Context)\n")
-	if !h.useCase.Exit(ctx.PostForm("suuid")) {
-		log.Println("Stream Not Found")
+func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
+	fmt.Println("  * ServeStreamVidOverWebRTC(ctx *gin.Context)")
+
+	suuid := ctx.PostForm("suuid")
+	if !h.useCase.Exit(suuid) {
+		fmt.Println("    info: stream not found. suuid:", suuid)
 		return
 	}
-	h.useCase.RunIfNotRun(ctx.PostForm("suuid"))
-	codecs := h.useCase.CodecGet(ctx.PostForm("suuid"))
+
+	h.useCase.RunIfNotRun(suuid)
+
+	codecs := h.useCase.CodecGet(suuid)
 	if codecs == nil {
-		log.Println("Stream Codec Not Found")
+		fmt.Println("    info: stream codec not found. suuid:", suuid)
 		return
 	}
-	var audioOnly bool
+
+	audioOnly := false
 	if len(codecs) == 1 && codecs[0].Type().IsAudio() {
 		audioOnly = true
 	}
-	muxerWebRTC := webrtc.NewMuxer(webrtc.Options{ICEServers: h.useCase.GetICEServers(), ICEUsername: h.useCase.GetICEUsername(), ICECredential: h.useCase.GetICECredential(), PortMin: h.useCase.GetWebRTCPortMin(), PortMax: h.useCase.GetWebRTCPortMax()})
+
+	muxerWebRTC := webrtc.NewMuxer(webrtc.Options{ICEServers: h.useCase.GetICEServers(),
+		ICEUsername: h.useCase.GetICEUsername(), ICECredential: h.useCase.GetICECredential(),
+		PortMin: h.useCase.GetWebRTCPortMin(), PortMax: h.useCase.GetWebRTCPortMax()})
 	answer, err := muxerWebRTC.WriteHeader(codecs, ctx.PostForm("data"))
 	if err != nil {
-		log.Printf("WriteHeader error. Error: %s.\n", err.Error())
-		return
-	}
-	_, err = ctx.Writer.Write([]byte(answer))
-	if err != nil {
-		log.Printf("Cannot write bytes error. Error: %s.\n", err.Error())
+		fmt.Println("    error: WriteHeader. error:", err.Error())
 		return
 	}
 
-	go h.writePackets(ctx.PostForm("suuid"), muxerWebRTC, audioOnly)
+	if _, err := ctx.Writer.Write([]byte(answer)); err != nil {
+		fmt.Println("    error: cannot write bytes. error:", err.Error())
+		return
+	}
+
+	go h.useCase.WritePackets(suuid, muxerWebRTC, audioOnly)
 }
 
 func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
-	fmt.Printf("  * ServeStreamWebRTC2(ctx *gin.Context)\n")
+	fmt.Println("  * ServeStreamWebRTC2(ctx *gin.Context)")
+
 	url := ctx.PostForm("url")
 	if _, ok := h.cfg.Streams[url]; !ok {
 		h.cfg.Streams[url] = models.Stream{
@@ -134,8 +147,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 
 	codecs := h.useCase.CodecGet(url)
 	if codecs == nil {
-		log.Println("Stream Codec Not Found")
-		ctx.JSON(500, models.ResponseError{Error: h.cfg.LastError.Error()})
+		fmt.Println("    error: stream codec not found. lasterror:", h.cfg.LastError.Error())
 		return
 	}
 
@@ -150,12 +162,11 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	sdp64 := ctx.PostForm("sdp64")
 	answer, err := muxerWebRTC.WriteHeader(codecs, sdp64)
 	if err != nil {
-		log.Printf("Muxer WriteHeader error. Error: %s.\n", err.Error())
-		ctx.JSON(500, models.ResponseError{Error: err.Error()})
+		fmt.Println("    error: Muxer WriteHeader. error:", err.Error())
 		return
 	}
 
-	response := models.Response{
+	response := stream.Response{
 		Sdp64: answer,
 	}
 
@@ -164,7 +175,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 			codec.Type() != av.PCM_ALAW &&
 			codec.Type() != av.PCM_MULAW &&
 			codec.Type() != av.OPUS {
-			log.Println("Codec Not Supported WebRTC ignore this track", codec.Type())
+			fmt.Println("    error: track is ignored - codec not supported WebRTC. codec type:", codec.Type())
 			continue
 		}
 		if codec.Type().IsVideo() {
@@ -178,34 +189,5 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 
 	audioOnly := len(codecs) == 1 && codecs[0].Type().IsAudio()
 
-	go h.writePackets(url, muxerWebRTC, audioOnly)
-}
-
-func (h *StreamHandler) writePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool) {
-	fmt.Printf("  * writePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool)\n")
-	cid, ch := h.useCase.CastListAdd(url)
-	defer h.useCase.CastListDelete(url, cid)
-	defer muxerWebRTC.Close()
-	videoStart := false
-	noVideo := time.NewTimer(videoTimeoutSeconds * time.Second)
-	for {
-		select {
-		case <-noVideo.C:
-			log.Printf("Info: No Video")
-			return
-		case pck := <-ch:
-			if pck.IsKeyFrame || audioOnly {
-				noVideo.Reset(videoTimeoutSeconds * time.Second)
-				videoStart = true
-			}
-			if !videoStart && !audioOnly {
-				continue
-			}
-			err := muxerWebRTC.WritePacket(pck)
-			if err != nil {
-				log.Printf("Write packet error. Error: %s.", err.Error())
-				return
-			}
-		}
-	}
+	go h.useCase.WritePackets(url, muxerWebRTC, audioOnly)
 }

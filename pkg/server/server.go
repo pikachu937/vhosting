@@ -113,7 +113,7 @@ func (a *App) Run() error {
 	// Check for web directory exists and register routes
 	if _, err := os.Stat("./web"); !os.IsNotExist(err) {
 		router.LoadHTMLGlob("./web/templates/*")
-		streamhandler.RegisterTemplateHTTPEndpoints(router, a.StreamUC, a.scfg)
+		streamhandler.RegisterTemplateHTTPEndpoints(router, a.scfg, a.StreamUC)
 	}
 
 	router.StaticFS("/static", http.Dir("./web/static"))
@@ -131,7 +131,7 @@ func (a *App) Run() error {
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
-	streamhandler.RegisterStreamingHTTPEndpoints(router, a.StreamUC, a.scfg)
+	streamhandler.RegisterStreamingHTTPEndpoints(router, a.scfg, a.StreamUC)
 	downloadhandler.RegisterHTTPEndpoints(router, a.downloadUseCase, a.logUseCase)
 
 	// HTTP Server
