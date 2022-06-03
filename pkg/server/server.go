@@ -24,7 +24,6 @@ import (
 	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
 	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/internal/models"
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	permhandler "github.com/mikerumy/vhosting/internal/permission/handler"
 	permrepo "github.com/mikerumy/vhosting/internal/permission/repository"
@@ -41,6 +40,7 @@ import (
 	authrepo "github.com/mikerumy/vhosting/pkg/auth/repository"
 	authusecase "github.com/mikerumy/vhosting/pkg/auth/usecase"
 	"github.com/mikerumy/vhosting/pkg/config"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/download"
 	downloadhandler "github.com/mikerumy/vhosting/pkg/download/handler"
 	downloadusecase "github.com/mikerumy/vhosting/pkg/download/usecase"
@@ -57,7 +57,7 @@ import (
 type App struct {
 	httpServer      *http.Server
 	cfg             *config.Config
-	scfg            *models.ConfigST
+	scfg            *sconfig.Config
 	userUseCase     user.UserUseCase
 	authUseCase     auth.AuthUseCase
 	sessUseCase     sess.SessUseCase
@@ -70,7 +70,7 @@ type App struct {
 	downloadUseCase download.DownloadUseCase
 }
 
-func NewApp(cfg *config.Config, scfg *models.ConfigST) *App {
+func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
 	sessRepo := sessrepo.NewSessRepository(cfg)

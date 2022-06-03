@@ -5,11 +5,11 @@ import (
 	"flag"
 	"io/ioutil"
 
-	"github.com/mikerumy/vhosting/internal/models"
+	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
-func LoadConfig(path string) (*models.ConfigST, error) {
-	var cfg models.ConfigST
+func LoadConfig(path string) (*Config, error) {
+	var cfg Config
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -26,7 +26,7 @@ func LoadConfig(path string) (*models.ConfigST, error) {
 			cfg.Server.ICEServers = []string{*iceServer}
 		}
 
-		cfg.Streams = make(map[string]models.Stream)
+		cfg.Streams = make(map[string]stream.Stream)
 	}
 
 	err = json.Unmarshal(data, &cfg)
@@ -35,7 +35,7 @@ func LoadConfig(path string) (*models.ConfigST, error) {
 	}
 
 	for i, val := range cfg.Streams {
-		val.ClientList = make(map[string]models.Viewer)
+		val.ClientList = make(map[string]stream.Viewer)
 		cfg.Streams[i] = val
 	}
 

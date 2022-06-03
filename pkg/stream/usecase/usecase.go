@@ -10,7 +10,8 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
-	"github.com/mikerumy/vhosting/internal/models"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
+	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
 const (
@@ -19,10 +20,10 @@ const (
 )
 
 type StreamUseCase struct {
-	cfg *models.ConfigST
+	cfg *sconfig.Config
 }
 
-func NewStreamUseCase(cfg *models.ConfigST) *StreamUseCase {
+func NewStreamUseCase(cfg *sconfig.Config) *StreamUseCase {
 	return &StreamUseCase{
 		cfg: cfg,
 	}
@@ -244,7 +245,7 @@ func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
 	defer u.cfg.Mutex.Unlock()
 	cuuid := u.pseudoUUID()
 	ch := make(chan av.Packet, 100)
-	u.cfg.Streams[suuid].ClientList[cuuid] = models.Viewer{Cast: ch}
+	u.cfg.Streams[suuid].ClientList[cuuid] = stream.Viewer{Cast: ch}
 	return cuuid, ch
 }
 

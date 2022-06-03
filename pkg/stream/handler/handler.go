@@ -10,16 +10,16 @@ import (
 	"github.com/deepch/vdk/av"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/models"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
 type StreamHandler struct {
-	cfg     *models.ConfigST
+	cfg     *sconfig.Config
 	useCase stream.StreamUseCase
 }
 
-func NewStreamHandler(cfg *models.ConfigST, useCase stream.StreamUseCase) *StreamHandler {
+func NewStreamHandler(cfg *sconfig.Config, useCase stream.StreamUseCase) *StreamHandler {
 	return &StreamHandler{
 		cfg:     cfg,
 		useCase: useCase,
@@ -126,10 +126,10 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	url := ctx.PostForm("url")
 	if _, ok := h.cfg.Streams[url]; !ok {
-		h.cfg.Streams[url] = models.Stream{
+		h.cfg.Streams[url] = stream.Stream{
 			URL:        url,
 			OnDemand:   true,
-			ClientList: make(map[string]models.Viewer),
+			ClientList: make(map[string]stream.Viewer),
 		}
 	}
 

@@ -2,18 +2,18 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/models"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
-func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *models.ConfigST, uc stream.StreamUseCase) {
+func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *sconfig.Config, uc stream.StreamUseCase) {
 	h := NewStreamHandler(cfg, uc)
 
 	router.GET("/", h.ServeIndex)
 	router.GET("/stream/player/:uuid", h.ServeStreamPlayer)
 }
 
-func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *models.ConfigST, uc stream.StreamUseCase) {
+func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *sconfig.Config, uc stream.StreamUseCase) {
 	h := NewStreamHandler(cfg, uc)
 
 	streamRoute := router.Group("/stream")
