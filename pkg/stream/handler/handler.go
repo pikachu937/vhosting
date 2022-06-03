@@ -27,8 +27,6 @@ func NewStreamHandler(cfg *models.ConfigST, useCase stream.StreamUseCase) *Strea
 }
 
 func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
-	fmt.Println("  * ServeIndex(ctx *gin.Context)")
-
 	_, list := h.useCase.List()
 	if len(list) > 0 {
 		ctx.Header("Cache-Control", "no-cache, max-age=0, must-revalidate, no-store")
@@ -43,8 +41,6 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
-	fmt.Println("  * ServeStreamPlayer(ctx *gin.Context)")
-
 	_, list := h.useCase.List()
 	sort.Strings(list)
 	ctx.HTML(http.StatusOK, "player.tmpl", gin.H{
@@ -56,8 +52,6 @@ func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
-	fmt.Println("  * ServeStreamCodec(ctx *gin.Context)")
-
 	uuid := ctx.Param("uuid")
 	if h.useCase.Exit(uuid) {
 		h.useCase.RunIfNotRun(uuid)
@@ -93,8 +87,6 @@ func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
-	fmt.Println("  * ServeStreamVidOverWebRTC(ctx *gin.Context)")
-
 	suuid := ctx.PostForm("suuid")
 	if !h.useCase.Exit(suuid) {
 		fmt.Println("    info: stream not found. suuid:", suuid)
@@ -132,8 +124,6 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 }
 
 func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
-	fmt.Println("  * ServeStreamWebRTC2(ctx *gin.Context)")
-
 	url := ctx.PostForm("url")
 	if _, ok := h.cfg.Streams[url]; !ok {
 		h.cfg.Streams[url] = models.Stream{
