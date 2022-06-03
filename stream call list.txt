@@ -1,0 +1,42 @@
+Loading all configs
+  - ServeStreams()
+    - rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool)
+Info: stream tries to connect channel 9
+      - rtspWorker(name, url string, onDemand, disableAudio, debug bool) error
+        - codecAdd(suuid string, codecs []av.CodecData)
+        - cast(uuid string, pck av.Packet)
+
+Starting server
+  * ServeIndex()
+    - List() (string, []string)
+
+  * ServeStreamPlayer()
+    - List() (string, []string)
+
+  * ServeStreamCodec()
+    - Exit(suuid string) bool
+    - RunIfNotRun(uuid string)
+      - rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool)
+        - rtspWorker(name, url string, onDemand, disableAudio, debug bool) error
+          - codecAdd(suuid string, codecs []av.CodecData)
+          - cast(uuid string, pck av.Packet)
+    - CodecGet(suuid string) []av.CodecData
+
+  * ServeStreamVidOverWebRTC()
+    - Exit(suuid string) bool
+    - RunIfNotRun(uuid string)
+      - rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool)
+        - rtspWorker(name, url string, onDemand, disableAudio, debug bool) error
+          - codecAdd(suuid string, codecs []av.CodecData)
+          - cast(uuid string, pck av.Packet)
+    - CodecGet(suuid string) []av.CodecData
+    - GetICEServers() []string
+    - GetICEUsername() string
+    - GetICECredential() string
+    - GetWebRTCPortMin() uint16
+    - GetWebRTCPortMax() uint16
+Set ICEServers [stun:stun.l.google.com:19302]
+    - WritePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool)
+      - CastListAdd(suuid string) (string, chan av.Packet)
+        - pseudoUUID() (uuid string)
+      - CastListDelete(suuid, cuuid string)
