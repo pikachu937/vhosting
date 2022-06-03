@@ -7,6 +7,7 @@ import (
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 	"github.com/mikerumy/vhosting/pkg/timedate"
@@ -14,6 +15,7 @@ import (
 )
 
 type VideoHandler struct {
+	cfg         *config.Config
 	useCase     video.VideoUseCase
 	logUseCase  lg.LogUseCase
 	authUseCase auth.AuthUseCase
@@ -21,9 +23,11 @@ type VideoHandler struct {
 	userUseCase user.UserUseCase
 }
 
-func NewVideoHandler(useCase video.VideoUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+func NewVideoHandler(cfg *config.Config, useCase video.VideoUseCase,
+	logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *VideoHandler {
 	return &VideoHandler{
+		cfg:         cfg,
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
@@ -235,7 +239,7 @@ func (h *VideoHandler) isPermsGranted_getUserId(ctx *gin.Context, log *lg.Log, p
 		return false, -1
 	}
 
-	if timedate.IsDateExpired(session.CreationDate) {
+	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
 		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
 			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return false, -1

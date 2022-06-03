@@ -8,6 +8,7 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 	"github.com/mikerumy/vhosting/pkg/timedate"
@@ -15,6 +16,7 @@ import (
 )
 
 type PermHandler struct {
+	cfg          *config.Config
 	useCase      perm.PermUseCase
 	logUseCase   lg.LogUseCase
 	authUseCase  auth.AuthUseCase
@@ -23,9 +25,12 @@ type PermHandler struct {
 	groupUseCase group.GroupUseCase
 }
 
-func NewPermHandler(useCase perm.PermUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
-	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase, groupUseCase group.GroupUseCase) *PermHandler {
+func NewPermHandler(cfg *config.Config, useCase perm.PermUseCase,
+	logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase,
+	groupUseCase group.GroupUseCase) *PermHandler {
 	return &PermHandler{
+		cfg:          cfg,
 		useCase:      useCase,
 		logUseCase:   logUseCase,
 		authUseCase:  authUseCase,
@@ -88,7 +93,7 @@ func (h *PermHandler) isPermsGranted_getUserId(ctx *gin.Context, log *lg.Log, pe
 		return false, -1
 	}
 
-	if timedate.IsDateExpired(session.CreationDate) {
+	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
 		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
 			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return false, -1

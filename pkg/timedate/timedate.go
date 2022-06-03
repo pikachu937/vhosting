@@ -6,27 +6,6 @@ import (
 	"time"
 )
 
-const notExpiredHours = 168 // 7 days
-
-func IsDateExpired(date string) bool {
-	expirationDate, err := time.Parse(time.RFC3339Nano, date)
-	if err != nil {
-		fmt.Printf("Cannot parse date. Date: %s.\n", date)
-	}
-
-	expirationDate = expirationDate.Add(notExpiredHours * time.Hour)
-
-	if expirationDate.After(time.Now()) {
-		return false
-	}
-
-	return true
-}
-
-func GetDate() string {
-	return time.Now().String()[:9]
-}
-
 func GetTimestamp() string {
 	// get timestamp, separate gmt and time
 	time := time.Now().Round(time.Microsecond).String()
@@ -42,4 +21,19 @@ func GetTimestamp() string {
 
 	// assemble and return
 	return timeWithoutGMT + gmt
+}
+
+func IsDateExpired(date string, expirationHours int) bool {
+	expirationDate, err := time.Parse(time.RFC3339Nano, date)
+	if err != nil {
+		fmt.Printf("Cannot parse date. Date: %s.\n", date)
+	}
+
+	expirationDate = expirationDate.Add(time.Duration(expirationHours) * time.Hour)
+
+	if expirationDate.After(time.Now()) {
+		return false
+	}
+
+	return true
 }

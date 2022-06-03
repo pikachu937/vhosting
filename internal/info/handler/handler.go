@@ -7,6 +7,7 @@ import (
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 	"github.com/mikerumy/vhosting/pkg/timedate"
@@ -14,6 +15,7 @@ import (
 )
 
 type InfoHandler struct {
+	cfg         *config.Config
 	useCase     info.InfoUseCase
 	logUseCase  lg.LogUseCase
 	authUseCase auth.AuthUseCase
@@ -21,9 +23,11 @@ type InfoHandler struct {
 	userUseCase user.UserUseCase
 }
 
-func NewInfoHandler(useCase info.InfoUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+func NewInfoHandler(cfg *config.Config, useCase info.InfoUseCase,
+	logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *InfoHandler {
 	return &InfoHandler{
+		cfg:         cfg,
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
@@ -235,7 +239,7 @@ func (h *InfoHandler) isPermsGranted_getUserId(ctx *gin.Context, log *lg.Log, pe
 		return false, -1
 	}
 
-	if timedate.IsDateExpired(session.CreationDate) {
+	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
 		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
 			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return false, -1

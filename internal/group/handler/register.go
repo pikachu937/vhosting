@@ -6,12 +6,13 @@ import (
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc group.GroupUseCase, luc lg.LogUseCase,
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc group.GroupUseCase, luc lg.LogUseCase,
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase) {
-	h := NewGroupHandler(uc, luc, auc, suc, uuc)
+	h := NewGroupHandler(cfg, uc, luc, auc, suc, uuc)
 
 	groupRoute := router.Group("/group")
 	{

@@ -7,12 +7,13 @@ import (
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc perm.PermUseCase, luc lg.LogUseCase,
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc perm.PermUseCase, luc lg.LogUseCase,
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase, guc group.GroupUseCase) {
-	h := NewPermHandler(uc, luc, auc, suc, uuc, guc)
+	h := NewPermHandler(cfg, uc, luc, auc, suc, uuc, guc)
 
 	permRoute := router.Group("/perm")
 	{

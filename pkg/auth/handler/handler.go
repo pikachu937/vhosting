@@ -6,6 +6,7 @@ import (
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 	"github.com/mikerumy/vhosting/pkg/timedate"
@@ -13,15 +14,18 @@ import (
 )
 
 type AuthHandler struct {
+	cfg         *config.Config
 	useCase     auth.AuthUseCase
 	userUseCase user.UserUseCase
 	sessUseCase sess.SessUseCase
 	logUseCase  lg.LogUseCase
 }
 
-func NewAuthHandler(useCase auth.AuthUseCase, userUseCase user.UserUseCase,
-	sessUseCase sess.SessUseCase, logUseCase lg.LogUseCase) *AuthHandler {
+func NewAuthHandler(cfg *config.Config, useCase auth.AuthUseCase,
+	userUseCase user.UserUseCase, sessUseCase sess.SessUseCase,
+	logUseCase lg.LogUseCase) *AuthHandler {
 	return &AuthHandler{
+		cfg:         cfg,
 		useCase:     useCase,
 		userUseCase: userUseCase,
 		sessUseCase: sessUseCase,
@@ -201,7 +205,7 @@ func (h *AuthHandler) getValidSessionAndDeleteSession(ctx *gin.Context, log *lg.
 		return nil, err
 	}
 
-	if timedate.IsDateExpired(session.CreationDate) {
+	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
 		return nil, nil
 	}
 

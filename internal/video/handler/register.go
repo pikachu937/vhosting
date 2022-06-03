@@ -6,12 +6,13 @@ import (
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc video.VideoUseCase, luc lg.LogUseCase,
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc video.VideoUseCase, luc lg.LogUseCase,
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase) {
-	h := NewVideoHandler(uc, luc, auc, suc, uuc)
+	h := NewVideoHandler(cfg, uc, luc, auc, suc, uuc)
 
 	videoRoute := router.Group("/video")
 	{

@@ -119,17 +119,17 @@ func (a *App) Run() error {
 	router.StaticFS("/static", http.Dir("./web/static"))
 
 	// Register routes
-	authhandler.RegisterHTTPEndpoints(router, a.authUseCase, a.userUseCase,
+	authhandler.RegisterHTTPEndpoints(router, a.cfg, a.authUseCase, a.userUseCase,
 		a.sessUseCase, a.logUseCase)
-	userhandler.RegisterHTTPEndpoints(router, a.userUseCase, a.logUseCase,
+	userhandler.RegisterHTTPEndpoints(router, a.cfg, a.userUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase)
-	grouphandler.RegisterHTTPEndpoints(router, a.groupUseCase, a.logUseCase,
+	grouphandler.RegisterHTTPEndpoints(router, a.cfg, a.groupUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
-	permhandler.RegisterHTTPEndpoints(router, a.permUseCase, a.logUseCase,
+	permhandler.RegisterHTTPEndpoints(router, a.cfg, a.permUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase, a.groupUseCase)
-	infohandler.RegisterHTTPEndpoints(router, a.infoUseCase, a.logUseCase,
+	infohandler.RegisterHTTPEndpoints(router, a.cfg, a.infoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
-	videohandler.RegisterHTTPEndpoints(router, a.videoUseCase, a.logUseCase,
+	videohandler.RegisterHTTPEndpoints(router, a.cfg, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	streamhandler.RegisterStreamingHTTPEndpoints(router, a.scfg, a.StreamUC)
 	downloadhandler.RegisterHTTPEndpoints(router, a.downloadUseCase, a.logUseCase)

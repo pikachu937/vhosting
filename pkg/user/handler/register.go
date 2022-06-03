@@ -5,12 +5,13 @@ import (
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc user.UserUseCase, luc lg.LogUseCase,
-	auc auth.AuthUseCase, suc sess.SessUseCase) {
-	h := NewUserHandler(uc, luc, auc, suc)
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc user.UserUseCase,
+	luc lg.LogUseCase, auc auth.AuthUseCase, suc sess.SessUseCase) {
+	h := NewUserHandler(cfg, uc, luc, auc, suc)
 
 	userRoute := router.Group("/user")
 	{

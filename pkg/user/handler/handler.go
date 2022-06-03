@@ -6,6 +6,7 @@ import (
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/responder"
 	"github.com/mikerumy/vhosting/pkg/timedate"
@@ -13,15 +14,17 @@ import (
 )
 
 type UserHandler struct {
+	cfg         *config.Config
 	useCase     user.UserUseCase
 	logUseCase  lg.LogUseCase
 	authUseCase auth.AuthUseCase
 	sessUseCase sess.SessUseCase
 }
 
-func NewUserHandler(useCase user.UserUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
+func NewUserHandler(cfg *config.Config, useCase user.UserUseCase, logUseCase lg.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase) *UserHandler {
 	return &UserHandler{
+		cfg:         cfg,
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
@@ -280,7 +283,7 @@ func (h *UserHandler) isPermsGranted_getUserId(ctx *gin.Context, log *lg.Log, pe
 		return false, -1
 	}
 
-	if timedate.IsDateExpired(session.CreationDate) {
+	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
 		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
 			h.report(ctx, log, msg.ErrorCannotDeleteSession(err))
 			return false, -1

@@ -5,12 +5,13 @@ import (
 	lg "github.com/mikerumy/vhosting/internal/logging"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
+	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, uc auth.AuthUseCase, uuc user.UserUseCase,
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc auth.AuthUseCase, uuc user.UserUseCase,
 	suc sess.SessUseCase, luc lg.LogUseCase) {
-	h := NewAuthHandler(uc, uuc, suc, luc)
+	h := NewAuthHandler(cfg, uc, uuc, suc, luc)
 
 	authRoute := router.Group("/auth")
 	{
