@@ -4,9 +4,13 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"image/jpeg"
+	"log"
+	"os"
 	"time"
 
 	"github.com/deepch/vdk/av"
+	"github.com/deepch/vdk/cgo/ffmpeg"
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
@@ -16,7 +20,11 @@ import (
 
 const (
 	errorStreamExitNoViewer = "stream exit on demand - no Viewer"
+	snapshotPath            = "./media/vhosting/%s/images"
+	snapshotName            = "snapshot.jpg"
+	snapshotPeriodSeconds   = 60
 	videoTimeoutSeconds     = 80
+	jpegQuality             = 70
 )
 
 type StreamUseCase struct {
@@ -40,14 +48,14 @@ func (u *StreamUseCase) ServeStreams() {
 func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool) {
 	defer u.runUnlock(name)
 	for {
-		fmt.Println("      info: stream tries to connect", name)
+		log.Println("info. stream tries to connect", name)
 		err := u.rtspWorker(name, url, onDemand, disableAudio, debug)
 		if err != nil {
-			fmt.Println("      error: rtspWorker. error:", err.Error())
+			log.Println("error. rtspWorker error. error:", err.Error())
 			u.cfg.LastError = err
 		}
 		if onDemand && !u.isHasViewer(name) {
-			fmt.Println("      error:", errorStreamExitNoViewer)
+			log.Println("error. on demand && not has Viewer error:", errorStreamExitNoViewer)
 			return
 		}
 		time.Sleep(1 * time.Second)
@@ -57,19 +65,56 @@ func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio,
 func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, debug bool) error {
 	keyTest := time.NewTimer(20 * time.Second)
 	clientTest := time.NewTimer(20 * time.Second)
+
 	// add next timeout
-	rtspClient, err := rtspv2.Dial(rtspv2.RTSPClientOptions{URL: url, DisableAudio: disableAudio, DialTimeout: 3 * time.Second, ReadWriteTimeout: 3 * time.Second, Debug: debug})
+	newRTSPClient := rtspv2.RTSPClientOptions{
+		URL:              url,
+		DisableAudio:     disableAudio,
+		DialTimeout:      3 * time.Second,
+		ReadWriteTimeout: 3 * time.Second,
+		Debug:            debug,
+	}
+
+	rtspClient, err := rtspv2.Dial(newRTSPClient)
 	if err != nil {
 		return err
 	}
 	defer rtspClient.Close()
+
 	if rtspClient.CodecData != nil {
 		u.codecAdd(name, rtspClient.CodecData)
 	}
-	var audioOnly bool
-	if len(rtspClient.CodecData) == 1 && rtspClient.CodecData[0].Type().IsAudio() {
-		audioOnly = true
+
+	audioOnly := false
+	videoIDX := 0
+	for i, codec := range rtspClient.CodecData {
+		if codec.Type().IsVideo() {
+			audioOnly = false
+			videoIDX = i
+		}
 	}
+
+	var frameDecoderSingle *ffmpeg.VideoDecoder
+	if !audioOnly {
+		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
+		if err != nil {
+			log.Fatalln("fatal. frameDecoderSingle error. error:", err)
+		}
+	}
+
+	isTimeToSnapshot := true
+	go func() {
+		for {
+			time.Sleep(snapshotPeriodSeconds * time.Second)
+			isTimeToSnapshot = true
+		}
+	}()
+
+	snapshotDir := fmt.Sprintf(snapshotPath, name)
+	if exists, _ := isPathExists(snapshotDir); !exists {
+		os.MkdirAll(snapshotDir, 0777)
+	}
+
 	for {
 		select {
 		case <-clientTest.C:
@@ -94,8 +139,36 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 				keyTest.Reset(20 * time.Second)
 			}
 			u.cast(name, *packetAV)
+			// sample single frame decode encode to jpeg, save on disk
+			if !packetAV.IsKeyFrame {
+				break
+			}
+			pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
+			if err != nil ||
+				pic == nil || !isTimeToSnapshot {
+				break
+			}
+			out, err := os.Create(snapshotDir + "/" + snapshotName)
+			if err != nil {
+				break
+			}
+			if err := jpeg.Encode(out, &pic.Image, &jpeg.Options{Quality: jpegQuality}); err == nil {
+				log.Printf("info. snapshot created for %s\n", name)
+				isTimeToSnapshot = false
+			}
 		}
 	}
+}
+
+func isPathExists(snapshotPath string) (bool, error) {
+	_, err := os.Stat(snapshotPath)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {
@@ -128,11 +201,13 @@ func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
 func (u *StreamUseCase) runUnlock(uuid string) {
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
-	if cfg, ok := u.cfg.Streams[uuid]; ok {
-		if cfg.OnDemand && cfg.RunLock {
-			cfg.RunLock = false
-			u.cfg.Streams[uuid] = cfg
-		}
+	cfg, ok := u.cfg.Streams[uuid]
+	if !ok {
+		return
+	}
+	if cfg.OnDemand && cfg.RunLock {
+		cfg.RunLock = false
+		u.cfg.Streams[uuid] = cfg
 	}
 }
 
@@ -146,12 +221,14 @@ func (u *StreamUseCase) Exit(suuid string) bool {
 func (u *StreamUseCase) RunIfNotRun(uuid string) {
 	u.cfg.Mutex.Lock()
 	defer u.cfg.Mutex.Unlock()
-	if cfg, ok := u.cfg.Streams[uuid]; ok {
-		if cfg.OnDemand && !cfg.RunLock {
-			cfg.RunLock = true
-			u.cfg.Streams[uuid] = cfg
-			go u.rtspWorkerLoop(uuid, cfg.URL, cfg.OnDemand, cfg.DisableAudio, cfg.Debug)
-		}
+	cfg, ok := u.cfg.Streams[uuid]
+	if !ok {
+		return
+	}
+	if cfg.OnDemand && !cfg.RunLock {
+		cfg.RunLock = true
+		u.cfg.Streams[uuid] = cfg
+		go u.rtspWorkerLoop(uuid, cfg.URL, cfg.OnDemand, cfg.DisableAudio, cfg.Debug)
 	}
 }
 
@@ -163,21 +240,22 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 		if !ok {
 			return nil
 		}
-		if cfg.Codecs != nil {
-			for _, codec := range cfg.Codecs {
-				if codec.Type() == av.H264 {
-					codecVideo := codec.(h264parser.CodecData)
-					if codecVideo.SPS() == nil && codecVideo.PPS() == nil &&
-						len(codecVideo.SPS()) <= 0 && len(codecVideo.PPS()) <= 0 {
-						fmt.Println("      error: bad video codec - waiting for SPS/PPS")
-						time.Sleep(50 * time.Millisecond)
-						continue
-					}
-				}
-			}
-			return cfg.Codecs
+		if cfg.Codecs == nil {
+			time.Sleep(50 * time.Millisecond)
+			continue
 		}
-		time.Sleep(50 * time.Millisecond)
+		for _, codec := range cfg.Codecs {
+			if codec.Type() != av.H264 {
+				continue
+			}
+			codecVideo := codec.(h264parser.CodecData)
+			if codecVideo.SPS() == nil && codecVideo.PPS() == nil &&
+				len(codecVideo.SPS()) <= 0 && len(codecVideo.PPS()) <= 0 {
+				log.Println("error: bad video codec - waiting for SPS/PPS")
+				time.Sleep(50 * time.Millisecond)
+			}
+		}
+		return cfg.Codecs
 	}
 	return nil
 }
@@ -221,7 +299,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 	for {
 		select {
 		case <-noVideo.C:
-			fmt.Println("      info: no video")
+			log.Println("info: no video")
 			return
 		case pck := <-ch:
 			if pck.IsKeyFrame || audioOnly {
@@ -233,7 +311,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 			}
 			err := muxerWebRTC.WritePacket(pck)
 			if err != nil {
-				fmt.Println("      error: WritePacket. error:", err.Error())
+				log.Println("error: WritePacket error. error:", err.Error())
 				return
 			}
 		}
@@ -253,7 +331,7 @@ func (u *StreamUseCase) pseudoUUID() (uuid string) {
 	bytes := make([]byte, 16)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		fmt.Println("      error:", err.Error())
+		log.Println("error. pseudoUUID read error. error:", err.Error())
 		return
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])

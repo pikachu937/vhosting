@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -53,43 +53,46 @@ func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
 
 func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
 	uuid := ctx.Param("uuid")
-	if h.useCase.Exit(uuid) {
-		h.useCase.RunIfNotRun(uuid)
+	if !h.useCase.Exit(uuid) {
+		return
+	}
 
-		codecs := h.useCase.CodecGet(uuid)
-		if codecs == nil {
-			return
+	h.useCase.RunIfNotRun(uuid)
+
+	codecs := h.useCase.CodecGet(uuid)
+	if codecs == nil {
+		return
+	}
+
+	var tmpCodec []stream.JCodec
+	for _, codec := range codecs {
+		if codec.Type() != av.H264 && codec.Type() != av.PCM_ALAW && codec.Type() != av.PCM_MULAW && codec.Type() != av.OPUS {
+			log.Println("error. track is ignored - codec not supported WebRTC. codec type:", codec.Type())
+			continue
 		}
 
-		var tmpCodec []stream.JCodec
-		for _, codec := range codecs {
-			if codec.Type() != av.H264 && codec.Type() != av.PCM_ALAW && codec.Type() != av.PCM_MULAW && codec.Type() != av.OPUS {
-				fmt.Println("    error: track is ignored - codec not supported WebRTC. codec type:", codec.Type())
-				continue
-			}
-
-			if codec.Type().IsVideo() {
-				tmpCodec = append(tmpCodec, stream.JCodec{Type: "video"})
-			} else {
-				tmpCodec = append(tmpCodec, stream.JCodec{Type: "audio"})
-			}
+		if codec.Type().IsVideo() {
+			tmpCodec = append(tmpCodec, stream.JCodec{Type: "video"})
+		} else {
+			tmpCodec = append(tmpCodec, stream.JCodec{Type: "audio"})
 		}
+	}
 
-		b, err := json.Marshal(tmpCodec)
-		if err == nil {
-			_, err = ctx.Writer.Write(b)
-			if err != nil {
-				fmt.Println("    error: writing of codec info. error:", err.Error())
-				return
-			}
-		}
+	b, err := json.Marshal(tmpCodec)
+	if err != nil {
+		return
+	}
+
+	_, err = ctx.Writer.Write(b)
+	if err != nil {
+		log.Println("error. writing of codec info. error:", err.Error())
 	}
 }
 
 func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 	suuid := ctx.PostForm("suuid")
 	if !h.useCase.Exit(suuid) {
-		fmt.Println("    info: stream not found. suuid:", suuid)
+		log.Println("info. stream not found. suuid:", suuid)
 		return
 	}
 
@@ -97,7 +100,7 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 
 	codecs := h.useCase.CodecGet(suuid)
 	if codecs == nil {
-		fmt.Println("    info: stream codec not found. suuid:", suuid)
+		log.Println("info. stream codec not found. suuid:", suuid)
 		return
 	}
 
@@ -111,12 +114,12 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 		PortMin: h.useCase.GetWebRTCPortMin(), PortMax: h.useCase.GetWebRTCPortMax()})
 	answer, err := muxerWebRTC.WriteHeader(codecs, ctx.PostForm("data"))
 	if err != nil {
-		fmt.Println("    error: WriteHeader. error:", err.Error())
+		log.Println("error. WriteHeader error. error:", err.Error())
 		return
 	}
 
 	if _, err := ctx.Writer.Write([]byte(answer)); err != nil {
-		fmt.Println("    error: cannot write bytes. error:", err.Error())
+		log.Println("error. cannot write bytes. error:", err.Error())
 		return
 	}
 
@@ -137,7 +140,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 
 	codecs := h.useCase.CodecGet(url)
 	if codecs == nil {
-		fmt.Println("    error: stream codec not found. lasterror:", h.cfg.LastError.Error())
+		log.Println("error. stream codec not found. lasterror:", h.cfg.LastError.Error())
 		return
 	}
 
@@ -152,7 +155,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	sdp64 := ctx.PostForm("sdp64")
 	answer, err := muxerWebRTC.WriteHeader(codecs, sdp64)
 	if err != nil {
-		fmt.Println("    error: Muxer WriteHeader. error:", err.Error())
+		log.Println("error. Muxer WriteHeader error. error:", err.Error())
 		return
 	}
 
@@ -165,7 +168,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 			codec.Type() != av.PCM_ALAW &&
 			codec.Type() != av.PCM_MULAW &&
 			codec.Type() != av.OPUS {
-			fmt.Println("    error: track is ignored - codec not supported WebRTC. codec type:", codec.Type())
+			log.Println("error. track is ignored - codec not supported WebRTC. codec type:", codec.Type())
 			continue
 		}
 		if codec.Type().IsVideo() {

@@ -14,7 +14,7 @@ pagination:
 server:
   debugMode: false
   maxHeaderBytes: 1048576 # 1 megabyte
-  port: "8001"
+  port: "8000"
   readTimeoutSeconds: 15
   writeTimeoutSeconds: 15
 
