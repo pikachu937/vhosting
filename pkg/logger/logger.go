@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/timedate"
 )
 
@@ -15,8 +14,8 @@ const (
 	httpPrintIndent   = "    "
 )
 
-func Init(ctx *gin.Context) *lg.Log {
-	var log lg.Log
+func Init(ctx *gin.Context) *Log {
+	var log Log
 	if ctx != nil {
 		log.ClientIP = ctx.ClientIP()
 		log.SessionOwner = unauthorizedOwner
@@ -27,35 +26,35 @@ func Init(ctx *gin.Context) *lg.Log {
 	return &log
 }
 
-func Complete(log1 *lg.Log, log2 *lg.Log) {
-	if log1.ErrLevel == "" {
+func Complete(log1, log2 *Log) {
+	if log2.ErrLevel != "" {
 		log1.ErrLevel = log2.ErrLevel
 	}
-	if log1.ClientIP == "" {
+	if log2.ClientIP != "" {
 		log1.ClientIP = log2.ClientIP
 	}
-	if log1.SessionOwner == "" {
+	if log2.SessionOwner != "" {
 		log1.SessionOwner = log2.SessionOwner
 	}
-	if log1.RequestMethod == "" {
+	if log2.RequestMethod != "" {
 		log1.RequestMethod = log2.RequestMethod
 	}
-	if log1.RequestPath == "" {
+	if log2.RequestPath != "" {
 		log1.RequestPath = log2.RequestPath
 	}
-	if log1.StatusCode == 0 {
+	if log2.StatusCode != 0 {
 		log1.StatusCode = log2.StatusCode
 	}
-	if log1.ErrCode == 0 {
+	if log2.ErrCode != 0 {
 		log1.ErrCode = log2.ErrCode
 	}
-	if log1.CreationDate == "" {
+	if log2.CreationDate != "" {
 		log1.CreationDate = log2.CreationDate
 	}
 	log1.Message = log2.Message
 }
 
-func Print(log *lg.Log) {
+func Print(log *Log) {
 	if log.ErrLevel == "" {
 		log.ErrLevel = ErrLevelInfo
 	}
@@ -81,38 +80,27 @@ func Print(log *lg.Log) {
 		messageType := fmt.Sprintf("%T", log.Message)
 		if messageType == TypeOfUser {
 			printLine += GotUser + "\t"
-		}
-		if messageType == TypeOfUsers {
+		} else if messageType == TypeOfUsers {
 			printLine += GotAllUsers + "\t"
-		}
-		if messageType == TypeOfGroup {
+		} else if messageType == TypeOfGroup {
 			printLine += GotGroup + "\t"
-		}
-		if messageType == TypeOfGroups {
+		} else if messageType == TypeOfGroups {
 			printLine += GotAllGroups + "\t"
-		}
-		if messageType == TypeOfPermIds {
+		} else if messageType == TypeOfPermIds {
 			printLine += GotUserPerms + "\t"
-		}
-		if messageType == TypeOfPerms {
+		} else if messageType == TypeOfPerms {
 			printLine += GotAllPerms + "\t"
-		}
-		if messageType == TypeOfInfo {
+		} else if messageType == TypeOfInfo {
 			printLine += GotInfo + "\t"
-		}
-		if messageType == TypeOfInfos {
+		} else if messageType == TypeOfInfos {
 			printLine += GotAllInfos + "\t"
-		}
-		if messageType == TypeOfVideo {
+		} else if messageType == TypeOfVideo {
 			printLine += GotVideo + "\t"
-		}
-		if messageType == TypeOfVideos {
+		} else if messageType == TypeOfVideos {
 			printLine += GotAllVideos + "\t"
-		}
-		if messageType == TypeOfGroupIds {
+		} else if messageType == TypeOfGroupIds {
 			printLine += GotUserGroups + "\t"
-		}
-		if messageType == TypeOfDownload {
+		} else if messageType == TypeOfDownload {
 			printLine += GotDownload + "\t"
 		}
 	}
@@ -124,4 +112,10 @@ func Print(log *lg.Log) {
 	printLine += log.CreationDate
 
 	fmt.Println(printLine)
+}
+
+func Printc(ctx *gin.Context, messageLog *Log) {
+	log := Init(ctx)
+	Complete(log, messageLog)
+	Print(log)
 }

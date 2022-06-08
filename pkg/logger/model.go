@@ -1,4 +1,4 @@
-package logging
+package logger
 
 type Log struct {
 	Id            int         `db:"id"`

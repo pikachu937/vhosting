@@ -19,38 +19,38 @@ func (h *PermHandler) SetGroupPermissions(ctx *gin.Context) {
 	// Read requested ID, read input, check required fields
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
 	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
 	if h.useCase.IsRequiredEmpty(inputPermIds) {
-		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
+		h.logUseCase.Report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
 		return
 	}
 
 	// Check group existence, upsert group permissions
 	exists, err := h.groupUseCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.logUseCase.Report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
 	if err := h.useCase.SetGroupPermissions(reqId, inputPermIds); err != nil {
-		h.report(ctx, log, msg.ErrorCannotSetGroupPerms(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotSetGroupPerms(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGroupPermsSet())
+	h.logUseCase.Report(ctx, log, msg.InfoGroupPermsSet())
 }
 
 func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
@@ -66,17 +66,17 @@ func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 	// Read requested ID, check group existence, get group permissions
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
 	exists, err := h.groupUseCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.logUseCase.Report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
@@ -84,11 +84,11 @@ func (h *PermHandler) GetGroupPermissions(ctx *gin.Context) {
 
 	gottenPerms, err := h.useCase.GetGroupPermissions(reqId, urlparams)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotGetGroupPerms(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotGetGroupPerms(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGotGroupPerms(gottenPerms))
+	h.logUseCase.Report(ctx, log, msg.InfoGotGroupPerms(gottenPerms))
 }
 
 func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
@@ -104,36 +104,36 @@ func (h *PermHandler) DeleteGroupPermissions(ctx *gin.Context) {
 	// Read requested ID, read input, check required fields
 	reqId, err := h.useCase.AtoiRequestedId(ctx)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
 		return
 	}
 
 	inputPermIds, err := h.useCase.BindJSONPermIds(ctx)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotBindInputData(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotBindInputData(err))
 		return
 	}
 
 	if h.useCase.IsRequiredEmpty(inputPermIds) {
-		h.report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
+		h.logUseCase.Report(ctx, log, msg.ErrorPermIdsCannotBeEmpty())
 		return
 	}
 
 	// Check group existence, delete group permissions
 	exists, err := h.groupUseCase.IsGroupExists(reqId)
 	if err != nil {
-		h.report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckGroupExistence(err))
 		return
 	}
 	if !exists {
-		h.report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
+		h.logUseCase.Report(ctx, log, msg.ErrorGroupWithRequestedIDIsNotExist())
 		return
 	}
 
 	if err := h.useCase.DeleteGroupPermissions(reqId, inputPermIds); err != nil {
-		h.report(ctx, log, msg.ErrorCannotDeleteGroupPerms(err))
+		h.logUseCase.Report(ctx, log, msg.ErrorCannotDeleteGroupPerms(err))
 		return
 	}
 
-	h.report(ctx, log, msg.InfoGroupPermsDeleted())
+	h.logUseCase.Report(ctx, log, msg.InfoGroupPermsDeleted())
 }

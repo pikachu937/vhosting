@@ -13,8 +13,6 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
-	"github.com/gin-gonic/gin"
-	lg "github.com/mikerumy/vhosting/internal/logging"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/config"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
@@ -52,14 +50,14 @@ func (u *StreamUseCase) ServeStreams() {
 func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool) {
 	defer u.runUnlock(name)
 	for {
-		u.ReportToConsole(nil, msg.InfoStreamTriesToConnect(name))
+		logger.Printc(nil, msg.InfoStreamTriesToConnect(name))
 		err := u.rtspWorker(name, url, onDemand, disableAudio, debug)
 		if err != nil {
-			u.ReportToConsole(nil, msg.ErrorRTSPWorkerError(err))
+			logger.Printc(nil, msg.ErrorRTSPWorkerError(err))
 			u.scfg.LastError = err
 		}
 		if onDemand && !u.isHasViewer(name) {
-			u.ReportToConsole(nil, msg.ErrorOnDemandANDNotHasViewerError(errorStreamExitNoViewer))
+			logger.Printc(nil, msg.ErrorOnDemandANDNotHasViewerError(errorStreamExitNoViewer))
 			return
 		}
 		time.Sleep(1 * time.Second)
@@ -102,7 +100,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	if !audioOnly {
 		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
 		if err != nil {
-			u.ReportToConsole(nil, msg.ErrorFrameDecoderSingleError(err))
+			logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
 		}
 	}
 
@@ -160,7 +158,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 			}
 			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
 				if u.cfg.StreamSnapshotShowStatus {
-					u.ReportToConsole(nil, msg.InfoSnapshotCreated(name))
+					logger.Printc(nil, msg.InfoSnapshotCreated(name))
 				}
 				isTimeToSnapshot = false
 			}
@@ -259,7 +257,7 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 			codecVideo := codec.(h264parser.CodecData)
 			if codecVideo.SPS() == nil && codecVideo.PPS() == nil &&
 				len(codecVideo.SPS()) <= 0 && len(codecVideo.PPS()) <= 0 {
-				u.ReportToConsole(nil, msg.ErrorBadVideoCodecWaitingForSPS_PPS())
+				logger.Printc(nil, msg.ErrorBadVideoCodecWaitingForSPS_PPS())
 				time.Sleep(50 * time.Millisecond)
 			}
 		}
@@ -307,7 +305,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 	for {
 		select {
 		case <-noVideo.C:
-			u.ReportToConsole(nil, msg.InfoNoVideo())
+			logger.Printc(nil, msg.InfoNoVideo())
 			return
 		case pck := <-ch:
 			if pck.IsKeyFrame || audioOnly {
@@ -319,7 +317,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 			}
 			err := muxerWebRTC.WritePacket(pck)
 			if err != nil {
-				u.ReportToConsole(nil, msg.ErrorWritePacketError(err))
+				logger.Printc(nil, msg.ErrorWritePacketError(err))
 				return
 			}
 		}
@@ -339,7 +337,7 @@ func (u *StreamUseCase) pseudoUUID() (uuid string) {
 	bytes := make([]byte, 16)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		u.ReportToConsole(nil, msg.ErrorPseudoUUIDReadError(err))
+		logger.Printc(nil, msg.ErrorPseudoUUIDReadError(err))
 		return
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
@@ -364,10 +362,4 @@ func (u *StreamUseCase) List() (string, []string) {
 		res = append(res, key)
 	}
 	return first, res
-}
-
-func (h *StreamUseCase) ReportToConsole(ctx *gin.Context, messageLog *lg.Log) {
-	log := logger.Init(ctx)
-	logger.Complete(log, messageLog)
-	logger.Print(log)
 }

@@ -3,15 +3,15 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/group"
-	lg "github.com/mikerumy/vhosting/internal/logging"
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
+	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc perm.PermUseCase, luc lg.LogUseCase,
+func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc perm.PermUseCase, luc logger.LogUseCase,
 	auc auth.AuthUseCase, suc sess.SessUseCase, uuc user.UserUseCase, guc group.GroupUseCase) {
 	h := NewPermHandler(cfg, uc, luc, auc, suc, uuc, guc)
 

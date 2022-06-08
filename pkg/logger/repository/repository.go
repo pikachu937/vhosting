@@ -3,10 +3,10 @@ package repository
 import (
 	"fmt"
 
-	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
+	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
 type LogRepository struct {
@@ -17,14 +17,14 @@ func NewLogRepository(cfg *config.Config) *LogRepository {
 	return &LogRepository{cfg: cfg}
 }
 
-func (r *LogRepository) CreateLogRecord(log *lg.Log) error {
+func (r *LogRepository) CreateLogRecord(log *logger.Log) error {
 	db := db_connect.NewDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", lg.TableName,
-		lg.ErrLevel, lg.ClientID, lg.SessionOwner, lg.RequestMethod, lg.RequestPath,
-		lg.StatusCode, lg.ErrCode, lg.Message, lg.CreationDate)
+	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s, %s, %s, %s)", logger.TableName,
+		logger.ErrLevel, logger.ClientID, logger.SessionOwner, logger.RequestMethod, logger.RequestPath,
+		logger.StatusCode, logger.ErrCode, logger.Message, logger.CreationDate)
 	val := "($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 	query := fmt.Sprintf(template, tbl, val)
 

@@ -20,9 +20,6 @@ import (
 	infohandler "github.com/mikerumy/vhosting/internal/info/handler"
 	inforepo "github.com/mikerumy/vhosting/internal/info/repository"
 	infousecase "github.com/mikerumy/vhosting/internal/info/usecase"
-	lg "github.com/mikerumy/vhosting/internal/logging"
-	logrepo "github.com/mikerumy/vhosting/internal/logging/repository"
-	logusecase "github.com/mikerumy/vhosting/internal/logging/usecase"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	perm "github.com/mikerumy/vhosting/internal/permission"
 	permhandler "github.com/mikerumy/vhosting/internal/permission/handler"
@@ -44,7 +41,9 @@ import (
 	"github.com/mikerumy/vhosting/pkg/download"
 	downloadhandler "github.com/mikerumy/vhosting/pkg/download/handler"
 	downloadusecase "github.com/mikerumy/vhosting/pkg/download/usecase"
-	logger "github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/mikerumy/vhosting/pkg/logger"
+	logrepo "github.com/mikerumy/vhosting/pkg/logger/repository"
+	logusecase "github.com/mikerumy/vhosting/pkg/logger/usecase"
 	"github.com/mikerumy/vhosting/pkg/stream"
 	streamhandler "github.com/mikerumy/vhosting/pkg/stream/handler"
 	streamusecase "github.com/mikerumy/vhosting/pkg/stream/usecase"
@@ -61,7 +60,7 @@ type App struct {
 	userUseCase     user.UserUseCase
 	authUseCase     auth.AuthUseCase
 	sessUseCase     sess.SessUseCase
-	logUseCase      lg.LogUseCase
+	logUseCase      logger.LogUseCase
 	groupUseCase    group.GroupUseCase
 	permUseCase     perm.PermUseCase
 	infoUseCase     info.InfoUseCase
@@ -87,10 +86,10 @@ func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 		authUseCase:     authusecase.NewAuthUseCase(cfg, authRepo),
 		sessUseCase:     sessusecase.NewSessUseCase(sessRepo, authRepo),
 		logUseCase:      logusecase.NewLogUseCase(logRepo),
-		groupUseCase:    groupusecase.NewGroupUseCase(cfg, groupRepo),
-		permUseCase:     permusecase.NewPermUseCase(cfg, permRepo),
-		infoUseCase:     infousecase.NewInfoUseCase(cfg, infoRepo),
-		videoUseCase:    videousecase.NewVideoUseCase(cfg, videoRepo),
+		groupUseCase:    groupusecase.NewGroupUseCase(groupRepo),
+		permUseCase:     permusecase.NewPermUseCase(permRepo),
+		infoUseCase:     infousecase.NewInfoUseCase(infoRepo),
+		videoUseCase:    videousecase.NewVideoUseCase(videoRepo),
 		StreamUC:        streamusecase.NewStreamUseCase(cfg, scfg),
 		downloadUseCase: downloadusecase.NewDownloadUseCase(cfg),
 	}

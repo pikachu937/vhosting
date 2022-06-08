@@ -5,18 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mikerumy/vhosting/internal/group"
-	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type GroupUseCase struct {
-	cfg       *config.Config
 	groupRepo group.GroupRepository
 }
 
-func NewGroupUseCase(cfg *config.Config, groupRepo group.GroupRepository) *GroupUseCase {
+func NewGroupUseCase(groupRepo group.GroupRepository) *GroupUseCase {
 	return &GroupUseCase{
-		cfg:       cfg,
 		groupRepo: groupRepo,
 	}
 }

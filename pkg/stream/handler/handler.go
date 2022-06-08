@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
+	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
@@ -67,7 +68,7 @@ func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
 	var tmpCodec []stream.JCodec
 	for _, codec := range codecs {
 		if codec.Type() != av.H264 && codec.Type() != av.PCM_ALAW && codec.Type() != av.PCM_MULAW && codec.Type() != av.OPUS {
-			h.useCase.ReportToConsole(ctx, msg.ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codec.Type()))
+			logger.Printc(ctx, msg.ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codec.Type()))
 			continue
 		}
 
@@ -85,14 +86,14 @@ func (h *StreamHandler) ServeStreamCodec(ctx *gin.Context) {
 
 	_, err = ctx.Writer.Write(b)
 	if err != nil {
-		h.useCase.ReportToConsole(ctx, msg.ErrorWritingOfCodecError(err))
+		logger.Printc(ctx, msg.ErrorWritingOfCodecError(err))
 	}
 }
 
 func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 	suuid := ctx.PostForm("suuid")
 	if !h.useCase.Exit(suuid) {
-		h.useCase.ReportToConsole(ctx, msg.InfoStreamNotFound(suuid))
+		logger.Printc(ctx, msg.InfoStreamNotFound(suuid))
 		return
 	}
 
@@ -100,7 +101,7 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 
 	codecs := h.useCase.CodecGet(suuid)
 	if codecs == nil {
-		h.useCase.ReportToConsole(ctx, msg.InfoStreamCodecNotFound(suuid))
+		logger.Printc(ctx, msg.InfoStreamCodecNotFound(suuid))
 		return
 	}
 
@@ -114,12 +115,12 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 		PortMin: h.useCase.GetWebRTCPortMin(), PortMax: h.useCase.GetWebRTCPortMax()})
 	answer, err := muxerWebRTC.WriteHeader(codecs, ctx.PostForm("data"))
 	if err != nil {
-		h.useCase.ReportToConsole(ctx, msg.ErrorWriteHeaderError(err))
+		logger.Printc(ctx, msg.ErrorWriteHeaderError(err))
 		return
 	}
 
 	if _, err := ctx.Writer.Write([]byte(answer)); err != nil {
-		h.useCase.ReportToConsole(ctx, msg.ErrorCannotWriteBytes(err))
+		logger.Printc(ctx, msg.ErrorCannotWriteBytes(err))
 		return
 	}
 
@@ -140,7 +141,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 
 	codecs := h.useCase.CodecGet(url)
 	if codecs == nil {
-		h.useCase.ReportToConsole(ctx, msg.ErrorStreamCodecNotFound(h.cfg.LastError))
+		logger.Printc(ctx, msg.ErrorStreamCodecNotFound(h.cfg.LastError))
 		return
 	}
 
@@ -155,7 +156,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	sdp64 := ctx.PostForm("sdp64")
 	answer, err := muxerWebRTC.WriteHeader(codecs, sdp64)
 	if err != nil {
-		h.useCase.ReportToConsole(ctx, msg.ErrorMuxerWriteHeaderError(err))
+		logger.Printc(ctx, msg.ErrorMuxerWriteHeaderError(err))
 		return
 	}
 
@@ -168,7 +169,7 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 			codec.Type() != av.PCM_ALAW &&
 			codec.Type() != av.PCM_MULAW &&
 			codec.Type() != av.OPUS {
-			h.useCase.ReportToConsole(ctx, msg.ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codec.Type()))
+			logger.Printc(ctx, msg.ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codec.Type()))
 			continue
 		}
 		if codec.Type().IsVideo() {

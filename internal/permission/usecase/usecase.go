@@ -5,18 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	perm "github.com/mikerumy/vhosting/internal/permission"
-	"github.com/mikerumy/vhosting/pkg/config"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type PermUseCase struct {
-	cfg      *config.Config
 	permRepo perm.PermRepository
 }
 
-func NewPermUseCase(cfg *config.Config, permRepo perm.PermRepository) *PermUseCase {
+func NewPermUseCase(permRepo perm.PermRepository) *PermUseCase {
 	return &PermUseCase{
-		cfg:      cfg,
 		permRepo: permRepo,
 	}
 }
