@@ -91,14 +91,14 @@ func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 		permUseCase:     permusecase.NewPermUseCase(cfg, permRepo),
 		infoUseCase:     infousecase.NewInfoUseCase(cfg, infoRepo),
 		videoUseCase:    videousecase.NewVideoUseCase(cfg, videoRepo),
-		StreamUC:        streamusecase.NewStreamUseCase(scfg),
+		StreamUC:        streamusecase.NewStreamUseCase(cfg, scfg),
 		downloadUseCase: downloadusecase.NewDownloadUseCase(cfg),
 	}
 }
 
 func (a *App) Run() error {
 	// Debug mode
-	if a.cfg.ServerDebugMode {
+	if a.cfg.ServerDebugEnable {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
@@ -136,7 +136,7 @@ func (a *App) Run() error {
 
 	// HTTP Server
 	a.httpServer = &http.Server{
-		Addr:           ":" + a.cfg.ServerPort,
+		Addr:           fmt.Sprintf(":%d", a.cfg.ServerPort),
 		Handler:        router,
 		ReadTimeout:    time.Duration(a.cfg.ServerReadTimeoutSeconds) * time.Second,
 		WriteTimeout:   time.Duration(a.cfg.ServerWriteTimeoutSeconds) * time.Second,

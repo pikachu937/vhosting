@@ -15,10 +15,15 @@ func NewDBConnection(cfg *config.Config) *sqlx.DB {
 
 	var db *sqlx.DB
 
+	sslMode := "disable"
+	if cfg.DBSSLEnable {
+		sslMode = "enable"
+	}
+
 	go func() *sqlx.DB {
 		for {
-			db, _ = sqlx.Open(cfg.DBDriver, fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-				cfg.DBHost, cfg.DBPort, cfg.DBUsername, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode))
+			db, _ = sqlx.Open(cfg.DBDriver, fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
+				cfg.DBHost, cfg.DBPort, cfg.DBUsername, cfg.DBName, cfg.DBPassword, sslMode))
 
 			time.Sleep(3 * time.Millisecond)
 
@@ -28,13 +33,13 @@ func NewDBConnection(cfg *config.Config) *sqlx.DB {
 		}
 	}()
 
-	connLatency := time.Duration(cfg.DBConnLatencyMilliseconds)
+	connLatency := time.Duration(cfg.DBConnectionLatencyMilliseconds)
 	time.Sleep(connLatency * time.Millisecond)
 
-	connTimeout := cfg.DBConnTimeoutSeconds
+	connTimeout := cfg.DBConnectionTimeoutSeconds
 	for t := connTimeout; t > 0; t-- {
 		if db != nil {
-			if cfg.DBLogConnStatus {
+			if cfg.DBConnectionShowStatus {
 				logger.Print(msg.InfoEstablishedOpenedDBConnection(timeAtStarting))
 				return db
 			}
@@ -53,7 +58,7 @@ func CloseDBConnection(cfg *config.Config, db *sqlx.DB) {
 		return
 	}
 
-	if cfg.DBLogConnStatus {
+	if cfg.DBConnectionShowStatus {
 		logger.Print(msg.InfoEstablishedClosedConnectionToDB())
 		return
 	}

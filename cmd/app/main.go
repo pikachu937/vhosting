@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	msg "github.com/mikerumy/vhosting/internal/messages"
@@ -32,7 +34,7 @@ func main() {
 		logger.Print(msg.FatalFailedToLoadStreamConfigFile(err))
 		return
 	}
-	scfg.Server.HTTPPort = cfg.ServerPort
+	scfg.Server.HTTPPort = strconv.Itoa(cfg.ServerPort)
 	logger.Print(msg.InfoStreamConfigLoaded())
 
 	// Init new server

@@ -7,8 +7,8 @@ import (
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func WarningCannotConvertCvar(cvarName string, setValue interface{}, err error) *lg.Log {
-	return &lg.Log{ErrCode: 10, Message: fmt.Sprintf("Cannot convert cvar %s. Set default value: %v. Error: %s.", cvarName, setValue, err.Error()), ErrLevel: logger.ErrLevelWarning}
+func WarningCannotConvertCvar(cvarName string, setValue interface{}) *lg.Log {
+	return &lg.Log{ErrCode: 10, Message: fmt.Sprintf("Cannot convert cvar %s. Set default value: %v.", cvarName, setValue), ErrLevel: logger.ErrLevelWarning}
 }
 
 func FatalFailedToLoadConfigFile(err error) *lg.Log {

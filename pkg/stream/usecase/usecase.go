@@ -14,6 +14,7 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	"github.com/mikerumy/vhosting/pkg/config"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
@@ -22,23 +23,23 @@ const (
 	errorStreamExitNoViewer = "stream exit on demand - no Viewer"
 	snapshotPath            = "./media/vhosting/%s/images"
 	snapshotName            = "snapshot.jpg"
-	snapshotPeriodSeconds   = 60
 	videoTimeoutSeconds     = 80
-	jpegQuality             = 70
 )
 
 type StreamUseCase struct {
-	cfg *sconfig.Config
+	cfg  *config.Config
+	scfg *sconfig.Config
 }
 
-func NewStreamUseCase(cfg *sconfig.Config) *StreamUseCase {
+func NewStreamUseCase(cfg *config.Config, scfg *sconfig.Config) *StreamUseCase {
 	return &StreamUseCase{
-		cfg: cfg,
+		cfg:  cfg,
+		scfg: scfg,
 	}
 }
 
 func (u *StreamUseCase) ServeStreams() {
-	for key, val := range u.cfg.Streams {
+	for key, val := range u.scfg.Streams {
 		if !val.OnDemand {
 			go u.rtspWorkerLoop(key, val.URL, val.OnDemand, val.DisableAudio, val.Debug)
 		}
@@ -52,7 +53,7 @@ func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio,
 		err := u.rtspWorker(name, url, onDemand, disableAudio, debug)
 		if err != nil {
 			log.Println("error. rtspWorker error. error:", err.Error())
-			u.cfg.LastError = err
+			u.scfg.LastError = err
 		}
 		if onDemand && !u.isHasViewer(name) {
 			log.Println("error. on demand && not has Viewer error:", errorStreamExitNoViewer)
@@ -103,12 +104,14 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 
 	isTimeToSnapshot := true
-	go func() {
-		for {
-			time.Sleep(snapshotPeriodSeconds * time.Second)
-			isTimeToSnapshot = true
-		}
-	}()
+	if u.cfg.StreamSnapshotsEnable {
+		go func() {
+			for {
+				time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
+				isTimeToSnapshot = true
+			}
+		}()
+	}
 
 	snapshotDir := fmt.Sprintf(snapshotPath, name)
 	if exists, _ := isPathExists(snapshotDir); !exists {
@@ -140,7 +143,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 			}
 			u.cast(name, *packetAV)
 			// sample single frame decode encode to jpeg, save on disk
-			if !packetAV.IsKeyFrame {
+			if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
 				break
 			}
 			pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
@@ -152,7 +155,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 			if err != nil {
 				break
 			}
-			if err := jpeg.Encode(out, &pic.Image, &jpeg.Options{Quality: jpegQuality}); err == nil {
+			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
 				log.Printf("info. snapshot created for %s\n", name)
 				isTimeToSnapshot = false
 			}
@@ -172,26 +175,26 @@ func isPathExists(snapshotPath string) (bool, error) {
 }
 
 func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	t := u.cfg.Streams[suuid]
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	t := u.scfg.Streams[suuid]
 	t.Codecs = codecs
-	u.cfg.Streams[suuid] = t
+	u.scfg.Streams[suuid] = t
 }
 
 func (u *StreamUseCase) isHasViewer(uuid string) bool {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	if cfg, ok := u.cfg.Streams[uuid]; ok && len(cfg.ClientList) > 0 {
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	if cfg, ok := u.scfg.Streams[uuid]; ok && len(cfg.ClientList) > 0 {
 		return true
 	}
 	return false
 }
 
 func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	for _, val := range u.cfg.Streams[uuid].ClientList {
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	for _, val := range u.scfg.Streams[uuid].ClientList {
 		if len(val.Cast) < cap(val.Cast) {
 			val.Cast <- pck
 		}
@@ -199,44 +202,44 @@ func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
 }
 
 func (u *StreamUseCase) runUnlock(uuid string) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	cfg, ok := u.cfg.Streams[uuid]
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	cfg, ok := u.scfg.Streams[uuid]
 	if !ok {
 		return
 	}
 	if cfg.OnDemand && cfg.RunLock {
 		cfg.RunLock = false
-		u.cfg.Streams[uuid] = cfg
+		u.scfg.Streams[uuid] = cfg
 	}
 }
 
 func (u *StreamUseCase) Exit(suuid string) bool {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	_, ok := u.cfg.Streams[suuid]
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	_, ok := u.scfg.Streams[suuid]
 	return ok
 }
 
 func (u *StreamUseCase) RunIfNotRun(uuid string) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	cfg, ok := u.cfg.Streams[uuid]
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	cfg, ok := u.scfg.Streams[uuid]
 	if !ok {
 		return
 	}
 	if cfg.OnDemand && !cfg.RunLock {
 		cfg.RunLock = true
-		u.cfg.Streams[uuid] = cfg
+		u.scfg.Streams[uuid] = cfg
 		go u.rtspWorkerLoop(uuid, cfg.URL, cfg.OnDemand, cfg.DisableAudio, cfg.Debug)
 	}
 }
 
 func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 	for i := 0; i < 100; i++ {
-		u.cfg.Mutex.RLock()
-		cfg, ok := u.cfg.Streams[suuid]
-		u.cfg.Mutex.RUnlock()
+		u.scfg.Mutex.RLock()
+		cfg, ok := u.scfg.Streams[suuid]
+		u.scfg.Mutex.RUnlock()
 		if !ok {
 			return nil
 		}
@@ -261,33 +264,33 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 }
 
 func (u *StreamUseCase) GetICEServers() []string {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	return u.cfg.Server.ICEServers
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	return u.scfg.Server.ICEServers
 }
 
 func (u *StreamUseCase) GetICEUsername() string {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	return u.cfg.Server.ICEUsername
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	return u.scfg.Server.ICEUsername
 }
 
 func (u *StreamUseCase) GetICECredential() string {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	return u.cfg.Server.ICECredential
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	return u.scfg.Server.ICECredential
 }
 
 func (u *StreamUseCase) GetWebRTCPortMin() uint16 {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	return u.cfg.Server.WebRTCPortMin
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	return u.scfg.Server.WebRTCPortMin
 }
 
 func (u *StreamUseCase) GetWebRTCPortMax() uint16 {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	return u.cfg.Server.WebRTCPortMax
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	return u.scfg.Server.WebRTCPortMax
 }
 
 func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audioOnly bool) {
@@ -319,11 +322,11 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 }
 
 func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
 	cuuid := u.pseudoUUID()
 	ch := make(chan av.Packet, 100)
-	u.cfg.Streams[suuid].ClientList[cuuid] = stream.Viewer{Cast: ch}
+	u.scfg.Streams[suuid].ClientList[cuuid] = stream.Viewer{Cast: ch}
 	return cuuid, ch
 }
 
@@ -339,17 +342,17 @@ func (u *StreamUseCase) pseudoUUID() (uuid string) {
 }
 
 func (u *StreamUseCase) CastListDelete(suuid, cuuid string) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
-	delete(u.cfg.Streams[suuid].ClientList, cuuid)
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
+	delete(u.scfg.Streams[suuid].ClientList, cuuid)
 }
 
 func (u *StreamUseCase) List() (string, []string) {
-	u.cfg.Mutex.Lock()
-	defer u.cfg.Mutex.Unlock()
+	u.scfg.Mutex.Lock()
+	defer u.scfg.Mutex.Unlock()
 	var res []string
 	var first string
-	for key := range u.cfg.Streams {
+	for key := range u.scfg.Streams {
 		if first == "" {
 			first = key
 		}

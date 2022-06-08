@@ -8,8 +8,8 @@ import (
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func InfoServerStartedSuccessfullyAtLocalAddress(host, port string) *lg.Log {
-	return &lg.Log{Message: fmt.Sprintf("Server started successfully at local address: %s:%s.", host, port), ErrLevel: logger.ErrLevelInfo}
+func InfoServerStartedSuccessfullyAtLocalAddress(host string, port int) *lg.Log {
+	return &lg.Log{Message: fmt.Sprintf("Server started successfully at local address: %s:%d.", host, port), ErrLevel: logger.ErrLevelInfo}
 }
 
 func InfoServerShutedDownCorrectly() *lg.Log {

@@ -1,29 +1,33 @@
 package config
 
 type Config struct {
-	DBConnTimeoutSeconds      int
-	DBConnLatencyMilliseconds int
-	DBDriver                  string
-	DBHost                    string
-	DBLogConnStatus           bool
-	DBName                    string
-	DBPassword                string
-	DBPort                    string
-	DBSSLMode                 string
-	DBUsername                string
+	DBConnectionLatencyMilliseconds int
+	DBConnectionShowStatus          bool
+	DBConnectionTimeoutSeconds      int
+	DBHost                          string
+	DBName                          string
+	DBPort                          int
+	DBSSLEnable                     bool
+	DBUsername                      string
+	DBDriver                        string
+	DBPassword                      string
 
 	HashingPasswordSalt    string
 	HashingTokenSigningKey string
 
 	PaginationGetLimitDefault int
 
-	ServerDebugMode           bool
+	ServerDebugEnable         bool
 	ServerMaxHeaderBytes      int
-	ServerPort                string
+	ServerPort                int
 	ServerReadTimeoutSeconds  int
 	ServerWriteTimeoutSeconds int
 
 	SessionTTLHours int
 
 	ServerIP string
+
+	StreamSnapshotPeriodSeconds int
+	StreamSnapshotShowStatus    bool
+	StreamSnapshotsEnable       bool
 }

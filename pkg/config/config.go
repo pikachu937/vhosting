@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"strconv"
 	"strings"
 
 	msg "github.com/mikerumy/vhosting/internal/messages"
@@ -23,95 +22,106 @@ func LoadConfig(path string) (*Config, error) {
 		return &cfg, err
 	}
 
-	var cvarName string
+	var cvar string
 
-	cvarName = "db.connTimeoutSeconds"
-	dbConnTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
-		dbConnTimeoutSeconds = 5
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, dbConnTimeoutSeconds, err))
+	cvar = "db.connectionLatencyMilliseconds"
+	dbConnectionLatencyMilliseconds := viper.GetInt(cvar)
+	if dbConnectionLatencyMilliseconds == 0 {
+		dbConnectionLatencyMilliseconds = 100
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dbConnectionLatencyMilliseconds))
 	}
 
-	cvarName = "db.connLatencyMilliseconds"
-	dbConnLatencyMilliseconds, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
-		dbConnLatencyMilliseconds = 100
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, dbConnLatencyMilliseconds, err))
+	cvar = "db.connectionTimeoutSeconds"
+	dbConnectionTimeoutSeconds := viper.GetInt(cvar)
+	if dbConnectionTimeoutSeconds == 0 {
+		dbConnectionTimeoutSeconds = 5
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dbConnectionTimeoutSeconds))
 	}
 
-	cvarName = "db.logConnStatus"
-	dbLogConnStatus, err := strconv.ParseBool(viper.GetString(cvarName))
-	if err != nil {
-		dbLogConnStatus = true
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, dbLogConnStatus, err))
+	cvar = "db.port"
+	dbPort := viper.GetInt(cvar)
+	if dbPort == 0 {
+		dbPort = 3456
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dbPort))
 	}
 
-	cvarName = "pagination.getLimitDefault"
-	paginationGetLimitDefault, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
+	cvar = "pagination.getLimitDefault"
+	paginationGetLimitDefault := viper.GetInt(cvar)
+	if paginationGetLimitDefault == 0 {
 		paginationGetLimitDefault = 30
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, paginationGetLimitDefault, err))
+		logger.Print(msg.WarningCannotConvertCvar(cvar, paginationGetLimitDefault))
 	}
 
-	cvarName = "server.debugMode"
-	serverDebugMode, err := strconv.ParseBool(viper.GetString(cvarName))
-	if err != nil {
-		serverDebugMode = true
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, serverDebugMode, err))
-	}
-
-	cvarName = "server.maxHeaderBytes"
-	serverMaxHeaderBytes, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
+	cvar = "server.maxHeaderBytes"
+	serverMaxHeaderBytes := viper.GetInt(cvar)
+	if serverMaxHeaderBytes == 0 {
 		serverMaxHeaderBytes = 1048576 // 1 megabyte
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, serverMaxHeaderBytes, err))
+		logger.Print(msg.WarningCannotConvertCvar(cvar, serverMaxHeaderBytes))
 	}
 
-	cvarName = "server.readTimeoutSeconds"
-	serverReadTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
+	cvar = "server.port"
+	serverPort := viper.GetInt(cvar)
+	if serverPort == 0 {
+		serverPort = 8000
+		logger.Print(msg.WarningCannotConvertCvar(cvar, serverPort))
+	}
+
+	cvar = "server.readTimeoutSeconds"
+	serverReadTimeoutSeconds := viper.GetInt(cvar)
+	if serverReadTimeoutSeconds == 0 {
 		serverReadTimeoutSeconds = 15
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, serverReadTimeoutSeconds, err))
+		logger.Print(msg.WarningCannotConvertCvar(cvar, serverReadTimeoutSeconds))
 	}
 
-	cvarName = "server.writeTimeoutSeconds"
-	serverWriteTimeoutSeconds, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
+	cvar = "server.writeTimeoutSeconds"
+	serverWriteTimeoutSeconds := viper.GetInt(cvar)
+	if serverWriteTimeoutSeconds == 0 {
 		serverWriteTimeoutSeconds = 15
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, serverWriteTimeoutSeconds, err))
+		logger.Print(msg.WarningCannotConvertCvar(cvar, serverWriteTimeoutSeconds))
 	}
 
-	cvarName = "session.ttlHours"
-	sessionTTLHours, err := strconv.Atoi(viper.GetString(cvarName))
-	if err != nil {
-		sessionTTLHours = 336 // 14 days
-		logger.Print(msg.WarningCannotConvertCvar(cvarName, sessionTTLHours, err))
+	cvar = "session.ttlHours"
+	sessionTTLHours := viper.GetInt(cvar)
+	if sessionTTLHours == 0 {
+		sessionTTLHours = 168 // 7 days
+		logger.Print(msg.WarningCannotConvertCvar(cvar, sessionTTLHours))
+	}
+
+	cvar = "stream.snapshotPeriodSeconds"
+	streamSnapshotPeriodSeconds := viper.GetInt(cvar)
+	if streamSnapshotPeriodSeconds == 0 {
+		streamSnapshotPeriodSeconds = 60
+		logger.Print(msg.WarningCannotConvertCvar(cvar, streamSnapshotPeriodSeconds))
 	}
 
 	cfg = Config{
-		DBConnTimeoutSeconds:      dbConnTimeoutSeconds,
-		DBConnLatencyMilliseconds: dbConnLatencyMilliseconds,
-		DBDriver:                  os.Getenv("DB_DRIVER"),
-		DBHost:                    viper.GetString("db.host"),
-		DBLogConnStatus:           dbLogConnStatus,
-		DBName:                    viper.GetString("db.name"),
-		DBPassword:                os.Getenv("DB_PASSWORD"),
-		DBPort:                    viper.GetString("db.port"),
-		DBSSLMode:                 viper.GetString("db.sslmode"),
-		DBUsername:                viper.GetString("db.username"),
+		DBConnectionLatencyMilliseconds: dbConnectionLatencyMilliseconds,
+		DBConnectionShowStatus:          viper.GetBool("db.connectionShowStatus"),
+		DBConnectionTimeoutSeconds:      dbConnectionTimeoutSeconds,
+		DBHost:                          viper.GetString("db.host"),
+		DBName:                          viper.GetString("db.name"),
+		DBPort:                          dbPort,
+		DBSSLEnable:                     viper.GetBool("db.sslEnable"),
+		DBUsername:                      viper.GetString("db.username"),
+		DBDriver:                        os.Getenv("DB_DRIVER"),
+		DBPassword:                      os.Getenv("DB_PASSWORD"),
 
 		HashingPasswordSalt:    os.Getenv("HASHING_PASSWORD_SALT"),
 		HashingTokenSigningKey: os.Getenv("HASHING_TOKEN_SIGNING_KEY"),
 
 		PaginationGetLimitDefault: paginationGetLimitDefault,
 
-		ServerDebugMode:           serverDebugMode,
+		ServerDebugEnable:         viper.GetBool("server.debugEnable"),
 		ServerMaxHeaderBytes:      serverMaxHeaderBytes,
-		ServerPort:                viper.GetString("server.port"),
+		ServerPort:                serverPort,
 		ServerReadTimeoutSeconds:  serverReadTimeoutSeconds,
 		ServerWriteTimeoutSeconds: serverWriteTimeoutSeconds,
 
 		SessionTTLHours: sessionTTLHours,
+
+		StreamSnapshotPeriodSeconds: streamSnapshotPeriodSeconds,
+		StreamSnapshotShowStatus:    viper.GetBool("stream.snapshotShowStatus"),
+		StreamSnapshotsEnable:       viper.GetBool("stream.snapshotsEnable"),
 	}
 
 	return &cfg, nil

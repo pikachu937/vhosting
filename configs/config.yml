@@ -1,22 +1,27 @@
 db:
-  connTimeoutSeconds: 5
-  connLatencyMilliseconds: 50
+  connectionLatencyMilliseconds: 50
+  connectionShowStatus: false
+  connectionTimeoutSeconds: 5
   host: "127.0.0.1"
-  logConnStatus: false
-  name: "vhosting2"
-  port: "5432"
-  sslMode: "disable"
+  name: "vhosting"
+  port: 5432
+  sslEnable: false
   username: "postgres"
 
 pagination:
   getLimitDefault: 100
 
 server:
-  debugMode: false
+  debugEnable: false
   maxHeaderBytes: 1048576 # 1 megabyte
-  port: "8000"
+  port: 8000
   readTimeoutSeconds: 15
   writeTimeoutSeconds: 15
 
 session:
   ttlHours: 168 # 7 days
+
+stream:
+  snapshotPeriodSeconds: 60
+  snapshotShowStatus: false
+  snapshotsEnable: false

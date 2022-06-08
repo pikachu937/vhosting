@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mikerumy/vhosting/pkg/config"
@@ -28,7 +29,7 @@ func (u *DownloadUseCase) IsValidExtension(file_name string) bool {
 
 func (u *DownloadUseCase) CreateDownloadLink(local_file_path string) *download.Download {
 	var dload download.Download
-	dload.DownloadLink = "http://" + u.cfg.ServerIP + ":" +
-		u.cfg.ServerPort + "/files/" + local_file_path
+	dload.DownloadLink = fmt.Sprintf("http://%s:%d/media/%s", u.cfg.ServerIP,
+		u.cfg.ServerPort, local_file_path)
 	return &dload
 }
