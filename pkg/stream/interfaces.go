@@ -3,6 +3,8 @@ package stream
 import (
 	"github.com/deepch/vdk/av"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	"github.com/gin-gonic/gin"
+	lg "github.com/mikerumy/vhosting/internal/logging"
 )
 
 type StreamUseCase interface {
@@ -19,4 +21,5 @@ type StreamUseCase interface {
 	CastListAdd(suuid string) (string, chan av.Packet)
 	CastListDelete(suuid, cuuid string)
 	List() (string, []string)
+	ReportToConsole(ctx *gin.Context, messageLog *lg.Log)
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
-	"log"
 	"os"
 	"time"
 
@@ -14,13 +13,17 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	"github.com/gin-gonic/gin"
+	lg "github.com/mikerumy/vhosting/internal/logging"
+	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/config"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
+	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
 const (
-	errorStreamExitNoViewer = "stream exit on demand - no Viewer"
+	errorStreamExitNoViewer = "Stream was exited on demand - no Viewer"
 	snapshotPath            = "./media/vhosting/%s/images"
 	snapshotName            = "snapshot.jpg"
 	videoTimeoutSeconds     = 80
@@ -49,14 +52,14 @@ func (u *StreamUseCase) ServeStreams() {
 func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool) {
 	defer u.runUnlock(name)
 	for {
-		log.Println("info. stream tries to connect", name)
+		u.ReportToConsole(nil, msg.InfoStreamTriesToConnect(name))
 		err := u.rtspWorker(name, url, onDemand, disableAudio, debug)
 		if err != nil {
-			log.Println("error. rtspWorker error. error:", err.Error())
+			u.ReportToConsole(nil, msg.ErrorRTSPWorkerError(err))
 			u.scfg.LastError = err
 		}
 		if onDemand && !u.isHasViewer(name) {
-			log.Println("error. on demand && not has Viewer error:", errorStreamExitNoViewer)
+			u.ReportToConsole(nil, msg.ErrorOnDemandANDNotHasViewerError(errorStreamExitNoViewer))
 			return
 		}
 		time.Sleep(1 * time.Second)
@@ -99,7 +102,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	if !audioOnly {
 		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
 		if err != nil {
-			log.Fatalln("fatal. frameDecoderSingle error. error:", err)
+			u.ReportToConsole(nil, msg.ErrorFrameDecoderSingleError(err))
 		}
 	}
 
@@ -156,7 +159,9 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 				break
 			}
 			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
-				log.Printf("info. snapshot created for %s\n", name)
+				if u.cfg.StreamSnapshotShowStatus {
+					u.ReportToConsole(nil, msg.InfoSnapshotCreated(name))
+				}
 				isTimeToSnapshot = false
 			}
 		}
@@ -254,7 +259,7 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 			codecVideo := codec.(h264parser.CodecData)
 			if codecVideo.SPS() == nil && codecVideo.PPS() == nil &&
 				len(codecVideo.SPS()) <= 0 && len(codecVideo.PPS()) <= 0 {
-				log.Println("error: bad video codec - waiting for SPS/PPS")
+				u.ReportToConsole(nil, msg.ErrorBadVideoCodecWaitingForSPS_PPS())
 				time.Sleep(50 * time.Millisecond)
 			}
 		}
@@ -302,7 +307,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 	for {
 		select {
 		case <-noVideo.C:
-			log.Println("info: no video")
+			u.ReportToConsole(nil, msg.InfoNoVideo())
 			return
 		case pck := <-ch:
 			if pck.IsKeyFrame || audioOnly {
@@ -314,7 +319,7 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 			}
 			err := muxerWebRTC.WritePacket(pck)
 			if err != nil {
-				log.Println("error: WritePacket error. error:", err.Error())
+				u.ReportToConsole(nil, msg.ErrorWritePacketError(err))
 				return
 			}
 		}
@@ -334,7 +339,7 @@ func (u *StreamUseCase) pseudoUUID() (uuid string) {
 	bytes := make([]byte, 16)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		log.Println("error. pseudoUUID read error. error:", err.Error())
+		u.ReportToConsole(nil, msg.ErrorPseudoUUIDReadError(err))
 		return
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
@@ -359,4 +364,10 @@ func (u *StreamUseCase) List() (string, []string) {
 		res = append(res, key)
 	}
 	return first, res
+}
+
+func (h *StreamUseCase) ReportToConsole(ctx *gin.Context, messageLog *lg.Log) {
+	log := logger.Init(ctx)
+	logger.Complete(log, messageLog)
+	logger.Print(log)
 }

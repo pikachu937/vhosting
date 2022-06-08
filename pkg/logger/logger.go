@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/logging"
+	lg "github.com/mikerumy/vhosting/internal/logging"
 	"github.com/mikerumy/vhosting/pkg/timedate"
 )
 
@@ -15,8 +15,8 @@ const (
 	httpPrintIndent   = "    "
 )
 
-func Init(ctx *gin.Context) *logging.Log {
-	var log logging.Log
+func Init(ctx *gin.Context) *lg.Log {
+	var log lg.Log
 	if ctx != nil {
 		log.ClientIP = ctx.ClientIP()
 		log.SessionOwner = unauthorizedOwner
@@ -27,7 +27,7 @@ func Init(ctx *gin.Context) *logging.Log {
 	return &log
 }
 
-func Complete(log1 *logging.Log, log2 *logging.Log) {
+func Complete(log1 *lg.Log, log2 *lg.Log) {
 	if log1.ErrLevel == "" {
 		log1.ErrLevel = log2.ErrLevel
 	}
@@ -55,7 +55,11 @@ func Complete(log1 *logging.Log, log2 *logging.Log) {
 	log1.Message = log2.Message
 }
 
-func Print(log *logging.Log) {
+func Print(log *lg.Log) {
+	if log.ErrLevel == "" {
+		log.ErrLevel = ErrLevelInfo
+	}
+
 	printLine := log.ErrLevel + "\t"
 
 	if log.ClientIP != "" {
@@ -67,7 +71,7 @@ func Print(log *logging.Log) {
 	}
 
 	errorLine := ""
-	if log.ErrCode != 0 {
+	if log.ErrLevel != ErrLevelInfo {
 		errorLine = fmt.Sprintf("ErrCode: %d. ", log.ErrCode)
 	}
 
