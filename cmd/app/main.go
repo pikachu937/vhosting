@@ -13,20 +13,28 @@ import (
 )
 
 func main() {
+	// Create log storage
+	logs := make([]*logger.Log, 0, 100)
+
 	// Load environments
 	if err := godotenv.Load("./configs/.env"); err != nil {
-		logger.Print(msg.FatalFailedToLoadEnvironmentFile(err))
+		logs = append(logs, msg.FatalFailedToLoadEnvironmentFile(err))
 		return
 	}
-	logger.Print(msg.InfoEnvironmentsLoaded())
+	logs = append(logs, msg.InfoEnvironmentsLoaded())
 
 	// Load config
 	cfg, err := config.LoadConfig("./configs/config.yml")
 	if err != nil {
-		logger.Print(msg.FatalFailedToLoadConfigFile(err))
+		logs = append(logs, msg.FatalFailedToLoadConfigFile(err))
 		return
 	}
-	logger.Print(msg.InfoConfigLoaded())
+	logs = append(logs, msg.InfoConfigLoaded())
+
+	// ==============================
+	logger.Print(logs[0])
+	logger.Print(logs[1])
+	// ==============================
 
 	// Load stream config
 	scfg, err := config_stream.LoadConfig("./configs/stream_config.json")

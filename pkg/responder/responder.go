@@ -21,7 +21,7 @@ type ErrorOutput struct {
 }
 
 type ErrorData struct {
-	ErrCode   int    `json:"err-code"`
+	ErrCode   int    `json:"errCode"`
 	Statement string `json:"statement"`
 }
 

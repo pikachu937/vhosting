@@ -4,18 +4,18 @@ import "github.com/deepch/vdk/av"
 
 type Server struct {
 	HTTPPort      string
-	ICEServers    []string `json:"ice_servers"`
-	ICEUsername   string   `json:"ice_username"`
-	ICECredential string   `json:"ice_credential"`
-	WebRTCPortMin uint16   `json:"webrtc_port_min"`
-	WebRTCPortMax uint16   `json:"webrtc_port_max"`
+	ICEServers    []string `json:"iceServers"`
+	ICEUsername   string   `json:"iceUsername"`
+	ICECredential string   `json:"iceCredential"`
+	WebRTCPortMin uint16   `json:"webrtcPortMin"`
+	WebRTCPortMax uint16   `json:"webrtcPortMax"`
 }
 
 type Stream struct {
 	URL          string `json:"url"`
 	Status       bool   `json:"status"`
-	OnDemand     bool   `json:"on_demand"`
-	DisableAudio bool   `json:"disable_audio"`
+	OnDemand     bool   `json:"onDemand"`
+	DisableAudio bool   `json:"disableAudio"`
 	Debug        bool   `json:"debug"`
 	RunLock      bool   `json:"-"`
 	Codecs       []av.CodecData

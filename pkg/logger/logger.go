@@ -2,7 +2,6 @@ package logger
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -10,15 +9,15 @@ import (
 )
 
 const (
-	unauthorizedOwner = "unauthorized"
-	httpPrintIndent   = "    "
+	tab    = "\t"
+	indent = "    "
 )
 
 func Init(ctx *gin.Context) *Log {
 	var log Log
 	if ctx != nil {
 		log.ClientIP = ctx.ClientIP()
-		log.SessionOwner = unauthorizedOwner
+		log.SessionOwner = "unauthorized"
 		log.RequestMethod = ctx.Request.Method
 		log.RequestPath = ctx.Request.URL.Path
 	}
@@ -48,74 +47,98 @@ func Complete(log1, log2 *Log) {
 	if log2.ErrCode != 0 {
 		log1.ErrCode = log2.ErrCode
 	}
+	if log2.Message != "" {
+		log1.Message = log2.Message
+	}
 	if log2.CreationDate != "" {
 		log1.CreationDate = log2.CreationDate
 	}
-	log1.Message = log2.Message
 }
 
-func Print(log *Log) {
+func Finish(log *Log) {
 	if log.ErrLevel == "" {
 		log.ErrLevel = ErrLevelInfo
 	}
-
-	printLine := log.ErrLevel + "\t"
-
-	if log.ClientIP != "" {
-		printLine += log.ClientIP + httpPrintIndent +
-			log.SessionOwner + httpPrintIndent +
-			log.RequestMethod + httpPrintIndent +
-			log.RequestPath + httpPrintIndent +
-			strconv.Itoa(log.StatusCode) + httpPrintIndent
-	}
-
-	errorLine := ""
-	if log.ErrLevel != ErrLevelInfo {
-		errorLine = fmt.Sprintf("ErrCode: %d. ", log.ErrCode)
-	}
-
-	if reflect.TypeOf(log.Message) == reflect.TypeOf("") {
-		printLine += errorLine + log.Message.(string) + "\t"
-	} else {
-		messageType := fmt.Sprintf("%T", log.Message)
-		if messageType == TypeOfUser {
-			printLine += GotUser + "\t"
-		} else if messageType == TypeOfUsers {
-			printLine += GotAllUsers + "\t"
-		} else if messageType == TypeOfGroup {
-			printLine += GotGroup + "\t"
-		} else if messageType == TypeOfGroups {
-			printLine += GotAllGroups + "\t"
-		} else if messageType == TypeOfPermIds {
-			printLine += GotUserPerms + "\t"
-		} else if messageType == TypeOfPerms {
-			printLine += GotAllPerms + "\t"
-		} else if messageType == TypeOfInfo {
-			printLine += GotInfo + "\t"
-		} else if messageType == TypeOfInfos {
-			printLine += GotAllInfos + "\t"
-		} else if messageType == TypeOfVideo {
-			printLine += GotVideo + "\t"
-		} else if messageType == TypeOfVideos {
-			printLine += GotAllVideos + "\t"
-		} else if messageType == TypeOfGroupIds {
-			printLine += GotUserGroups + "\t"
-		} else if messageType == TypeOfDownload {
-			printLine += GotDownload + "\t"
-		}
-	}
-
 	if log.CreationDate == "" {
 		log.CreationDate = timedate.GetTimestamp()
 	}
-
-	printLine += log.CreationDate
-
-	fmt.Println(printLine)
 }
 
 func Printc(ctx *gin.Context, messageLog *Log) {
 	log := Init(ctx)
 	Complete(log, messageLog)
 	Print(log)
+}
+
+func Print(log *Log) {
+	fmt.Println(parseLogLine(log))
+}
+
+func parseLogLine(log *Log) string {
+	return parseErrLevel(log) + parseHttpLine(log) + parseErrorPrefix(log) +
+		ParseMessage(log) + parseCreationDate(log)
+}
+
+func parseErrLevel(log *Log) string {
+	if log.ErrLevel != "" {
+		return log.ErrLevel + tab
+	}
+	return ErrLevelInfo + tab
+}
+
+func parseHttpLine(log *Log) string {
+	if log.ClientIP != "" {
+		return log.ClientIP + indent +
+			log.SessionOwner + indent +
+			log.RequestMethod + indent +
+			log.RequestPath + indent +
+			strconv.Itoa(log.StatusCode) + tab
+	}
+	return ""
+}
+
+func parseErrorPrefix(log *Log) string {
+	if log.ErrCode != 0 {
+		return "ErrCode: " + strconv.Itoa(log.ErrCode) + ". "
+	}
+	return ""
+}
+
+func ParseMessage(log *Log) string {
+	msgType := fmt.Sprintf("%T", log.Message)
+	if msgType == "string" {
+		return log.Message.(string) + tab
+	} else if msgType == "*user.User" {
+		return "Got user" + tab
+	} else if msgType == "map[int]*user.User" {
+		return "Got all users" + tab
+	} else if msgType == "*group.Group" {
+		return "Got group" + tab
+	} else if msgType == "map[int]*group.Group" {
+		return "Got all groups" + tab
+	} else if msgType == "*permission.PermIds" {
+		return "Got user permissions" + tab
+	} else if msgType == "map[int]*permission.Perm" {
+		return "Got all permissions" + tab
+	} else if msgType == "*info.Info" {
+		return "Got info" + tab
+	} else if msgType == "map[int]*info.Info" {
+		return "Got all infos" + tab
+	} else if msgType == "*video.Video" {
+		return "Got video" + tab
+	} else if msgType == "map[int]*video.Video" {
+		return "Got all videos" + tab
+	} else if msgType == "*group.GroupIds" {
+		return "Got user groups" + tab
+	} else if msgType == "*download.Download" {
+		return "Got download link" + tab
+	}
+	return "Got data of unknown type. Type: " + msgType + tab
+}
+
+func parseCreationDate(log *Log) string {
+	if log.CreationDate != "" {
+		return log.CreationDate
+	}
+	return timedate.GetTimestamp()
 }

@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS public.users;
 DROP TABLE IF EXISTS public.groups;
 DROP TABLE IF EXISTS public.perms;
 
---------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS public.perms (
     id        INTEGER      NOT NULL UNIQUE,

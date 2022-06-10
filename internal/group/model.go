@@ -6,5 +6,5 @@ type Group struct {
 }
 
 type GroupIds struct {
-	Ids []int `json:"group-ids" db:"group_id"`
+	Ids []int `json:"groupIds" db:"group_id"`
 }
