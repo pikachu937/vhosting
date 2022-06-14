@@ -75,8 +75,9 @@ func Print(log *Log) {
 }
 
 func parseLogLine(log *Log) string {
-	return parseErrLevel(log) + parseHttpLine(log) + parseErrorPrefix(log) +
-		ParseMessage(log) + parseCreationDate(log)
+	return parseErrLevel(log) + parseHttpLine(log) +
+		parseErrorPrefix(log) + ParseMessage(log) +
+		parseCreationDate(log)
 }
 
 func parseErrLevel(log *Log) string {

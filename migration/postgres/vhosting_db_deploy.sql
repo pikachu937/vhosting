@@ -52,7 +52,9 @@ INSERT INTO public.perms (id, name, code_name) VALUES
 (41, 'Can get an Info',                  'get_info'),
 (42, 'Can get all of the Infos',         'get_all_infos'),
 (43, 'Can partially update an Info',     'patch_info'),
-(44, 'Can delete an Info',               'delete_info');
+(44, 'Can delete an Info',               'delete_info'),
+
+(50, 'Can download a File',               'download_file');
 
 -------------------------------------------------------------------------------
 

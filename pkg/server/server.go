@@ -131,7 +131,8 @@ func (a *App) Run() error {
 	videohandler.RegisterHTTPEndpoints(router, a.cfg, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	streamhandler.RegisterStreamingHTTPEndpoints(router, a.scfg, a.StreamUC)
-	downloadhandler.RegisterHTTPEndpoints(router, a.downloadUseCase, a.logUseCase)
+	downloadhandler.RegisterHTTPEndpoints(router, a.cfg, a.downloadUseCase, a.logUseCase,
+		a.authUseCase, a.sessUseCase, a.userUseCase)
 
 	// HTTP Server
 	a.httpServer = &http.Server{
