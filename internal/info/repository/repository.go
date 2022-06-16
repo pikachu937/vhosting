@@ -19,7 +19,7 @@ func NewInfoRepository(cfg *config.Config) *InfoRepository {
 }
 
 func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
@@ -38,7 +38,7 @@ func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -57,7 +57,7 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 }
 
 func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
@@ -98,7 +98,7 @@ func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info,
 }
 
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -117,7 +117,7 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) DeleteInfo(id int) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
@@ -135,7 +135,7 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 }
 
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND

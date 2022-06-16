@@ -10,36 +10,59 @@ import (
 	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
-func NewDBConnection(cfg *config.Config) *sqlx.DB {
+func CreateLocalDBConnection(cfg *config.Config) *sqlx.DB {
+	var dbcfg DBConfig
+	dbcfg.DBConnectionLatencyMilliseconds = cfg.DBConnectionLatencyMilliseconds
+	dbcfg.DBConnectionShowStatus = cfg.DBConnectionShowStatus
+	dbcfg.DBConnectionTimeoutSeconds = cfg.DBConnectionTimeoutSeconds
+	dbcfg.DBHost = cfg.DBHost
+	dbcfg.DBName = cfg.DBName
+	dbcfg.DBPort = cfg.DBPort
+	dbcfg.DBSSLEnable = cfg.DBSSLEnable
+	dbcfg.DBUsername = cfg.DBUsername
+	dbcfg.DBDriver = cfg.DBDriver
+	dbcfg.DBPassword = cfg.DBPassword
+	return connectToDB(&dbcfg)
+}
+
+func CreateOuterDBConnection(cfg *config.Config) *sqlx.DB {
+	var dbcfg DBConfig
+	dbcfg.DBConnectionLatencyMilliseconds = cfg.DBOConnectionLatencyMilliseconds
+	dbcfg.DBConnectionShowStatus = cfg.DBOConnectionShowStatus
+	dbcfg.DBConnectionTimeoutSeconds = cfg.DBOConnectionTimeoutSeconds
+	dbcfg.DBHost = cfg.DBOHost
+	dbcfg.DBName = cfg.DBOName
+	dbcfg.DBPort = cfg.DBOPort
+	dbcfg.DBSSLEnable = cfg.DBOSSLEnable
+	dbcfg.DBUsername = cfg.DBOUsername
+	dbcfg.DBDriver = cfg.DBODriver
+	dbcfg.DBPassword = cfg.DBOPassword
+	return connectToDB(&dbcfg)
+}
+
+func connectToDB(dbcfg *DBConfig) *sqlx.DB {
 	timeAtStarting := time.Now()
-
 	var db *sqlx.DB
-
 	sslMode := "disable"
-	if cfg.DBSSLEnable {
+	if dbcfg.DBSSLEnable {
 		sslMode = "enable"
 	}
-
 	go func() *sqlx.DB {
 		for {
-			db, _ = sqlx.Open(cfg.DBDriver, fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
-				cfg.DBHost, cfg.DBPort, cfg.DBUsername, cfg.DBName, cfg.DBPassword, sslMode))
-
+			db, _ = sqlx.Open(dbcfg.DBDriver, fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
+				dbcfg.DBHost, dbcfg.DBPort, dbcfg.DBUsername, dbcfg.DBName, dbcfg.DBPassword, sslMode))
 			time.Sleep(3 * time.Millisecond)
-
 			if db.Ping() == nil {
 				return db
 			}
 		}
 	}()
-
-	connLatency := time.Duration(cfg.DBConnectionLatencyMilliseconds)
+	connLatency := time.Duration(dbcfg.DBConnectionLatencyMilliseconds)
 	time.Sleep(connLatency * time.Millisecond)
-
-	connTimeout := cfg.DBConnectionTimeoutSeconds
+	connTimeout := dbcfg.DBConnectionTimeoutSeconds
 	for t := connTimeout; t > 0; t-- {
 		if db != nil {
-			if cfg.DBConnectionShowStatus {
+			if dbcfg.DBConnectionShowStatus {
 				logger.Print(msg.InfoEstablishedOpenedDBConnection(timeAtStarting))
 				return db
 			}
@@ -47,7 +70,6 @@ func NewDBConnection(cfg *config.Config) *sqlx.DB {
 		}
 		time.Sleep(time.Second)
 	}
-
 	logger.Print(msg.ErrorTimeWaitingOfDBConnectionExceededLimit(connTimeout))
 	return nil
 }
@@ -57,7 +79,6 @@ func CloseDBConnection(cfg *config.Config, db *sqlx.DB) {
 		logger.Print(msg.ErrorCannotCloseDBConnection(err))
 		return
 	}
-
 	if cfg.DBConnectionShowStatus {
 		logger.Print(msg.InfoEstablishedClosedConnectionToDB())
 		return

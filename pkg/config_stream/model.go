@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Mutex     sync.RWMutex
-	Server    stream.Server            `json:"server"`
-	Streams   map[string]stream.Stream `json:"streams"`
+	Server    stream.Server                    `json:"server"`
+	Streams   map[string]stream.StreamSettings `json:"streams"`
 	LastError error
 }

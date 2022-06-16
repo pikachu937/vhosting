@@ -46,6 +46,7 @@ import (
 	logusecase "github.com/mikerumy/vhosting/pkg/logger/usecase"
 	"github.com/mikerumy/vhosting/pkg/stream"
 	streamhandler "github.com/mikerumy/vhosting/pkg/stream/handler"
+	streamrepo "github.com/mikerumy/vhosting/pkg/stream/repository"
 	streamusecase "github.com/mikerumy/vhosting/pkg/stream/usecase"
 	"github.com/mikerumy/vhosting/pkg/user"
 	userhandler "github.com/mikerumy/vhosting/pkg/user/handler"
@@ -78,6 +79,7 @@ func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 	permRepo := permrepo.NewPermRepository(cfg)
 	infoRepo := inforepo.NewInfoRepository(cfg)
 	videoRepo := videorepo.NewVideoRepository(cfg)
+	streamRepo := streamrepo.NewStreamRepository(cfg)
 
 	return &App{
 		cfg:             cfg,
@@ -90,7 +92,7 @@ func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 		permUseCase:     permusecase.NewPermUseCase(permRepo),
 		infoUseCase:     infousecase.NewInfoUseCase(infoRepo),
 		videoUseCase:    videousecase.NewVideoUseCase(videoRepo),
-		StreamUC:        streamusecase.NewStreamUseCase(cfg, scfg),
+		StreamUC:        streamusecase.NewStreamUseCase(cfg, scfg, streamRepo),
 		downloadUseCase: downloadusecase.NewDownloadUseCase(cfg),
 	}
 }
@@ -112,7 +114,8 @@ func (a *App) Run() error {
 	// Check for web directory exists and register routes
 	if _, err := os.Stat("./web"); !os.IsNotExist(err) {
 		router.LoadHTMLGlob("./web/templates/*")
-		streamhandler.RegisterTemplateHTTPEndpoints(router, a.scfg, a.StreamUC)
+		streamhandler.RegisterTemplateHTTPEndpoints(router, a.cfg, a.scfg, a.StreamUC,
+			a.userUseCase, a.logUseCase, a.authUseCase, a.sessUseCase)
 	}
 
 	router.StaticFS("/static", http.Dir("./web/static"))
@@ -130,7 +133,8 @@ func (a *App) Run() error {
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	videohandler.RegisterHTTPEndpoints(router, a.cfg, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
-	streamhandler.RegisterStreamingHTTPEndpoints(router, a.scfg, a.StreamUC)
+	streamhandler.RegisterStreamingHTTPEndpoints(router, a.cfg, a.scfg, a.StreamUC,
+		a.userUseCase, a.logUseCase, a.authUseCase, a.sessUseCase)
 	downloadhandler.RegisterHTTPEndpoints(router, a.cfg, a.downloadUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 

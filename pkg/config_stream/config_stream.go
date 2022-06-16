@@ -26,7 +26,7 @@ func LoadConfig(path string) (*Config, error) {
 			cfg.Server.ICEServers = []string{*iceServer}
 		}
 
-		cfg.Streams = make(map[string]stream.Stream)
+		cfg.Streams = make(map[string]stream.StreamSettings)
 	}
 
 	err = json.Unmarshal(data, &cfg)

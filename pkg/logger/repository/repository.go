@@ -18,7 +18,7 @@ func NewLogRepository(cfg *config.Config) *LogRepository {
 }
 
 func (r *LogRepository) CreateLogRecord(log *logger.Log) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL

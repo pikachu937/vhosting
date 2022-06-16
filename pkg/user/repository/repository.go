@@ -22,7 +22,7 @@ func NewUserRepository(cfg *config.Config) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(usr *user.User) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
@@ -41,7 +41,7 @@ func (r *UserRepository) CreateUser(usr *user.User) error {
 }
 
 func (r *UserRepository) GetUser(id int) (*user.User, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -61,7 +61,7 @@ func (r *UserRepository) GetUser(id int) (*user.User, error) {
 }
 
 func (r *UserRepository) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
@@ -103,7 +103,7 @@ func (r *UserRepository) GetAllUsers(urlparams *user.Pagin) (map[int]*user.User,
 }
 
 func (r *UserRepository) UpdateUserPassword(namepass *auth.Namepass) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -122,7 +122,7 @@ func (r *UserRepository) UpdateUserPassword(namepass *auth.Namepass) error {
 }
 
 func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -147,7 +147,7 @@ func (r *UserRepository) PartiallyUpdateUser(usr *user.User) error {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
@@ -165,7 +165,7 @@ func (r *UserRepository) DeleteUser(id int) error {
 }
 
 func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -191,7 +191,7 @@ func (r *UserRepository) IsUserSuperuserOrStaff(username string) (bool, error) {
 }
 
 func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm string) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL1_FROM_TBL1_WHERE_CND1_SELECT_COL2_FROM_TBL2_CND2
@@ -217,7 +217,7 @@ func (r *UserRepository) IsUserHavePersonalPermission(userId int, userPerm strin
 }
 
 func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	var template, col, tbl, cnd, query string
@@ -252,7 +252,7 @@ func (r *UserRepository) IsUserExists(idOrUsername interface{}) (bool, error) {
 }
 
 func (r *UserRepository) GetUserId(username string) (int, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND

@@ -19,7 +19,7 @@ func NewVideoRepository(cfg *config.Config) *VideoRepository {
 }
 
 func (r *VideoRepository) CreateVideo(vid *video.Video) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
@@ -38,7 +38,7 @@ func (r *VideoRepository) CreateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -57,7 +57,7 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 }
 
 func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
@@ -98,7 +98,7 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 }
 
 func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -119,7 +119,7 @@ func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) DeleteVideo(id int) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
@@ -137,7 +137,7 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 }
 
 func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND

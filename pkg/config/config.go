@@ -45,6 +45,27 @@ func LoadConfig(path string) (*Config, error) {
 		logger.Print(msg.WarningCannotConvertCvar(cvar, dbPort))
 	}
 
+	cvar = "dbo.connectionLatencyMilliseconds"
+	dboConnectionLatencyMilliseconds := viper.GetInt(cvar)
+	if dboConnectionLatencyMilliseconds == 0 {
+		dboConnectionLatencyMilliseconds = 100
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dboConnectionLatencyMilliseconds))
+	}
+
+	cvar = "dbo.connectionTimeoutSeconds"
+	dboConnectionTimeoutSeconds := viper.GetInt(cvar)
+	if dboConnectionTimeoutSeconds == 0 {
+		dboConnectionTimeoutSeconds = 5
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dboConnectionTimeoutSeconds))
+	}
+
+	cvar = "dbo.port"
+	dboPort := viper.GetInt(cvar)
+	if dboPort == 0 {
+		dboPort = 3456
+		logger.Print(msg.WarningCannotConvertCvar(cvar, dboPort))
+	}
+
 	cvar = "pagination.getLimitDefault"
 	paginationGetLimitDefault := viper.GetInt(cvar)
 	if paginationGetLimitDefault == 0 {
@@ -105,6 +126,17 @@ func LoadConfig(path string) (*Config, error) {
 		DBUsername:                      viper.GetString("db.username"),
 		DBDriver:                        os.Getenv("DB_DRIVER"),
 		DBPassword:                      os.Getenv("DB_PASSWORD"),
+
+		DBOConnectionLatencyMilliseconds: dboConnectionLatencyMilliseconds,
+		DBOConnectionShowStatus:          viper.GetBool("dbo.connectionShowStatus"),
+		DBOConnectionTimeoutSeconds:      dboConnectionTimeoutSeconds,
+		DBOHost:                          viper.GetString("dbo.host"),
+		DBOName:                          viper.GetString("dbo.name"),
+		DBOPort:                          dboPort,
+		DBOSSLEnable:                     viper.GetBool("dbo.sslEnable"),
+		DBOUsername:                      viper.GetString("dbo.username"),
+		DBODriver:                        os.Getenv("DBO_DRIVER"),
+		DBOPassword:                      os.Getenv("DBO_PASSWORD"),
 
 		HashingPasswordSalt:    os.Getenv("HASHING_PASSWORD_SALT"),
 		HashingTokenSigningKey: os.Getenv("HASHING_TOKEN_SIGNING_KEY"),

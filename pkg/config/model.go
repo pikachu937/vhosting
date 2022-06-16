@@ -12,6 +12,17 @@ type Config struct {
 	DBDriver                        string
 	DBPassword                      string
 
+	DBOConnectionLatencyMilliseconds int
+	DBOConnectionShowStatus          bool
+	DBOConnectionTimeoutSeconds      int
+	DBOHost                          string
+	DBOName                          string
+	DBOPort                          int
+	DBOSSLEnable                     bool
+	DBOUsername                      string
+	DBODriver                        string
+	DBOPassword                      string
+
 	HashingPasswordSalt    string
 	HashingTokenSigningKey string
 

@@ -8,6 +8,16 @@ db:
   sslEnable: false
   username: "postgres"
 
+dbo:
+  connectionLatencyMilliseconds: 500
+  connectionShowStatus: false
+  connectionTimeoutSeconds: 5
+  host: "192.168.0.32"
+  name: "l3"
+  port: 5432
+  sslEnable: false
+  username: "sysadmin"
+
 pagination:
   getLimitDefault: 100
 

@@ -19,7 +19,7 @@ func NewAuthRepository(cfg *config.Config) *AuthRepository {
 }
 
 func (r *AuthRepository) GetNamepass(namepass *auth.Namepass) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -37,7 +37,7 @@ func (r *AuthRepository) GetNamepass(namepass *auth.Namepass) error {
 }
 
 func (r *AuthRepository) UpdateUserPassword(namepass *auth.Namepass) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -56,7 +56,7 @@ func (r *AuthRepository) UpdateUserPassword(namepass *auth.Namepass) error {
 }
 
 func (r *AuthRepository) IsUsernameAndPasswordExists(usename, passwordHash string) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -80,7 +80,7 @@ func (r *AuthRepository) IsUsernameAndPasswordExists(usename, passwordHash strin
 }
 
 func (r *AuthRepository) UpdateNamepassLastLogin(username, timestamp string) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND

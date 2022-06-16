@@ -19,7 +19,7 @@ func NewPermRepository(cfg *config.Config) *PermRepository {
 }
 
 func (r *PermRepository) GetAllPermissions(urlparams *user.Pagin) (map[int]*perm.Perm, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM

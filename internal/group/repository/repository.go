@@ -21,7 +21,7 @@ func NewGroupRepository(cfg *config.Config) *GroupRepository {
 }
 
 func (r *GroupRepository) CreateGroup(grp *group.Group) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
@@ -37,7 +37,7 @@ func (r *GroupRepository) CreateGroup(grp *group.Group) error {
 }
 
 func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
@@ -55,7 +55,7 @@ func (r *GroupRepository) GetGroup(id int) (*group.Group, error) {
 }
 
 func (r *GroupRepository) GetAllGroups(urlparams *user.Pagin) (map[int]*group.Group, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
@@ -93,7 +93,7 @@ func (r *GroupRepository) GetAllGroups(urlparams *user.Pagin) (map[int]*group.Gr
 }
 
 func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
@@ -112,7 +112,7 @@ func (r *GroupRepository) PartiallyUpdateGroup(grp *group.Group) error {
 }
 
 func (r *GroupRepository) DeleteGroup(id int) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
@@ -130,7 +130,7 @@ func (r *GroupRepository) DeleteGroup(id int) error {
 }
 
 func (r *GroupRepository) IsGroupExists(idOrName interface{}) (bool, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	var template, col, tbl, cnd, query string

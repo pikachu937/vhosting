@@ -10,7 +10,7 @@ import (
 )
 
 func (r *GroupRepository) SetUserGroups(values string) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
@@ -27,7 +27,7 @@ func (r *GroupRepository) SetUserGroups(values string) error {
 }
 
 func (r *GroupRepository) GetUserGroups(id int, urlparams *user.Pagin) (*group.GroupIds, error) {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
@@ -57,7 +57,7 @@ func (r *GroupRepository) GetUserGroups(id int, urlparams *user.Pagin) (*group.G
 }
 
 func (r *GroupRepository) DeleteUserGroups(id int, condIds string) error {
-	db := db_connect.NewDBConnection(r.cfg)
+	db := db_connect.CreateLocalDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, db)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND

@@ -131,6 +131,10 @@ func ParseMessage(log *Log) string {
 		return "Got all videos" + tab
 	} else if msgType == "*group.GroupIds" {
 		return "Got user groups" + tab
+	} else if msgType == "*stream.Stream" {
+		return "Got stream" + tab
+	} else if msgType == "map[int]*stream.Stream" {
+		return "Got all streams" + tab
 	} else if msgType == "*download.Download" {
 		return "Got download link" + tab
 	}

@@ -3,6 +3,7 @@ package messages
 import (
 	"github.com/deepch/vdk/av"
 	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/mikerumy/vhosting/pkg/stream"
 )
 
 func ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codecType av.CodecType) *logger.Log {
@@ -71,4 +72,32 @@ func ErrorWritePacketError(err error) *logger.Log {
 
 func ErrorPseudoUUIDReadError(err error) *logger.Log {
 	return &logger.Log{ErrCode: 911, Message: "pseudoUUID read error. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
+}
+
+func ErrorCannotCheckStreamExistence(err error) *logger.Log {
+	return &logger.Log{StatusCode: 500, ErrCode: 930, Message: "Cannot check stream existence. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
+}
+
+func ErrorStreamWithRequestedIDIsNotExist() *logger.Log {
+	return &logger.Log{StatusCode: 400, ErrCode: 931, Message: "Stream with requested ID is not exist", ErrLevel: logger.ErrLevelError}
+}
+
+func ErrorCannotGetStream(err error) *logger.Log {
+	return &logger.Log{StatusCode: 500, ErrCode: 932, Message: "Cannot get stream. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
+}
+
+func InfoGotStream(strm *stream.Stream) *logger.Log {
+	return &logger.Log{StatusCode: 200, Message: strm}
+}
+
+func ErrorCannotGetAllStreams(err error) *logger.Log {
+	return &logger.Log{StatusCode: 500, ErrCode: 208, Message: "Cannot get all streams. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
+}
+
+func InfoNoStreamsAvailable() *logger.Log {
+	return &logger.Log{StatusCode: 200, Message: "No streams available"}
+}
+
+func InfoGotAllStreams(streams map[int]*stream.Stream) *logger.Log {
+	return &logger.Log{StatusCode: 200, Message: streams}
 }

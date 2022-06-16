@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/jpeg"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/deepch/vdk/av"
@@ -13,11 +14,13 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	"github.com/gin-gonic/gin"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/config"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
+	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 const (
@@ -28,15 +31,80 @@ const (
 )
 
 type StreamUseCase struct {
-	cfg  *config.Config
-	scfg *sconfig.Config
+	cfg        *config.Config
+	scfg       *sconfig.Config
+	streamRepo stream.StreamRepository
 }
 
-func NewStreamUseCase(cfg *config.Config, scfg *sconfig.Config) *StreamUseCase {
+func NewStreamUseCase(cfg *config.Config, scfg *sconfig.Config, streamRepo stream.StreamRepository) *StreamUseCase {
 	return &StreamUseCase{
-		cfg:  cfg,
-		scfg: scfg,
+		cfg:        cfg,
+		scfg:       scfg,
+		streamRepo: streamRepo,
 	}
+}
+
+func (u *StreamUseCase) GetStream(id int) (*stream.Stream, error) {
+	strmg, err := u.streamRepo.GetStream(id)
+	if err != nil {
+		return nil, err
+	}
+	var strm stream.Stream
+	strm.Id = strmg.Id
+	strm.Stream = strmg.Stream.String
+	strm.DateTime = strmg.DateTime.String
+	strm.StatePublic = int(strmg.StatePublic.Int16)
+	strm.StatusPublic = int(strmg.StatusPublic.Int16)
+	strm.StatusRecord = int(strmg.StatusRecord.Int16)
+	strm.PathStream = strmg.PathStream.String
+	return &strm, nil
+}
+
+func (u *StreamUseCase) GetAllStreams(urlparams *user.Pagin) (map[int]*stream.Stream, error) {
+	streamsg, err := u.streamRepo.GetAllStreams(urlparams)
+	if err != nil {
+		return nil, err
+	}
+	var streams = map[int]*stream.Stream{}
+	for _, val := range streamsg {
+		streams[val.Id] = &stream.Stream{Id: val.Id, Stream: val.Stream.String,
+			DateTime: val.DateTime.String, StatePublic: int(val.StatePublic.Int16),
+			StatusPublic: int(val.StatusPublic.Int16), StatusRecord: int(val.StatusRecord.Int16),
+			PathStream: val.PathStream.String}
+	}
+	return streams, nil
+}
+
+func (u *StreamUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
+func (u *StreamUseCase) IsStreamExists(id int) (bool, error) {
+	exists, err := u.streamRepo.IsStreamExists(id)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (u *StreamUseCase) ParseURLParams(ctx *gin.Context) *user.Pagin {
+	urlparams := ctx.Request.URL.Query()
+	var pagin user.Pagin
+	if lim := urlparams.Get("_limit"); lim != "" {
+		pagin.Limit, _ = strconv.Atoi(lim)
+	}
+	if pg := urlparams.Get("_page"); pg != "" {
+		pagin.Page, _ = strconv.Atoi(pg)
+	}
+	pagin.Page = pagin.Page*pagin.Limit - pagin.Limit
+	if pagin.Limit == 0 {
+		pagin.Limit = u.cfg.PaginationGetLimitDefault
+	}
+	return &pagin
 }
 
 func (u *StreamUseCase) ServeStreams() {
