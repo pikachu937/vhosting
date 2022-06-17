@@ -57,7 +57,7 @@ import (
 type App struct {
 	httpServer      *http.Server
 	cfg             *config.Config
-	scfg            *sconfig.Config
+	scfg            *sconfig.SConfig
 	userUseCase     user.UserUseCase
 	authUseCase     auth.AuthUseCase
 	sessUseCase     sess.SessUseCase
@@ -70,7 +70,7 @@ type App struct {
 	downloadUseCase download.DownloadUseCase
 }
 
-func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
+func NewApp(cfg *config.Config, scfg *sconfig.SConfig) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
 	sessRepo := sessrepo.NewSessRepository(cfg)

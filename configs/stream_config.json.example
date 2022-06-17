@@ -1,9 +1,16 @@
 {
-  "server": {
-    "iceServers": ["stun:stun.l.google.com:19302"]
-  },
   "streams": {
-    "video name": {
+    "new video 1": {
+      "onDemand": false,
+      "disableAudio": false,
+      "url": "rtsp://..."
+    },
+    "new video 2": {
+      "onDemand": false,
+      "disableAudio": false,
+      "url": "rtsp://..."
+    },
+    "new video 3": {
       "onDemand": false,
       "disableAudio": false,
       "url": "rtsp://..."

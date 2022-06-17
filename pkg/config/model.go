@@ -1,5 +1,7 @@
 package config
 
+import "sync"
+
 type Config struct {
 	DBConnectionLatencyMilliseconds int
 	DBConnectionShowStatus          bool
@@ -38,6 +40,9 @@ type Config struct {
 
 	ServerIP string
 
+	StreamICEServersMutex       sync.RWMutex
+	StreamICEServers            []string
+	StreamLink                  string
 	StreamSnapshotPeriodSeconds int
 	StreamSnapshotShowStatus    bool
 	StreamSnapshotsEnable       bool

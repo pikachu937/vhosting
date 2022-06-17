@@ -32,6 +32,9 @@ session:
   ttlHours: 168 # 7 days
 
 stream:
+  iceServers: [
+    "stun:stun.l.google.com:19302"
+  ]
   snapshotPeriodSeconds: 60
   snapshotShowStatus: false
   snapshotsEnable: false

@@ -108,6 +108,13 @@ func LoadConfig(path string) (*Config, error) {
 		logger.Print(msg.WarningCannotConvertCvar(cvar, sessionTTLHours))
 	}
 
+	cvar = "stream.iceServers"
+	streamICEServers := viper.GetStringSlice(cvar)
+	if len(streamICEServers) == 0 {
+		streamICEServers = append(streamICEServers, "")
+		logger.Print(msg.WarningCannotConvertCvar(cvar, ""))
+	}
+
 	cvar = "stream.snapshotPeriodSeconds"
 	streamSnapshotPeriodSeconds := viper.GetInt(cvar)
 	if streamSnapshotPeriodSeconds == 0 {
@@ -151,6 +158,7 @@ func LoadConfig(path string) (*Config, error) {
 
 		SessionTTLHours: sessionTTLHours,
 
+		StreamICEServers:            streamICEServers,
 		StreamSnapshotPeriodSeconds: streamSnapshotPeriodSeconds,
 		StreamSnapshotShowStatus:    viper.GetBool("stream.snapshotShowStatus"),
 		StreamSnapshotsEnable:       viper.GetBool("stream.snapshotsEnable"),

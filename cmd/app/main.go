@@ -1,13 +1,11 @@
 package main
 
 import (
-	"strconv"
-
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/config_stream"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/server"
 )
@@ -29,12 +27,11 @@ func main() {
 	logger.Print(msg.InfoConfigLoaded())
 
 	// Load stream config
-	scfg, err := config_stream.LoadConfig("./configs/stream_config.json")
+	scfg, err := sconfig.LoadConfig("./configs/stream_config.json")
 	if err != nil {
 		logger.Print(msg.FatalFailedToLoadStreamConfigFile(err))
 		return
 	}
-	scfg.Server.HTTPPort = strconv.Itoa(cfg.ServerPort)
 	logger.Print(msg.InfoStreamConfigLoaded())
 
 	// Init new server

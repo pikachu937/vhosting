@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/deepch/vdk/av"
@@ -16,13 +17,12 @@ import (
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
-	"github.com/mikerumy/vhosting/pkg/timedate"
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type StreamHandler struct {
 	cfg         *config.Config
-	scfg        *sconfig.Config
+	scfg        *sconfig.SConfig
 	useCase     stream.StreamUseCase
 	userUseCase user.UserUseCase
 	logUseCase  logger.LogUseCase
@@ -30,7 +30,7 @@ type StreamHandler struct {
 	sessUseCase sess.SessUseCase
 }
 
-func NewStreamHandler(cfg *config.Config, scfg *sconfig.Config, useCase stream.StreamUseCase,
+func NewStreamHandler(cfg *config.Config, scfg *sconfig.SConfig, useCase stream.StreamUseCase,
 	userUseCase user.UserUseCase, logUseCase logger.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase) *StreamHandler {
 	return &StreamHandler{
@@ -44,69 +44,6 @@ func NewStreamHandler(cfg *config.Config, scfg *sconfig.Config, useCase stream.S
 	}
 }
 
-func (h *StreamHandler) GetStream(ctx *gin.Context) {
-	actPermission := "get_stream"
-
-	log := logger.Init(ctx)
-
-	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
-	if !hasPerms {
-		return
-	}
-
-	// Read requested ID, check user existence, get user
-	reqId, err := h.useCase.AtoiRequestedId(ctx)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotConvertRequestedIDToTypeInt(err))
-		return
-	}
-
-	exists, err := h.useCase.IsStreamExists(reqId)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckStreamExistence(err))
-		return
-	}
-	if !exists {
-		h.logUseCase.Report(ctx, log, msg.ErrorStreamWithRequestedIDIsNotExist())
-		return
-	}
-
-	gottenStream, err := h.useCase.GetStream(reqId)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotGetStream(err))
-		return
-	}
-
-	h.logUseCase.Report(ctx, log, msg.InfoGotStream(gottenStream))
-}
-
-func (h *StreamHandler) GetAllStreams(ctx *gin.Context) {
-	actPermission := "get_all_streams"
-
-	log := logger.Init(ctx)
-
-	hasPerms, _ := h.isPermsGranted_getUserId(ctx, log, actPermission)
-	if !hasPerms {
-		return
-	}
-
-	urlparams := h.useCase.ParseURLParams(ctx)
-
-	// Get all users. If gotten is nothing - send such a message
-	gottenStreams, err := h.useCase.GetAllStreams(urlparams)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotGetAllStreams(err))
-		return
-	}
-
-	if gottenStreams == nil {
-		h.logUseCase.Report(ctx, log, msg.InfoNoStreamsAvailable())
-		return
-	}
-
-	h.logUseCase.Report(ctx, log, msg.InfoGotAllStreams(gottenStreams))
-}
-
 func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 	_, list := h.useCase.List()
 	if len(list) > 0 {
@@ -115,7 +52,7 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 		ctx.Redirect(http.StatusMovedPermanently, "stream/player/"+list[0])
 	} else {
 		ctx.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"port":    h.scfg.Server.HTTPPort,
+			"port":    strconv.Itoa(h.cfg.ServerPort),
 			"version": time.Now().String(),
 		})
 	}
@@ -125,7 +62,7 @@ func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
 	_, list := h.useCase.List()
 	sort.Strings(list)
 	ctx.HTML(http.StatusOK, "player.tmpl", gin.H{
-		"port":     h.scfg.Server.HTTPPort,
+		"port":     strconv.Itoa(h.cfg.ServerPort),
 		"suuid":    ctx.Param("uuid"),
 		"suuidMap": list,
 		"version":  time.Now().String(),
@@ -210,10 +147,10 @@ func (h *StreamHandler) ServeStreamVidOverWebRTC(ctx *gin.Context) {
 func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	url := ctx.PostForm("url")
 	if _, ok := h.scfg.Streams[url]; !ok {
-		h.scfg.Streams[url] = stream.StreamSettings{
+		h.scfg.Streams[url] = sconfig.Stream{
 			URL:        url,
 			OnDemand:   true,
-			ClientList: make(map[string]stream.Viewer),
+			ClientList: make(map[string]sconfig.Viewer),
 		}
 	}
 
@@ -264,73 +201,4 @@ func (h *StreamHandler) ServeStreamWebRTC2(ctx *gin.Context) {
 	audioOnly := len(codecs) == 1 && codecs[0].Type().IsAudio()
 
 	go h.useCase.WritePackets(url, muxerWebRTC, audioOnly)
-}
-
-func (h *StreamHandler) isPermsGranted_getUserId(ctx *gin.Context, log *logger.Log, permission string) (bool, int) {
-	headerToken := h.authUseCase.ReadHeader(ctx)
-	if !h.authUseCase.IsTokenExists(headerToken) {
-		h.logUseCase.Report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false, -1
-	}
-
-	session, err := h.sessUseCase.GetSessionAndDate(headerToken)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotGetSessionAndDate(err))
-		return false, -1
-	}
-	if !h.authUseCase.IsSessionExists(session) {
-		h.logUseCase.Report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false, -1
-	}
-
-	if timedate.IsDateExpired(session.CreationDate, h.cfg.SessionTTLHours) {
-		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
-			h.logUseCase.Report(ctx, log, msg.ErrorCannotDeleteSession(err))
-			return false, -1
-		}
-		h.logUseCase.Report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false, -1
-	}
-
-	headerNamepass, err := h.authUseCase.ParseToken(headerToken)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotParseToken(err))
-		return false, -1
-	}
-
-	gottenUserId, err := h.userUseCase.GetUserId(headerNamepass.Username)
-	if err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckUserExistence(err))
-		return false, -1
-	}
-	if gottenUserId < 0 {
-		if err := h.sessUseCase.DeleteSession(headerToken); err != nil {
-			h.logUseCase.Report(ctx, log, msg.ErrorCannotDeleteSession(err))
-			return false, -1
-		}
-		h.logUseCase.Report(ctx, log, msg.ErrorUserWithThisUsernameIsNotExist())
-		return false, -1
-	}
-
-	log.SessionOwner = headerNamepass.Username
-
-	isSUorStaff := false
-	hasPersonalPerm := false
-	if isSUorStaff, err = h.userUseCase.IsUserSuperuserOrStaff(headerNamepass.Username); err != nil {
-		h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckSuperuserStaffPermissions(err))
-		return false, -1
-	}
-	if !isSUorStaff {
-		if hasPersonalPerm, err = h.userUseCase.IsUserHavePersonalPermission(gottenUserId, permission); err != nil {
-			h.logUseCase.Report(ctx, log, msg.ErrorCannotCheckPersonalPermission(err))
-			return false, -1
-		}
-	}
-
-	if !isSUorStaff && !hasPersonalPerm {
-		h.logUseCase.Report(ctx, log, msg.ErrorYouHaveNotEnoughPermissions())
-		return false, -1
-	}
-
-	return true, gottenUserId
 }

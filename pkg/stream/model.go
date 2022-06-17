@@ -2,8 +2,6 @@ package stream
 
 import (
 	"database/sql"
-
-	"github.com/deepch/vdk/av"
 )
 
 type Stream struct {
@@ -24,30 +22,6 @@ type StreamGet struct {
 	StatusPublic sql.NullInt16  `db:"StatusPublic"`
 	StatusRecord sql.NullInt16  `db:"StatusRecord"`
 	PathStream   sql.NullString `db:"pathStream"`
-}
-
-type Server struct {
-	HTTPPort      string
-	ICEServers    []string `json:"iceServers"`
-	ICEUsername   string   `json:"iceUsername"`
-	ICECredential string   `json:"iceCredential"`
-	WebRTCPortMin uint16   `json:"webrtcPortMin"`
-	WebRTCPortMax uint16   `json:"webrtcPortMax"`
-}
-
-type StreamSettings struct {
-	URL          string `json:"url"`
-	Status       bool   `json:"status"`
-	OnDemand     bool   `json:"onDemand"`
-	DisableAudio bool   `json:"disableAudio"`
-	Debug        bool   `json:"debug"`
-	RunLock      bool   `json:"-"`
-	Codecs       []av.CodecData
-	ClientList   map[string]Viewer
-}
-
-type Viewer struct {
-	Cast chan av.Packet
 }
 
 type JCodec struct {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image/jpeg"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/deepch/vdk/av"
@@ -14,13 +13,11 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
-	"github.com/gin-gonic/gin"
 	msg "github.com/mikerumy/vhosting/internal/messages"
 	"github.com/mikerumy/vhosting/pkg/config"
 	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/stream"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 const (
@@ -32,79 +29,16 @@ const (
 
 type StreamUseCase struct {
 	cfg        *config.Config
-	scfg       *sconfig.Config
+	scfg       *sconfig.SConfig
 	streamRepo stream.StreamRepository
 }
 
-func NewStreamUseCase(cfg *config.Config, scfg *sconfig.Config, streamRepo stream.StreamRepository) *StreamUseCase {
+func NewStreamUseCase(cfg *config.Config, scfg *sconfig.SConfig, streamRepo stream.StreamRepository) *StreamUseCase {
 	return &StreamUseCase{
 		cfg:        cfg,
 		scfg:       scfg,
 		streamRepo: streamRepo,
 	}
-}
-
-func (u *StreamUseCase) GetStream(id int) (*stream.Stream, error) {
-	strmg, err := u.streamRepo.GetStream(id)
-	if err != nil {
-		return nil, err
-	}
-	var strm stream.Stream
-	strm.Id = strmg.Id
-	strm.Stream = strmg.Stream.String
-	strm.DateTime = strmg.DateTime.String
-	strm.StatePublic = int(strmg.StatePublic.Int16)
-	strm.StatusPublic = int(strmg.StatusPublic.Int16)
-	strm.StatusRecord = int(strmg.StatusRecord.Int16)
-	strm.PathStream = strmg.PathStream.String
-	return &strm, nil
-}
-
-func (u *StreamUseCase) GetAllStreams(urlparams *user.Pagin) (map[int]*stream.Stream, error) {
-	streamsg, err := u.streamRepo.GetAllStreams(urlparams)
-	if err != nil {
-		return nil, err
-	}
-	var streams = map[int]*stream.Stream{}
-	for _, val := range streamsg {
-		streams[val.Id] = &stream.Stream{Id: val.Id, Stream: val.Stream.String,
-			DateTime: val.DateTime.String, StatePublic: int(val.StatePublic.Int16),
-			StatusPublic: int(val.StatusPublic.Int16), StatusRecord: int(val.StatusRecord.Int16),
-			PathStream: val.PathStream.String}
-	}
-	return streams, nil
-}
-
-func (u *StreamUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return -1, err
-	}
-	return id, nil
-}
-
-func (u *StreamUseCase) IsStreamExists(id int) (bool, error) {
-	exists, err := u.streamRepo.IsStreamExists(id)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
-func (u *StreamUseCase) ParseURLParams(ctx *gin.Context) *user.Pagin {
-	urlparams := ctx.Request.URL.Query()
-	var pagin user.Pagin
-	if lim := urlparams.Get("_limit"); lim != "" {
-		pagin.Limit, _ = strconv.Atoi(lim)
-	}
-	if pg := urlparams.Get("_page"); pg != "" {
-		pagin.Page, _ = strconv.Atoi(pg)
-	}
-	pagin.Page = pagin.Page*pagin.Limit - pagin.Limit
-	if pagin.Limit == 0 {
-		pagin.Limit = u.cfg.PaginationGetLimitDefault
-	}
-	return &pagin
 }
 
 func (u *StreamUseCase) ServeStreams() {
@@ -246,16 +180,16 @@ func isPathExists(snapshotPath string) (bool, error) {
 }
 
 func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	t := u.scfg.Streams[suuid]
 	t.Codecs = codecs
 	u.scfg.Streams[suuid] = t
 }
 
 func (u *StreamUseCase) isHasViewer(uuid string) bool {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	if cfg, ok := u.scfg.Streams[uuid]; ok && len(cfg.ClientList) > 0 {
 		return true
 	}
@@ -263,8 +197,8 @@ func (u *StreamUseCase) isHasViewer(uuid string) bool {
 }
 
 func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	for _, val := range u.scfg.Streams[uuid].ClientList {
 		if len(val.Cast) < cap(val.Cast) {
 			val.Cast <- pck
@@ -273,8 +207,8 @@ func (u *StreamUseCase) cast(uuid string, pck av.Packet) {
 }
 
 func (u *StreamUseCase) runUnlock(uuid string) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	cfg, ok := u.scfg.Streams[uuid]
 	if !ok {
 		return
@@ -286,15 +220,15 @@ func (u *StreamUseCase) runUnlock(uuid string) {
 }
 
 func (u *StreamUseCase) Exit(suuid string) bool {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	_, ok := u.scfg.Streams[suuid]
 	return ok
 }
 
 func (u *StreamUseCase) RunIfNotRun(uuid string) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	cfg, ok := u.scfg.Streams[uuid]
 	if !ok {
 		return
@@ -308,9 +242,9 @@ func (u *StreamUseCase) RunIfNotRun(uuid string) {
 
 func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 	for i := 0; i < 100; i++ {
-		u.scfg.Mutex.RLock()
+		u.scfg.StreamsMutex.RLock()
 		cfg, ok := u.scfg.Streams[suuid]
-		u.scfg.Mutex.RUnlock()
+		u.scfg.StreamsMutex.RUnlock()
 		if !ok {
 			return nil
 		}
@@ -335,32 +269,32 @@ func (u *StreamUseCase) CodecGet(suuid string) []av.CodecData {
 }
 
 func (u *StreamUseCase) GetICEServers() []string {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
-	return u.scfg.Server.ICEServers
+	u.cfg.StreamICEServersMutex.Lock()
+	defer u.cfg.StreamICEServersMutex.Unlock()
+	return u.cfg.StreamICEServers
 }
 
 func (u *StreamUseCase) GetICEUsername() string {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.Server.ICEUsernameMutex.Lock()
+	defer u.scfg.Server.ICEUsernameMutex.Unlock()
 	return u.scfg.Server.ICEUsername
 }
 
 func (u *StreamUseCase) GetICECredential() string {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.Server.ICECredentialMutex.Lock()
+	defer u.scfg.Server.ICECredentialMutex.Unlock()
 	return u.scfg.Server.ICECredential
 }
 
 func (u *StreamUseCase) GetWebRTCPortMin() uint16 {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.Server.WebRTCPortMinMutex.Lock()
+	defer u.scfg.Server.WebRTCPortMinMutex.Unlock()
 	return u.scfg.Server.WebRTCPortMin
 }
 
 func (u *StreamUseCase) GetWebRTCPortMax() uint16 {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.Server.WebRTCPortMaxMutex.Lock()
+	defer u.scfg.Server.WebRTCPortMaxMutex.Unlock()
 	return u.scfg.Server.WebRTCPortMax
 }
 
@@ -393,11 +327,11 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 }
 
 func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	cuuid := u.pseudoUUID()
 	ch := make(chan av.Packet, 100)
-	u.scfg.Streams[suuid].ClientList[cuuid] = stream.Viewer{Cast: ch}
+	u.scfg.Streams[suuid].ClientList[cuuid] = sconfig.Viewer{Cast: ch}
 	return cuuid, ch
 }
 
@@ -413,14 +347,14 @@ func (u *StreamUseCase) pseudoUUID() (uuid string) {
 }
 
 func (u *StreamUseCase) CastListDelete(suuid, cuuid string) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	delete(u.scfg.Streams[suuid].ClientList, cuuid)
 }
 
 func (u *StreamUseCase) List() (string, []string) {
-	u.scfg.Mutex.Lock()
-	defer u.scfg.Mutex.Unlock()
+	u.scfg.StreamsMutex.Lock()
+	defer u.scfg.StreamsMutex.Unlock()
 	var res []string
 	var first string
 	for key := range u.scfg.Streams {

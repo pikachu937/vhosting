@@ -5,39 +5,48 @@ import (
 	"flag"
 	"io/ioutil"
 
-	"github.com/mikerumy/vhosting/pkg/stream"
+	"github.com/mikerumy/vhosting/pkg/config"
 )
 
-func LoadConfig(path string) (*Config, error) {
-	var cfg Config
+func LoadConfig(path string) (*SConfig, error) {
+	var scfg SConfig
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		addr := flag.String("listen", "8000", "HTTP host:port")
 		udpMin := flag.Int("udp_min", 0, "WebRTC UDP port min")
 		udpMax := flag.Int("udp_max", 0, "WebRTC UDP port max")
-		iceServer := flag.String("ice_server", "", "ICE Server")
 		flag.Parse()
 
-		cfg.Server.HTTPPort = *addr
-		cfg.Server.WebRTCPortMin = uint16(*udpMin)
-		cfg.Server.WebRTCPortMax = uint16(*udpMax)
-		if len(*iceServer) > 0 {
-			cfg.Server.ICEServers = []string{*iceServer}
-		}
+		scfg.Server.WebRTCPortMin = uint16(*udpMin)
+		scfg.Server.WebRTCPortMax = uint16(*udpMax)
 
-		cfg.Streams = make(map[string]stream.StreamSettings)
+		scfg.Streams = make(map[string]Stream)
 	}
 
-	err = json.Unmarshal(data, &cfg)
+	err = json.Unmarshal(data, &scfg)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, val := range cfg.Streams {
-		val.ClientList = make(map[string]stream.Viewer)
-		cfg.Streams[i] = val
+	for i, val := range scfg.Streams {
+		val.ClientList = make(map[string]Viewer)
+		scfg.Streams[i] = val
 	}
 
-	return &cfg, nil
+	return &scfg, nil
+}
+
+func LoadRTSPLink(cfg *config.Config) (*SConfig, error) {
+	var scfg SConfig
+	var strm Stream
+
+	strm.DisableAudio = true
+	strm.URL = cfg.StreamLink
+
+	for i, val := range scfg.Streams {
+		val.ClientList = make(map[string]Viewer)
+		scfg.Streams[i] = val
+	}
+
+	return &scfg, nil
 }
