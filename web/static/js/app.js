@@ -35,7 +35,7 @@ $(document).ready(function() {
 
 
 function getCodecInfo() {
-  $.get("../codec/" + suuid, function(data) {
+  $.get("/stream/codec/" + suuid, function(data) {
     console.log(data)
     console.log(document.location.href)
     try {

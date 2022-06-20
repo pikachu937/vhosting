@@ -49,7 +49,7 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 	if len(list) > 0 {
 		ctx.Header("Cache-Control", "no-cache, max-age=0, must-revalidate, no-store")
 		ctx.Header("Access-Control-Allow-Origin", "*")
-		ctx.Redirect(http.StatusMovedPermanently, "stream/player/"+list[0])
+		ctx.Redirect(http.StatusMovedPermanently, "stream/"+list[0])
 	} else {
 		ctx.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"port":    strconv.Itoa(h.cfg.ServerPort),
@@ -58,7 +58,7 @@ func (h *StreamHandler) ServeIndex(ctx *gin.Context) {
 	}
 }
 
-func (h *StreamHandler) ServeStreamPlayer(ctx *gin.Context) {
+func (h *StreamHandler) ServeStream(ctx *gin.Context) {
 	_, list := h.useCase.List()
 	sort.Strings(list)
 	ctx.HTML(http.StatusOK, "player.tmpl", gin.H{

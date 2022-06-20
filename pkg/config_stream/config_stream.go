@@ -26,9 +26,8 @@ func LoadConfig(path string) (*SConfig, error) {
 	// 	scfg.Streams[i] = val
 	// }
 
-	urls := []string{"43704893903143017940"}
-	// , "21854368092658842199",
-	// "41574336307958053922", "93884975412010002133"}
+	urls := []string{"43704893903143017940", "21854368092658842199",
+		"41574336307958053922", "93884975412010002133"}
 
 	scfg.Streams = map[string]Stream{}
 	for _, val := range urls {

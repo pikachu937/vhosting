@@ -16,7 +16,7 @@ func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg 
 	h := NewStreamHandler(cfg, scfg, uc, uuc, luc, auc, suc)
 
 	router.GET("/stream", h.ServeIndex)
-	router.GET("/stream/player/:uuid", h.ServeStreamPlayer)
+	router.GET("/stream/:uuid", h.ServeStream)
 }
 
 func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.SConfig, uc stream.StreamUseCase,
