@@ -58,7 +58,7 @@ func (h *InfoHandler) CreateInfo(ctx *gin.Context) {
 
 	// Assign user ID into info and creation date, create info
 	inputInfo.UserId = userId
-	inputInfo.CreationDate = log.CreationDate
+	inputInfo.CreateDate = log.CreationDate
 
 	if err := h.useCase.CreateInfo(inputInfo); err != nil {
 		h.logUseCase.Report(ctx, log, msg.ErrorCannotCreateInfo(err))

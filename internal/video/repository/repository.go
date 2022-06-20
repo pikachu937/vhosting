@@ -3,11 +3,16 @@ package repository
 import (
 	"fmt"
 
+	"github.com/mikerumy/vhosting/internal/constants"
 	"github.com/mikerumy/vhosting/internal/video"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
 	"github.com/mikerumy/vhosting/pkg/user"
+)
+
+const (
+	outerDBName = constants.OuterDBWWW
 )
 
 type VideoRepository struct {
@@ -19,18 +24,19 @@ func NewVideoRepository(cfg *config.Config) *VideoRepository {
 }
 
 func (r *VideoRepository) CreateVideo(vid *video.Video) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
 	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s)", video.TableName,
-		video.Url, video.Filename, video.UserId, video.InfoId,
-		video.CreationDate)
-	val := "($1, $2, $3, $4, $5)"
+		video.Url, video.File, video.CreateDate, video.InfoId,
+		video.UserId)
+	val := fmt.Sprintf("('%s', '%s', '%s', %d, %d)", vid.Url, vid.File,
+		vid.CreateDate, vid.InfoId, vid.UserId)
 	query := fmt.Sprintf(template, tbl, val)
 
-	if _, err := db.Query(query, vid.Url, vid.Filename, vid.UserId,
-		vid.InfoId, vid.CreationDate); err != nil {
+	if _, err := dbo.Query(query); err != nil {
 		return err
 	}
 
@@ -38,18 +44,19 @@ func (r *VideoRepository) CreateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s", video.Id, video.Url,
-		video.Filename, video.UserId, video.InfoId, video.CreationDate)
+		video.File, video.CreateDate, video.InfoId, video.UserId)
 	tbl := video.TableName
-	cnd := fmt.Sprintf("%s=$1", video.Id)
+	cnd := fmt.Sprintf("%s=%d", video.Id, id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var vid video.Video
-	if err := db.Get(&vid, query, id); err != nil {
+	if err := dbo.Get(&vid, query); err != nil {
 		return nil, err
 	}
 
@@ -57,8 +64,9 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 }
 
 func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
 	col := "*"
@@ -68,7 +76,7 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 	pag := urlparams.Page
 	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
-	rows, err := db.Query(query)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +85,13 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 	var videos = map[int]*video.Video{}
 	var vid video.Video
 	for rows.Next() {
-		if err := rows.Scan(&vid.Id, &vid.Url, &vid.Filename, &vid.UserId,
-			&vid.InfoId, &vid.CreationDate); err != nil {
+		if err := rows.Scan(&vid.Id, &vid.Url, &vid.File, &vid.CreateDate,
+			&vid.InfoId, &vid.UserId); err != nil {
 			return nil, err
 		}
 		videos[vid.Id] = &video.Video{Id: vid.Id, Url: vid.Url,
-			Filename: vid.Filename, UserId: vid.UserId,
-			InfoId: vid.InfoId, CreationDate: vid.CreationDate}
+			File: vid.File, CreateDate: vid.CreateDate,
+			InfoId: vid.InfoId, UserId: vid.UserId}
 	}
 
 	if err := rows.Err(); err != nil {
@@ -98,18 +106,19 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 }
 
 func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := video.TableName
-	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END, ", video.Url, video.Url) +
-		fmt.Sprintf("%s=CASE WHEN $2 <> '' THEN $2 ELSE %s END, ", video.Filename, video.Filename) +
-		fmt.Sprintf("%s=CASE WHEN $3 > -1 THEN $3 ELSE %s END", video.InfoId, video.InfoId)
-	cnd := fmt.Sprintf("%s=$4", video.Id)
+	val := fmt.Sprintf("%s=CASE WHEN '%s' <> '' THEN '%s' ELSE %s END, ", video.Url, vid.Url, vid.Url, video.Url) +
+		fmt.Sprintf("%s=CASE WHEN '%s' <> '' THEN '%s' ELSE %s END, ", video.File, vid.File, vid.File, video.File) +
+		fmt.Sprintf("%s=CASE WHEN %d > -1 THEN %d ELSE %s END", video.InfoId, vid.InfoId, vid.InfoId, video.InfoId)
+	cnd := fmt.Sprintf("%s=%d", video.Id, vid.Id)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
-	rows, err := db.Query(query, vid.Url, vid.Filename, vid.InfoId, vid.Id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return err
 	}
@@ -119,15 +128,16 @@ func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) DeleteVideo(id int) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := video.TableName
-	cnd := fmt.Sprintf("%s=$1", video.Id)
+	cnd := fmt.Sprintf("%s=%d", video.Id, id)
 	query := fmt.Sprintf(template, tbl, cnd)
 
-	rows, err := db.Query(query, id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return err
 	}
@@ -137,16 +147,17 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 }
 
 func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := video.Id
 	tbl := video.TableName
-	cnd := fmt.Sprintf("%s=$1", video.Id)
+	cnd := fmt.Sprintf("%s=%d", video.Id, id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
-	rows, err := db.Query(query, id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return false, err
 	}

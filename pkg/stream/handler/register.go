@@ -15,7 +15,7 @@ func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg 
 	uuc user.UserUseCase, luc logger.LogUseCase, auc auth.AuthUseCase, suc sess.SessUseCase) {
 	h := NewStreamHandler(cfg, scfg, uc, uuc, luc, auc, suc)
 
-	router.GET("/", h.ServeIndex)
+	router.GET("/stream", h.ServeIndex)
 	router.GET("/stream/player/:uuid", h.ServeStreamPlayer)
 }
 
@@ -29,7 +29,7 @@ func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg
 		streamRoute.POST("/receiver/:uuid", h.ServeStreamVidOverWebRTC)
 		streamRoute.POST("/", h.ServeStreamWebRTC2)
 
-		streamRoute.GET(":id", h.GetStream)
-		streamRoute.GET("all", h.GetAllStreams)
+		streamRoute.GET("/get/:id", h.GetStream)
+		streamRoute.GET("/get/all", h.GetAllStreams)
 	}
 }

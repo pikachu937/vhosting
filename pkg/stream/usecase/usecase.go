@@ -1,15 +1,14 @@
 package usecase
 
 import (
-	"crypto/rand"
 	"errors"
-	"fmt"
-	"image/jpeg"
+
+	// "image/jpeg"
 	"os"
 	"time"
 
 	"github.com/deepch/vdk/av"
-	"github.com/deepch/vdk/cgo/ffmpeg"
+	// "github.com/deepch/vdk/cgo/ffmpeg"
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
@@ -72,7 +71,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 
 	// add next timeout
 	newRTSPClient := rtspv2.RTSPClientOptions{
-		URL:              url,
+		URL:              os.Getenv("RTSP_URL_MAIN") + url,
 		DisableAudio:     disableAudio,
 		DialTimeout:      3 * time.Second,
 		ReadWriteTimeout: 3 * time.Second,
@@ -90,36 +89,36 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 
 	audioOnly := false
-	videoIDX := 0
-	for i, codec := range rtspClient.CodecData {
-		if codec.Type().IsVideo() {
-			audioOnly = false
-			videoIDX = i
-		}
-	}
+	// videoIDX := 0
+	// for i, codec := range rtspClient.CodecData {
+	// 	if codec.Type().IsVideo() {
+	// 		audioOnly = false
+	// 		videoIDX = i
+	// 	}
+	// }
 
-	var frameDecoderSingle *ffmpeg.VideoDecoder
-	if !audioOnly {
-		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
-		if err != nil {
-			logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
-		}
-	}
+	// var frameDecoderSingle *ffmpeg.VideoDecoder
+	// if !audioOnly {
+	// 	frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
+	// 	if err != nil {
+	// 		logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
+	// 	}
+	// }
 
-	isTimeToSnapshot := true
-	if u.cfg.StreamSnapshotsEnable {
-		go func() {
-			for {
-				time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
-				isTimeToSnapshot = true
-			}
-		}()
-	}
+	// isTimeToSnapshot := true
+	// if u.cfg.StreamSnapshotsEnable {
+	// 	go func() {
+	// 		for {
+	// 			time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
+	// 			isTimeToSnapshot = true
+	// 		}
+	// 	}()
+	// }
 
-	snapshotDir := fmt.Sprintf(snapshotPath, name)
-	if exists, _ := isPathExists(snapshotDir); !exists {
-		os.MkdirAll(snapshotDir, 0777)
-	}
+	// snapshotDir := fmt.Sprintf(snapshotPath, name)
+	// if exists, _ := isPathExists(snapshotDir); !exists {
+	// 	os.MkdirAll(snapshotDir, 0777)
+	// }
 
 	for {
 		select {
@@ -145,25 +144,25 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 				keyTest.Reset(20 * time.Second)
 			}
 			u.cast(name, *packetAV)
-			// sample single frame decode encode to jpeg, save on disk
-			if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
-				break
-			}
-			pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
-			if err != nil ||
-				pic == nil || !isTimeToSnapshot {
-				break
-			}
-			out, err := os.Create(snapshotDir + "/" + snapshotName)
-			if err != nil {
-				break
-			}
-			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
-				if u.cfg.StreamSnapshotShowStatus {
-					logger.Printc(nil, msg.InfoSnapshotCreated(name))
-				}
-				isTimeToSnapshot = false
-			}
+			// // sample single frame decode encode to jpeg, save on disk
+			// if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
+			// 	break
+			// }
+			// pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
+			// if err != nil ||
+			// 	pic == nil || !isTimeToSnapshot {
+			// 	break
+			// }
+			// out, err := os.Create(snapshotDir + "/" + snapshotName)
+			// if err != nil {
+			// 	break
+			// }
+			// if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
+			// 	if u.cfg.StreamSnapshotShowStatus {
+			// 		logger.Printc(nil, msg.InfoSnapshotCreated(name))
+			// 	}
+			// 	isTimeToSnapshot = false
+			// }
 		}
 	}
 }
@@ -329,22 +328,23 @@ func (u *StreamUseCase) WritePackets(url string, muxerWebRTC *webrtc.Muxer, audi
 func (u *StreamUseCase) CastListAdd(suuid string) (string, chan av.Packet) {
 	u.scfg.StreamsMutex.Lock()
 	defer u.scfg.StreamsMutex.Unlock()
-	cuuid := u.pseudoUUID()
+	// cuuid := u.pseudoUUID()
+	cuuid := suuid
 	ch := make(chan av.Packet, 100)
 	u.scfg.Streams[suuid].ClientList[cuuid] = sconfig.Viewer{Cast: ch}
 	return cuuid, ch
 }
 
-func (u *StreamUseCase) pseudoUUID() (uuid string) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		logger.Printc(nil, msg.ErrorPseudoUUIDReadError(err))
-		return
-	}
-	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
-	return
-}
+// func (u *StreamUseCase) pseudoUUID() (uuid string) {
+// 	bytes := make([]byte, 16)
+// 	_, err := rand.Read(bytes)
+// 	if err != nil {
+// 		logger.Printc(nil, msg.ErrorPseudoUUIDReadError(err))
+// 		return
+// 	}
+// 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
+// 	return
+// }
 
 func (u *StreamUseCase) CastListDelete(suuid, cuuid string) {
 	u.scfg.StreamsMutex.Lock()

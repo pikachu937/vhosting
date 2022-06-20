@@ -51,14 +51,14 @@ func (h *VideoHandler) CreateVideo(ctx *gin.Context) {
 		return
 	}
 
-	if h.useCase.IsRequiredEmpty(inputVideo.Url, inputVideo.Filename) {
+	if h.useCase.IsRequiredEmpty(inputVideo.Url, inputVideo.File) {
 		h.logUseCase.Report(ctx, log, msg.ErrorUrlAndFilenameCannotBeEmpty())
 		return
 	}
 
 	// Assign user ID into info and creation date, create info
 	inputVideo.UserId = userId
-	inputVideo.CreationDate = log.CreationDate
+	inputVideo.CreateDate = log.CreationDate
 
 	if err := h.useCase.CreateVideo(inputVideo); err != nil {
 		h.logUseCase.Report(ctx, log, msg.ErrorCannotCreateVideo(err))

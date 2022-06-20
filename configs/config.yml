@@ -2,8 +2,9 @@ db:
   connectionLatencyMilliseconds: 50
   connectionShowStatus: false
   connectionTimeoutSeconds: 5
+  driver: "postgres"
   host: "127.0.0.1"
-  name: "vhosting"
+  name: "vhosting2"
   port: 5432
   sslEnable: false
   username: "postgres"
@@ -12,6 +13,7 @@ dbo:
   connectionLatencyMilliseconds: 500
   connectionShowStatus: false
   connectionTimeoutSeconds: 5
+  driver: "postgres"
   host: "192.168.0.32"
   name: "l3"
   port: 5432
@@ -24,7 +26,7 @@ pagination:
 server:
   debugEnable: false
   maxHeaderBytes: 1048576 # 1 megabyte
-  port: 8000
+  port: 8001
   readTimeoutSeconds: 15
   writeTimeoutSeconds: 15
 

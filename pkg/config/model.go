@@ -6,24 +6,26 @@ type Config struct {
 	DBConnectionLatencyMilliseconds int
 	DBConnectionShowStatus          bool
 	DBConnectionTimeoutSeconds      int
+	DBDriver                        string
 	DBHost                          string
 	DBName                          string
 	DBPort                          int
 	DBSSLEnable                     bool
 	DBUsername                      string
-	DBDriver                        string
-	DBPassword                      string
+
+	DBPassword string
 
 	DBOConnectionLatencyMilliseconds int
 	DBOConnectionShowStatus          bool
 	DBOConnectionTimeoutSeconds      int
+	DBODriver                        string
 	DBOHost                          string
 	DBOName                          string
 	DBOPort                          int
 	DBOSSLEnable                     bool
 	DBOUsername                      string
-	DBODriver                        string
-	DBOPassword                      string
+
+	DBOPassword string
 
 	HashingPasswordSalt    string
 	HashingTokenSigningKey string
@@ -38,12 +40,12 @@ type Config struct {
 
 	SessionTTLHours int
 
-	ServerIP string
-
 	StreamICEServersMutex       sync.RWMutex
 	StreamICEServers            []string
 	StreamLink                  string
 	StreamSnapshotPeriodSeconds int
 	StreamSnapshotShowStatus    bool
 	StreamSnapshotsEnable       bool
+
+	ServerIP string
 }

@@ -1,12 +1,12 @@
 package info
 
 const (
-	TableName    = "public.infos"
-	Id           = "id"
-	Stream       = "stream"
-	StartPeriod  = "start_period"
-	StopPeriod   = "stop_period"
-	LifeTime     = "life_time"
-	UserId       = "user_id"
-	CreationDate = "creation_date"
+	TableName   = "public.video_info" // "public.infos"
+	Id          = "id"
+	CreateDate  = "create_date"
+	Stream      = "stream"
+	StartPeriod = "start_period"
+	StopPeriod  = "stop_period"
+	TimeLife    = "time_life"
+	UserId      = "user_id"
 )

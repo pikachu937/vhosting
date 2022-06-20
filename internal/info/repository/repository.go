@@ -3,11 +3,16 @@ package repository
 import (
 	"fmt"
 
+	"github.com/mikerumy/vhosting/internal/constants"
 	"github.com/mikerumy/vhosting/internal/info"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
 	"github.com/mikerumy/vhosting/pkg/user"
+)
+
+const (
+	outerDBName = constants.OuterDBWWW
 )
 
 type InfoRepository struct {
@@ -19,18 +24,19 @@ func NewInfoRepository(cfg *config.Config) *InfoRepository {
 }
 
 func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.INSERT_INTO_TBL_VALUES_VAL
-	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s, %s)", info.TableName,
-		info.Stream, info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId,
-		info.CreationDate)
-	val := "($1, $2, $3, $4, $5, $6)"
+	tbl := fmt.Sprintf("%s (%s, %s, %s, %s, %s)", info.TableName,
+		info.CreateDate, info.Stream, info.StartPeriod, info.StopPeriod,
+		info.TimeLife)
+	val := fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')",
+		nfo.CreateDate, nfo.Stream, nfo.StartPeriod, nfo.StopPeriod,
+		nfo.TimeLife)
 	query := fmt.Sprintf(template, tbl, val)
-
-	if _, err := db.Query(query, nfo.Stream, nfo.StartPeriod, nfo.StopPeriod,
-		nfo.LifeTime, nfo.UserId, nfo.CreationDate); err != nil {
+	if _, err := dbo.Query(query); err != nil {
 		return err
 	}
 
@@ -38,18 +44,19 @@ func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
-	col := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s", info.Id, info.Stream,
-		info.StartPeriod, info.StopPeriod, info.LifeTime, info.UserId, info.CreationDate)
+	col := fmt.Sprintf("%s, %s, %s, %s, %s", info.Id, info.Stream,
+		info.StartPeriod, info.StopPeriod, info.TimeLife)
 	tbl := info.TableName
-	cnd := fmt.Sprintf("%s=$1", info.Id)
+	cnd := fmt.Sprintf("%s=%d", info.Id, id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
 	var nfo info.Info
-	if err := db.Get(&nfo, query, id); err != nil {
+	if err := dbo.Get(&nfo, query); err != nil {
 		return nil, err
 	}
 
@@ -57,8 +64,9 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 }
 
 func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM
 	col := "*"
@@ -68,7 +76,7 @@ func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info,
 	pag := urlparams.Page
 	query := fmt.Sprintf(template, col, tbl, cnd, pag, tbl, pag, lim)
 
-	rows, err := db.Query(query)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +85,13 @@ func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info,
 	var infos = map[int]*info.Info{}
 	var nfo info.Info
 	for rows.Next() {
-		if err := rows.Scan(&nfo.Id, &nfo.Stream, &nfo.StartPeriod, &nfo.StopPeriod,
-			&nfo.LifeTime, &nfo.UserId, &nfo.CreationDate); err != nil {
+		if err := rows.Scan(&nfo.Id, &nfo.CreateDate, &nfo.Stream, &nfo.StartPeriod,
+			&nfo.StopPeriod, &nfo.TimeLife, &nfo.UserId); err != nil {
 			return nil, err
 		}
-		infos[nfo.Id] = &info.Info{Id: nfo.Id, Stream: nfo.Stream,
-			StartPeriod: nfo.StartPeriod, StopPeriod: nfo.StopPeriod,
-			LifeTime: nfo.LifeTime, UserId: nfo.UserId, CreationDate: nfo.CreationDate}
+		infos[nfo.Id] = &info.Info{Id: nfo.Id, CreateDate: nfo.CreateDate,
+			Stream: nfo.Stream, StartPeriod: nfo.StartPeriod, StopPeriod: nfo.StopPeriod,
+			TimeLife: nfo.TimeLife, UserId: nfo.UserId}
 	}
 
 	if err := rows.Err(); err != nil {
@@ -98,16 +106,18 @@ func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info,
 }
 
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.UPDATE_TBL_SET_VAL_WHERE_CND
 	tbl := info.TableName
-	val := fmt.Sprintf("%s=CASE WHEN $1 <> '' THEN $1 ELSE %s END", info.Stream, info.Stream)
-	cnd := fmt.Sprintf("%s=$2", info.Id)
+	val := fmt.Sprintf("%s=CASE WHEN '%s' <> '' THEN '%s' ELSE %s END",
+		info.Stream, nfo.Stream, nfo.Stream, info.Stream)
+	cnd := fmt.Sprintf("%s=%d", info.Id, nfo.Id)
 	query := fmt.Sprintf(template, tbl, val, cnd)
 
-	rows, err := db.Query(query, nfo.Stream, nfo.Id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return err
 	}
@@ -117,15 +127,16 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) DeleteInfo(id int) error {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.DELETE_FROM_TBL_WHERE_CND
 	tbl := info.TableName
-	cnd := fmt.Sprintf("%s=$1", info.Id)
+	cnd := fmt.Sprintf("%s=%d", info.Id, id)
 	query := fmt.Sprintf(template, tbl, cnd)
 
-	rows, err := db.Query(query, id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return err
 	}
@@ -135,16 +146,17 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 }
 
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
-	db := db_connect.CreateLocalDBConnection(r.cfg)
-	defer db_connect.CloseDBConnection(r.cfg, db)
+	r.cfg.DBOName = outerDBName
+	dbo := db_connect.CreateOuterDBConnection(r.cfg)
+	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
 	template := qconsts.SELECT_COL_FROM_TBL_WHERE_CND
 	col := info.Id
 	tbl := info.TableName
-	cnd := fmt.Sprintf("%s=$1", info.Id)
+	cnd := fmt.Sprintf("%s=%d", info.Id, id)
 	query := fmt.Sprintf(template, col, tbl, cnd)
 
-	rows, err := db.Query(query, id)
+	rows, err := dbo.Query(query)
 	if err != nil {
 		return false, err
 	}

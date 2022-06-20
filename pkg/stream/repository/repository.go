@@ -3,11 +3,16 @@ package repository
 import (
 	"fmt"
 
+	"github.com/mikerumy/vhosting/internal/constants"
 	"github.com/mikerumy/vhosting/pkg/config"
 	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
 	"github.com/mikerumy/vhosting/pkg/db_connect"
 	"github.com/mikerumy/vhosting/pkg/stream"
 	"github.com/mikerumy/vhosting/pkg/user"
+)
+
+const (
+	outerDBName = constants.OuterDBL3
 )
 
 type StreamRepository struct {
@@ -19,6 +24,7 @@ func NewStreamRepository(cfg *config.Config) *StreamRepository {
 }
 
 func (r *StreamRepository) GetStream(id int) (*stream.StreamGet, error) {
+	r.cfg.DBOName = outerDBName
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -39,6 +45,7 @@ func (r *StreamRepository) GetStream(id int) (*stream.StreamGet, error) {
 }
 
 func (r *StreamRepository) GetAllStreams(urlparams *user.Pagin) (map[int]*stream.StreamGet, error) {
+	r.cfg.DBOName = outerDBName
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -82,6 +89,7 @@ func (r *StreamRepository) GetAllStreams(urlparams *user.Pagin) (map[int]*stream
 }
 
 func (r *StreamRepository) IsStreamExists(id int) (bool, error) {
+	r.cfg.DBOName = outerDBName
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 

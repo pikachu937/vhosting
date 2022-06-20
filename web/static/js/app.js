@@ -36,6 +36,8 @@ $(document).ready(function() {
 
 function getCodecInfo() {
   $.get("../codec/" + suuid, function(data) {
+    console.log(data)
+    console.log(document.location.href)
     try {
       data = JSON.parse(data);
     } catch (e) {
@@ -53,15 +55,17 @@ function getCodecInfo() {
 let sendChannel = null;
 
 function getRemoteSdp() {
-  $.post("../receiver/"+ suuid, {
+  $.post("/stream/receiver/"+ suuid, {
     suuid: suuid,
     data: btoa(pc.localDescription.sdp)
   }, function(data) {
+    console.log(data)
     try {
       pc.setRemoteDescription(new RTCSessionDescription({
         type: 'answer',
         sdp: atob(data)
       }))
+      console.log(pc)
     } catch (e) {
       console.warn(e);
     }
