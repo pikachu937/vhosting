@@ -12,20 +12,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/download/vid_dir/vid.mp4",
+					"raw": "http://127.0.0.1:8000/download/vid_dir/vid.mp4",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"download",
 						"vid_dir",

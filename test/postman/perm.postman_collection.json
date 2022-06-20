@@ -12,20 +12,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/all",
+					"raw": "http://{{address}}:{{port}}/perm/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"all"
@@ -41,7 +38,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -50,15 +47,12 @@
 					"raw": "{\n    \"permIds\": [5,7]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/user/0",
+					"raw": "http://{{address}}:{{port}}/perm/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"user",
@@ -75,20 +69,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/user/0",
+					"raw": "http://{{address}}:{{port}}/perm/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"user",
@@ -105,7 +96,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -114,15 +105,12 @@
 					"raw": "{\n    \"permIds\": [9,10,4,5]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/user/0",
+					"raw": "http://{{address}}:{{port}}/perm/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"user",
@@ -139,7 +127,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -148,15 +136,12 @@
 					"raw": "{\n    \"permIds\": [9,10,11]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/group/0",
+					"raw": "http://{{address}}:{{port}}/perm/group/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"group",
@@ -173,20 +158,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/group/0",
+					"raw": "http://{{address}}:{{port}}/perm/group/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"group",
@@ -203,7 +185,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -212,15 +194,12 @@
 					"raw": "{\n    \"permIds\": [10,11,12,13,14]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/perm/group/0",
+					"raw": "http://{{address}}:{{port}}/perm/group/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"perm",
 						"group",

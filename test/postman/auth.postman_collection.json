@@ -15,13 +15,10 @@
 					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/auth/signin",
+					"raw": "http://{{address}}:{{port}}/auth/signin",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -48,13 +45,10 @@
 					"raw": "{\n    \"password\": \"admin\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/auth/change_password",
+					"raw": "http://{{address}}:{{port}}/auth/change_password",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -77,13 +71,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/auth/signout",
+					"raw": "http://{{address}}:{{port}}/auth/signout",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [

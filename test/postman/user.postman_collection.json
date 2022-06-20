@@ -12,7 +12,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -21,15 +21,12 @@
 					"raw": "{\n    \"username\": \"admin1\",\n    \"password\": \"admin1\",\n    \"firstName\": \"asd\",\n    \"lastName\": \"qwe\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/user",
+					"raw": "http://{{address}}:{{port}}/user",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user"
 					]
@@ -44,20 +41,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/5",
+					"raw": "http://{{address}}:{{port}}/user/5",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user",
 						"5"
@@ -73,20 +67,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/all",
+					"raw": "http://{{address}}:{{port}}/user/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user",
 						"all"
@@ -102,7 +93,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -111,15 +102,12 @@
 					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/change_password",
+					"raw": "http://{{address}}:{{port}}/user/change_password",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user",
 						"change_password"
@@ -135,7 +123,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
@@ -144,15 +132,12 @@
 					"raw": "{\n    \"username\": \"admin1_edit\",\n    \"password\": \"admin1_edit\",\n    \"isSuperuser\": true,\n    \"isStaff\": false,\n    \"firstName\": \"Петр\",\n    \"lastName\": \"Петров\",\n    \"joiningDate\": \"2020-03-19 12:50:42.429290+03\",\n    \"lastLogin\": \"2020-04-19 15:01:32.654811+03\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/1",
+					"raw": "http://{{address}}:{{port}}/user/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user",
 						"1"
@@ -168,20 +153,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "",
+						"value": "{{token}}",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/1",
+					"raw": "http://{{address}}:{{port}}/user/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
-					"port": "8000",
+					"port": "{{port}}",
 					"path": [
 						"user",
 						"1"

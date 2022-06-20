@@ -12,24 +12,21 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"stream\": \"dnsbfksbfkbsf\",\n    \"startPeriod\": \"2022-05-18 16:13:51.973640+03\",\n    \"stopPeriod\": \"2022-05-18 16:13:51.973640+03\",\n    \"lifeTime\": \"2022-05-18 16:13:51.973640+03\"\n}\n"
+					"raw": "{\n    \"stream\": \"43704893903143017940\",\n    \"startPeriod\": \"2022-06-18 10:00:00.973640+03\",\n    \"stopPeriod\": \"2022-06-18 10:15:51.973640+03\",\n    \"timeLife\": \"2022-06-19 16:13:51.973640+03\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/info",
+					"raw": "http://127.0.0.1:8000/info",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"info"
 					]
@@ -44,23 +41,20 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/info/1",
+					"raw": "http://127.0.0.1:8000/info/69",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"info",
-						"1"
+						"69"
 					]
 				}
 			},
@@ -73,20 +67,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/info/all",
+					"raw": "http://127.0.0.1:8000/info/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"info",
 						"all"
@@ -102,7 +93,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
@@ -111,18 +102,15 @@
 					"raw": "{\n    \"stream\": \"qwerty\",\n    \"userId\": 33\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/info/1",
+					"raw": "http://127.0.0.1:8000/info/69",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"info",
-						"1"
+						"69"
 					]
 				}
 			},
@@ -135,20 +123,17 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{token}}",
+						"value": "",
 						"type": "default"
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/info/1",
+					"raw": "http://127.0.0.1:8000/info/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
-					"port": "{{port}}",
+					"port": "8000",
 					"path": [
 						"info",
 						"1"

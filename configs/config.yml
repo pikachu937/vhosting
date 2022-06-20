@@ -39,4 +39,4 @@ stream:
   ]
   snapshotPeriodSeconds: 60
   snapshotShowStatus: false
-  snapshotsEnable: false
+  snapshotsEnable: true

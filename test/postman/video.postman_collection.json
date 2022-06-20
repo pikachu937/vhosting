@@ -18,16 +18,13 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"url\": \"https://somewebsite.com/video/meqjqnrkjqnr\",\n    \"fileName\": \"asd.webm\",\n    \"infoId\": 2\n}\n"
+					"raw": "{\n    \"url\": \"https://somewebsite.com/video/meqjqnrkjqnr\",\n    \"file\": \"asd.webm\",\n    \"infoId\": 69\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/video",
+					"raw": "http://{{address}}:{{port}}/video",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -49,18 +46,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/video/5",
+					"raw": "http://{{address}}:{{port}}/video/65",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
 						"video",
-						"5"
+						"65"
 					]
 				}
 			},
@@ -78,13 +72,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/video/all",
+					"raw": "http://{{address}}:{{port}}/video/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -108,21 +99,18 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"url\": \"https://somewebsite.com/video/qwerty\",\n    \"fileName\": \"qwerty.webm\",\n    \"infoId\": 2\n}\n"
+					"raw": "{\n    \"url\": \"https://somewebsite.com/video/qwerty\",\n    \"fileName\": \"qwerty.webm\",\n    \"infoId\": 69\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/video/1",
+					"raw": "http://{{address}}:{{port}}/video/65",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
 						"video",
-						"1"
+						"65"
 					]
 				}
 			},
@@ -140,18 +128,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/video/1",
+					"raw": "http://{{address}}:{{port}}/video/65",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
 						"video",
-						"1"
+						"65"
 					]
 				}
 			},

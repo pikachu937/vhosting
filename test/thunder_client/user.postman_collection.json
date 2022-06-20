@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "1764411d-8b33-496c-ab0e-f59aba31c87d",
-		"name": "info",
+		"_postman_id": "b38e53e4-2ac0-4677-95a2-20098ac09a32",
+		"name": "user",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "create info",
+			"name": "create user",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -18,27 +18,24 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"stream\": \"dnsbfksbfkbsf\",\n    \"startPeriod\": \"2022-05-18 16:13:51.973640+03\",\n    \"stopPeriod\": \"2022-05-18 16:13:51.973640+03\",\n    \"lifeTime\": \"2022-05-18 16:13:51.973640+03\"\n}\n"
+					"raw": "{\n    \"username\": \"admin1\",\n    \"password\": \"admin1\",\n    \"firstName\": \"asd\",\n    \"lastName\": \"qwe\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/info",
+					"raw": "http://127.0.0.1:8000/user",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
 					"port": "8000",
 					"path": [
-						"info"
+						"user"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "get info",
+			"name": "get user",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -49,25 +46,22 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/info/1",
+					"raw": "http://127.0.0.1:8000/user/5",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
 					"port": "8000",
 					"path": [
-						"info",
-						"1"
+						"user",
+						"5"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "get all infos",
+			"name": "get all users",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -78,17 +72,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/info/all",
+					"raw": "http://127.0.0.1:8000/user/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
 					"port": "8000",
 					"path": [
-						"info",
+						"user",
 						"all"
 					]
 				}
@@ -96,7 +87,37 @@
 			"response": []
 		},
 		{
-			"name": "partially update info",
+			"name": "change user password",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}\n"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/change_password",
+					"protocol": "http",
+					"host": [
+						"127.0.0.1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"change_password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "partially update user",
 			"request": {
 				"method": "PATCH",
 				"header": [
@@ -108,20 +129,17 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"stream\": \"qwerty\",\n    \"userId\": 33\n}\n"
+					"raw": "{\n    \"username\": \"admin1_edit\",\n    \"password\": \"admin1_edit\",\n    \"isSuperuser\": true,\n    \"isStaff\": false,\n    \"firstName\": \"Петр\",\n    \"lastName\": \"Петров\",\n    \"joiningDate\": \"2020-03-19 12:50:42.429290+03\",\n    \"lastLogin\": \"2020-04-19 15:01:32.654811+03\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/info/1",
+					"raw": "http://127.0.0.1:8000/user/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
 					"port": "8000",
 					"path": [
-						"info",
+						"user",
 						"1"
 					]
 				}
@@ -129,7 +147,7 @@
 			"response": []
 		},
 		{
-			"name": "delete info",
+			"name": "delete user",
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -140,17 +158,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:8000/info/1",
+					"raw": "http://127.0.0.1:8000/user/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"127.0.0.1"
 					],
 					"port": "8000",
 					"path": [
-						"info",
+						"user",
 						"1"
 					]
 				}

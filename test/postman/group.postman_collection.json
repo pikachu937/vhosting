@@ -21,13 +21,10 @@
 					"raw": "{\n    \"name\": \"New Group\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group",
+					"raw": "http://{{address}}:{{port}}/group",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -49,13 +46,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/2",
+					"raw": "http://{{address}}:{{port}}/group/2",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -78,13 +72,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/all",
+					"raw": "http://{{address}}:{{port}}/group/all",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -111,13 +102,10 @@
 					"raw": "{\n    \"name\": \"Some Other Group\"\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/user/1",
+					"raw": "http://{{address}}:{{port}}/user/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -140,13 +128,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/1",
+					"raw": "http://{{address}}:{{port}}/group/1",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -173,13 +158,10 @@
 					"raw": "{\n    \"groupIds\": [0,1]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/user/0",
+					"raw": "http://{{address}}:{{port}}/group/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -203,13 +185,10 @@
 					}
 				],
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/user/0",
+					"raw": "http://{{address}}:{{port}}/group/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
@@ -237,13 +216,10 @@
 					"raw": "{\n    \"groupIds\": [0,1]\n}\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:{{port}}/group/user/0",
+					"raw": "http://{{address}}:{{port}}/group/user/0",
 					"protocol": "http",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{address}}"
 					],
 					"port": "{{port}}",
 					"path": [
