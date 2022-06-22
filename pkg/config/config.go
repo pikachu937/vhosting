@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	msg "github.com/mikerumy/vhosting/internal/messages"
@@ -22,147 +23,283 @@ func LoadConfig(path string) (*Config, error) {
 		return &cfg, err
 	}
 
-	var cvar string
+	param := ""
 
-	cvar = "db.connectionLatencyMilliseconds"
-	dbConnectionLatencyMilliseconds := viper.GetInt(cvar)
-	if dbConnectionLatencyMilliseconds == 0 {
-		dbConnectionLatencyMilliseconds = 100
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dbConnectionLatencyMilliseconds))
+	param = "DB_CONNECTION_LATENCY_MILLISECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 50
+		cfg.DBConnectionLatencyMilliseconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBConnectionLatencyMilliseconds = val
 	}
 
-	cvar = "db.connectionTimeoutSeconds"
-	dbConnectionTimeoutSeconds := viper.GetInt(cvar)
-	if dbConnectionTimeoutSeconds == 0 {
-		dbConnectionTimeoutSeconds = 5
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dbConnectionTimeoutSeconds))
+	param = "DB_CONNECTION_SHOW_STATUS"
+	if val, err := strconv.ParseBool(os.Getenv(param)); err != nil {
+		defaultVal := false
+		cfg.DBConnectionShowStatus = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBConnectionShowStatus = val
 	}
 
-	cvar = "db.port"
-	dbPort := viper.GetInt(cvar)
-	if dbPort == 0 {
-		dbPort = 3456
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dbPort))
+	param = "DB_CONNECTION_TIMEOUT_SECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 5
+		cfg.DBConnectionTimeoutSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBConnectionTimeoutSeconds = val
 	}
 
-	cvar = "dbo.connectionLatencyMilliseconds"
-	dboConnectionLatencyMilliseconds := viper.GetInt(cvar)
-	if dboConnectionLatencyMilliseconds == 0 {
-		dboConnectionLatencyMilliseconds = 100
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dboConnectionLatencyMilliseconds))
+	param = "DB_DRIVER"
+	if os.Getenv(param) == "" {
+		defaultVal := "mysql"
+		cfg.DBDriver = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBDriver = os.Getenv(param)
 	}
 
-	cvar = "dbo.connectionTimeoutSeconds"
-	dboConnectionTimeoutSeconds := viper.GetInt(cvar)
-	if dboConnectionTimeoutSeconds == 0 {
-		dboConnectionTimeoutSeconds = 5
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dboConnectionTimeoutSeconds))
+	param = "DB_HOST"
+	if os.Getenv(param) == "" {
+		defaultVal := "127.0.0.1"
+		cfg.DBHost = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBHost = os.Getenv(param)
 	}
 
-	cvar = "dbo.port"
-	dboPort := viper.GetInt(cvar)
-	if dboPort == 0 {
-		dboPort = 3456
-		logger.Print(msg.WarningCannotConvertCvar(cvar, dboPort))
+	param = "DB_NAME"
+	if os.Getenv(param) == "" {
+		defaultVal := "vhs"
+		cfg.DBName = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBName = os.Getenv(param)
 	}
 
-	cvar = "pagination.getLimitDefault"
-	paginationGetLimitDefault := viper.GetInt(cvar)
-	if paginationGetLimitDefault == 0 {
-		paginationGetLimitDefault = 30
-		logger.Print(msg.WarningCannotConvertCvar(cvar, paginationGetLimitDefault))
+	param = "DB_PASSWORD"
+	if os.Getenv(param) == "" {
+		defaultVal := "1234"
+		cfg.DBPassword = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBPassword = os.Getenv(param)
 	}
 
-	cvar = "server.maxHeaderBytes"
-	serverMaxHeaderBytes := viper.GetInt(cvar)
-	if serverMaxHeaderBytes == 0 {
-		serverMaxHeaderBytes = 1048576 // 1 megabyte
-		logger.Print(msg.WarningCannotConvertCvar(cvar, serverMaxHeaderBytes))
+	param = "DB_PORT"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 2345
+		cfg.DBPort = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBPort = val
 	}
 
-	cvar = "server.port"
-	serverPort := viper.GetInt(cvar)
-	if serverPort == 0 {
-		serverPort = 8000
-		logger.Print(msg.WarningCannotConvertCvar(cvar, serverPort))
+	param = "DB_SSL_ENABLE"
+	if val, err := strconv.ParseBool(os.Getenv(param)); err != nil {
+		defaultVal := false
+		cfg.DBSSLEnable = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBSSLEnable = val
 	}
 
-	cvar = "server.readTimeoutSeconds"
-	serverReadTimeoutSeconds := viper.GetInt(cvar)
-	if serverReadTimeoutSeconds == 0 {
-		serverReadTimeoutSeconds = 15
-		logger.Print(msg.WarningCannotConvertCvar(cvar, serverReadTimeoutSeconds))
+	param = "DB_USERNAME"
+	if os.Getenv(param) == "" {
+		defaultVal := "joe"
+		cfg.DBUsername = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBUsername = os.Getenv(param)
 	}
 
-	cvar = "server.writeTimeoutSeconds"
-	serverWriteTimeoutSeconds := viper.GetInt(cvar)
-	if serverWriteTimeoutSeconds == 0 {
-		serverWriteTimeoutSeconds = 15
-		logger.Print(msg.WarningCannotConvertCvar(cvar, serverWriteTimeoutSeconds))
+	param = "DBO_CONNECTION_LATENCY_MILLISECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 500
+		cfg.DBOConnectionLatencyMilliseconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOConnectionLatencyMilliseconds = val
 	}
 
-	cvar = "session.ttlHours"
-	sessionTTLHours := viper.GetInt(cvar)
-	if sessionTTLHours == 0 {
-		sessionTTLHours = 168 // 7 days
-		logger.Print(msg.WarningCannotConvertCvar(cvar, sessionTTLHours))
+	param = "DBO_CONNECTION_SHOW_STATUS"
+	if val, err := strconv.ParseBool(os.Getenv(param)); err != nil {
+		defaultVal := false
+		cfg.DBOConnectionShowStatus = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOConnectionShowStatus = val
 	}
 
-	cvar = "stream.iceServers"
-	streamICEServers := viper.GetStringSlice(cvar)
-	if len(streamICEServers) == 0 {
-		streamICEServers = append(streamICEServers, "")
-		logger.Print(msg.WarningCannotConvertCvar(cvar, ""))
+	param = "DBO_CONNECTION_TIMEOUT_SECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 5
+		cfg.DBOConnectionTimeoutSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOConnectionTimeoutSeconds = val
 	}
 
-	cvar = "stream.snapshotPeriodSeconds"
-	streamSnapshotPeriodSeconds := viper.GetInt(cvar)
-	if streamSnapshotPeriodSeconds == 0 {
-		streamSnapshotPeriodSeconds = 60
-		logger.Print(msg.WarningCannotConvertCvar(cvar, streamSnapshotPeriodSeconds))
+	param = "DBO_DRIVER"
+	if os.Getenv(param) == "" {
+		defaultVal := "mysql"
+		cfg.DBODriver = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBODriver = os.Getenv(param)
 	}
 
-	cfg = Config{
-		DBConnectionLatencyMilliseconds: dbConnectionLatencyMilliseconds,
-		DBConnectionShowStatus:          viper.GetBool("db.connectionShowStatus"),
-		DBConnectionTimeoutSeconds:      dbConnectionTimeoutSeconds,
-		DBDriver:                        os.Getenv("db.driver"),
-		DBHost:                          viper.GetString("db.host"),
-		DBName:                          viper.GetString("db.name"),
-		DBPort:                          dbPort,
-		DBSSLEnable:                     viper.GetBool("db.sslEnable"),
-		DBUsername:                      viper.GetString("db.username"),
-		DBPassword:                      os.Getenv("DB_PASSWORD"),
-
-		DBOConnectionLatencyMilliseconds: dboConnectionLatencyMilliseconds,
-		DBOConnectionShowStatus:          viper.GetBool("dbo.connectionShowStatus"),
-		DBOConnectionTimeoutSeconds:      dboConnectionTimeoutSeconds,
-		DBODriver:                        os.Getenv("dbo.driver"),
-		DBOHost:                          viper.GetString("dbo.host"),
-		DBOName:                          viper.GetString("dbo.name"),
-		DBOPort:                          dboPort,
-		DBOSSLEnable:                     viper.GetBool("dbo.sslEnable"),
-		DBOUsername:                      viper.GetString("dbo.username"),
-		DBOPassword:                      os.Getenv("DBO_PASSWORD"),
-
-		HashingPasswordSalt:    os.Getenv("HASHING_PASSWORD_SALT"),
-		HashingTokenSigningKey: os.Getenv("HASHING_TOKEN_SIGNING_KEY"),
-
-		PaginationGetLimitDefault: paginationGetLimitDefault,
-
-		ServerDebugEnable:         viper.GetBool("server.debugEnable"),
-		ServerMaxHeaderBytes:      serverMaxHeaderBytes,
-		ServerPort:                serverPort,
-		ServerReadTimeoutSeconds:  serverReadTimeoutSeconds,
-		ServerWriteTimeoutSeconds: serverWriteTimeoutSeconds,
-
-		SessionTTLHours: sessionTTLHours,
-
-		StreamICEServers:            streamICEServers,
-		StreamSnapshotPeriodSeconds: streamSnapshotPeriodSeconds,
-		StreamSnapshotShowStatus:    viper.GetBool("stream.snapshotShowStatus"),
-		StreamSnapshotsEnable:       viper.GetBool("stream.snapshotsEnable"),
+	param = "DBO_HOST"
+	if os.Getenv(param) == "" {
+		defaultVal := "127.0.0.1"
+		cfg.DBOHost = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOHost = os.Getenv(param)
 	}
+
+	param = "DBO_NAME"
+	if os.Getenv(param) == "" {
+		defaultVal := "l333"
+		cfg.DBOName = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOName = os.Getenv(param)
+	}
+
+	param = "DBO_PASSWORD"
+	if os.Getenv(param) == "" {
+		defaultVal := "1234"
+		cfg.DBOPassword = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOPassword = os.Getenv(param)
+	}
+
+	param = "DBO_PORT"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 2345
+		cfg.DBOPort = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOPort = val
+	}
+
+	param = "DBO_SSL_ENABLE"
+	if val, err := strconv.ParseBool(os.Getenv(param)); err != nil {
+		defaultVal := false
+		cfg.DBOSSLEnable = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOSSLEnable = val
+	}
+
+	param = "DBO_USERNAME"
+	if os.Getenv(param) == "" {
+		defaultVal := "john"
+		cfg.DBOUsername = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.DBOUsername = os.Getenv(param)
+	}
+
+	param = "HASHING_PASSWORD_SALT"
+	if os.Getenv(param) == "" {
+		defaultVal := "SdD2Sdf@dFhSe#r"
+		cfg.HashingPasswordSalt = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.HashingPasswordSalt = os.Getenv(param)
+	}
+
+	param = "HASHING_TOKEN_SIGNING_KEY"
+	if os.Getenv(param) == "" {
+		defaultVal := "gHs@dHk4Bs#v5HeK4h"
+		cfg.HashingTokenSigningKey = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.HashingTokenSigningKey = os.Getenv(param)
+	}
+
+	param = "SERVER_READ_TIMEOUT_SECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 15
+		cfg.ServerReadTimeoutSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerReadTimeoutSeconds = val
+	}
+
+	param = "SERVER_WRITE_TIMEOUT_SECONDS"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 15
+		cfg.ServerWriteTimeoutSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerWriteTimeoutSeconds = val
+	}
+
+	param = "pagination.getLimitDefault"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 30
+		cfg.PaginationGetLimitDefault = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.PaginationGetLimitDefault = val
+	}
+
+	cfg.ServerDebugEnable = viper.GetBool("server.debugEnable")
+
+	param = "server.maxHeaderBytes"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 1048576 // 1 megabyte
+		cfg.ServerMaxHeaderBytes = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerMaxHeaderBytes = val
+	}
+
+	param = "server.port"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 8000
+		cfg.ServerPort = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerPort = val
+	}
+
+	param = "session.ttlHours"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 168 // 7 days
+		cfg.SessionTTLHours = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.SessionTTLHours = val
+	}
+
+	param = "stream.iceServers"
+	if val := viper.GetStringSlice(param); len(val) == 0 {
+		defaultICEServer := "stun:stun.l.google.com:19302"
+		defaultVal := []string{defaultICEServer}
+		cfg.StreamICEServers = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, "[\""+defaultICEServer+"\"]"))
+	} else {
+		cfg.StreamICEServers = val
+	}
+
+	param = "stream.snapshotPeriodSeconds"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 60
+		cfg.StreamSnapshotPeriodSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.StreamSnapshotPeriodSeconds = val
+	}
+
+	cfg.StreamSnapshotShowStatus = viper.GetBool("stream.snapshotShowStatus")
+	cfg.StreamSnapshotsEnable = viper.GetBool("stream.snapshotsEnable")
 
 	return &cfg, nil
 }

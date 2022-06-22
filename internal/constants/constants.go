@@ -1,6 +1,7 @@
 package constants
 
 const (
-	OuterDBL3  = "l3"
-	OuterDBWWW = "www"
+	DB_VHOSTING_Name = "vhosting"
+	DBO_L3_Name      = "l3"
+	DBO_WWW_Name     = "www"
 )

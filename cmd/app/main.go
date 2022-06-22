@@ -38,7 +38,7 @@ func main() {
 	app := server.NewApp(cfg, scfg)
 
 	// Run stream recieving
-	go app.StreamUC.ServeStreams()
+	app.StreamUC.ServeStreams()
 
 	// Run the server and wait interrupt signal
 	if err := app.Run(); err != nil {

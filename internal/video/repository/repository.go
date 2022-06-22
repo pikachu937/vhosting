@@ -11,10 +11,6 @@ import (
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-const (
-	outerDBName = constants.OuterDBWWW
-)
-
 type VideoRepository struct {
 	cfg *config.Config
 }
@@ -24,7 +20,7 @@ func NewVideoRepository(cfg *config.Config) *VideoRepository {
 }
 
 func (r *VideoRepository) CreateVideo(vid *video.Video) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -44,7 +40,7 @@ func (r *VideoRepository) CreateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -64,7 +60,7 @@ func (r *VideoRepository) GetVideo(id int) (*video.Video, error) {
 }
 
 func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Video, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -106,7 +102,7 @@ func (r *VideoRepository) GetAllVideos(urlparams *user.Pagin) (map[int]*video.Vi
 }
 
 func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -128,7 +124,7 @@ func (r *VideoRepository) PartiallyUpdateVideo(vid *video.Video) error {
 }
 
 func (r *VideoRepository) DeleteVideo(id int) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -147,7 +143,7 @@ func (r *VideoRepository) DeleteVideo(id int) error {
 }
 
 func (r *VideoRepository) IsVideoExists(id int) (bool, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 

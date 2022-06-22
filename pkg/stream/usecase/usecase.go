@@ -3,14 +3,13 @@ package usecase
 import (
 	"errors"
 	"fmt"
-	"image/jpeg"
 
 	// "image/jpeg"
 	"os"
 	"time"
 
 	"github.com/deepch/vdk/av"
-	"github.com/deepch/vdk/cgo/ffmpeg"
+
 	// "github.com/deepch/vdk/cgo/ffmpeg"
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
@@ -92,31 +91,31 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 
 	audioOnly := false
-	videoIDX := 0
-	for i, codec := range rtspClient.CodecData {
-		if codec.Type().IsVideo() {
-			audioOnly = false
-			videoIDX = i
-		}
-	}
+	// videoIDX := 0
+	// for i, codec := range rtspClient.CodecData {
+	// 	if codec.Type().IsVideo() {
+	// 		audioOnly = false
+	// 		videoIDX = i
+	// 	}
+	// }
 
-	var frameDecoderSingle *ffmpeg.VideoDecoder
-	if !audioOnly {
-		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
-		if err != nil {
-			logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
-		}
-	}
+	// var frameDecoderSingle *ffmpeg.VideoDecoder
+	// if !audioOnly {
+	// 	frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
+	// 	if err != nil {
+	// 		logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
+	// 	}
+	// }
 
-	isTimeToSnapshot := true
-	if u.cfg.StreamSnapshotsEnable {
-		go func() {
-			for {
-				time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
-				isTimeToSnapshot = true
-			}
-		}()
-	}
+	// isTimeToSnapshot := true
+	// if u.cfg.StreamSnapshotsEnable {
+	// 	go func() {
+	// 		for {
+	// 			time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
+	// 			isTimeToSnapshot = true
+	// 		}
+	// 	}()
+	// }
 
 	snapshotDir := fmt.Sprintf(snapshotPath, name)
 	if exists, _ := isPathExists(snapshotDir); !exists {
@@ -148,24 +147,24 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 			}
 			u.cast(name, *packetAV)
 			// sample single frame decode encode to jpeg, save on disk
-			if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
-				break
-			}
-			pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
-			if err != nil ||
-				pic == nil || !isTimeToSnapshot {
-				break
-			}
-			out, err := os.Create(snapshotDir + "/" + snapshotName)
-			if err != nil {
-				break
-			}
-			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
-				if u.cfg.StreamSnapshotShowStatus {
-					logger.Printc(nil, msg.InfoSnapshotCreated(name))
-				}
-				isTimeToSnapshot = false
-			}
+			// if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
+			// 	break
+			// }
+			// pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
+			// if err != nil ||
+			// 	pic == nil || !isTimeToSnapshot {
+			// 	break
+			// }
+			// out, err := os.Create(snapshotDir + "/" + snapshotName)
+			// if err != nil {
+			// 	break
+			// }
+			// if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
+			// 	if u.cfg.StreamSnapshotShowStatus {
+			// 		logger.Printc(nil, msg.InfoSnapshotCreated(name))
+			// 	}
+			// 	isTimeToSnapshot = false
+			// }
 		}
 	}
 }

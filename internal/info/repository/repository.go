@@ -11,10 +11,6 @@ import (
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-const (
-	outerDBName = constants.OuterDBWWW
-)
-
 type InfoRepository struct {
 	cfg *config.Config
 }
@@ -24,7 +20,7 @@ func NewInfoRepository(cfg *config.Config) *InfoRepository {
 }
 
 func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -44,7 +40,7 @@ func (r *InfoRepository) CreateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -64,7 +60,7 @@ func (r *InfoRepository) GetInfo(id int) (*info.Info, error) {
 }
 
 func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -106,7 +102,7 @@ func (r *InfoRepository) GetAllInfos(urlparams *user.Pagin) (map[int]*info.Info,
 }
 
 func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -127,7 +123,7 @@ func (r *InfoRepository) PartiallyUpdateInfo(nfo *info.Info) error {
 }
 
 func (r *InfoRepository) DeleteInfo(id int) error {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
@@ -146,7 +142,7 @@ func (r *InfoRepository) DeleteInfo(id int) error {
 }
 
 func (r *InfoRepository) IsInfoExists(id int) (bool, error) {
-	r.cfg.DBOName = outerDBName
+	r.cfg.DBOName = constants.DBO_WWW_Name
 	dbo := db_connect.CreateOuterDBConnection(r.cfg)
 	defer db_connect.CloseDBConnection(r.cfg, dbo)
 
