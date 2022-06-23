@@ -23,7 +23,7 @@ func (u *StreamUseCase) GetStream(id int) (*stream.Stream, error) {
 	strm.StatusPublic = int(strmg.StatusPublic.Int16)
 	strm.StatusRecord = int(strmg.StatusRecord.Int16)
 	strm.PathStream = strmg.PathStream.String
-	if (strm.Stream != "") && (strm.StatePublic != 0) {
+	if (strm.Stream != "") && (strm.StatusPublic != 0) {
 		u.cfg.StreamLink = os.Getenv("RTSP_URL_MAIN") + strm.Stream
 		fmt.Println("Got RTSP link")
 	} else {
@@ -41,11 +41,14 @@ func (u *StreamUseCase) GetAllStreams(urlparams *user.Pagin) (map[int]*stream.St
 	var streams = map[int]*stream.Stream{}
 	for _, val := range streamsg {
 		streams[val.Id] = &stream.Stream{Id: val.Id, Stream: val.Stream.String,
-			DateTime: val.DateTime.String, StatePublic: int(val.StatePublic.Int16),
-			StatusPublic: int(val.StatusPublic.Int16), StatusRecord: int(val.StatusRecord.Int16),
+			DateTime: val.DateTime.String, StatusPublic: int(val.StatusPublic.Int16),
 			PathStream: val.PathStream.String}
 	}
 	return streams, nil
+}
+
+func (u *StreamUseCase) getAllWorkingStreams() (*[]string, error) {
+	return u.streamRepo.GetAllWorkingStreams()
 }
 
 func (u *StreamUseCase) AtoiRequestedId(ctx *gin.Context) (int, error) {

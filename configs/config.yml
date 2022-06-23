@@ -16,3 +16,4 @@ stream:
   snapshotPeriodSeconds: 60
   snapshotShowStatus: false
   snapshotsEnable: true
+  streamsUpdatePeriodSeconds: 60

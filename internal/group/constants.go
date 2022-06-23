@@ -1,11 +1,11 @@
 package group
 
 const (
-	TableName = "public.groups"
+	TableName = "groups"
 	Id        = "id"
 	Name      = "name"
 
-	UGTableName = "public.user_groups"
+	UGTableName = "user_groups"
 	UserId      = "user_id"
 	GroupId     = "group_id"
 )

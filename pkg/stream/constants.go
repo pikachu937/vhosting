@@ -1,7 +1,7 @@
 package stream
 
 const (
-	TableName    = "public.\"VideoPublic\""
+	TableName    = "\"VideoPublic\""
 	Id           = "id"
 	StreamColumn = "\"Stream\""
 	DateTime     = "\"DateTime\""

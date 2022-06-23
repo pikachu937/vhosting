@@ -1,7 +1,7 @@
 package user
 
 const (
-	TableName    = "public.users"
+	TableName    = "users"
 	Id           = "id"
 	Username     = "username"
 	PasswordHash = "password_hash"

@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	// "image/jpeg"
+	"image/jpeg"
 	"os"
 	"time"
 
 	"github.com/deepch/vdk/av"
 
-	// "github.com/deepch/vdk/cgo/ffmpeg"
+	"github.com/deepch/vdk/cgo/ffmpeg"
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
@@ -43,21 +43,60 @@ func NewStreamUseCase(cfg *config.Config, scfg *sconfig.SConfig, streamRepo stre
 }
 
 func (u *StreamUseCase) ServeStreams() {
-	for key, val := range u.scfg.Streams {
-		if !val.OnDemand {
-			go u.rtspWorkerLoop(key, val.URL, val.OnDemand, val.DisableAudio, val.Debug)
+	u.scfg.Streams = map[string]sconfig.Stream{}
+
+	go func() {
+		for {
+			u.startDefaultGetWorkingStreamsCycle()
+			for {
+				time.Sleep(1 * time.Second)
+				if u.scfg.StreamDropped {
+					u.scfg.StreamDropped = false
+					break
+				}
+			}
 		}
+	}()
+}
+
+func (u *StreamUseCase) startDefaultGetWorkingStreamsCycle() {
+	for {
+		workingStreams, err := u.getAllWorkingStreams()
+		if err != nil {
+			logger.Printc(nil, msg.ErrorCannotGetAllWorkingStreams(err))
+			return
+		}
+		for _, url := range *workingStreams {
+			if _, found := u.scfg.Streams[url]; !found {
+				u.scfg.Streams[url] = sconfig.Stream{ClientList: make(map[string]sconfig.Viewer), URL: url}
+				if !u.scfg.Streams[url].OnDemand {
+					go u.rtspWorkerLoop(url, u.scfg.Streams[url].URL, u.scfg.Streams[url].OnDemand, u.scfg.Streams[url].DisableAudio, u.scfg.Streams[url].Debug)
+					u.scfg.StreamsCount++
+				}
+			}
+		}
+		logger.Printc(nil, &logger.Log{Message: fmt.Sprintf("Working Streams: %d", u.scfg.StreamsCount)})
+		time.Sleep(time.Duration(u.cfg.StreamStreamsUpdatePeriodSeconds) * time.Second)
 	}
 }
 
 func (u *StreamUseCase) rtspWorkerLoop(name, url string, onDemand, disableAudio, debug bool) {
+	defer func() {
+		if _, found := u.scfg.Streams[name]; found {
+			delete(u.scfg.Streams, name)
+			u.scfg.StreamDropped = true
+			u.scfg.StreamsCount--
+			logger.Printc(nil, &logger.Log{Message: "Stream dropped. Stream: " + name})
+		}
+	}()
 	defer u.runUnlock(name)
 	for {
 		logger.Printc(nil, msg.InfoStreamTriesToConnect(name))
 		err := u.rtspWorker(name, url, onDemand, disableAudio, debug)
 		if err != nil {
-			logger.Printc(nil, msg.ErrorRTSPWorkerError(err))
 			u.scfg.LastError = err
+			logger.Printc(nil, msg.ErrorRTSPWorkerError(err))
+			return
 		}
 		if onDemand && !u.isHasViewer(name) {
 			logger.Printc(nil, msg.ErrorOnDemandANDNotHasViewerError(errorStreamExitNoViewer))
@@ -91,31 +130,31 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 
 	audioOnly := false
-	// videoIDX := 0
-	// for i, codec := range rtspClient.CodecData {
-	// 	if codec.Type().IsVideo() {
-	// 		audioOnly = false
-	// 		videoIDX = i
-	// 	}
-	// }
+	videoIDX := 0
+	for i, codec := range rtspClient.CodecData {
+		if codec.Type().IsVideo() {
+			audioOnly = false
+			videoIDX = i
+		}
+	}
 
-	// var frameDecoderSingle *ffmpeg.VideoDecoder
-	// if !audioOnly {
-	// 	frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
-	// 	if err != nil {
-	// 		logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
-	// 	}
-	// }
+	var frameDecoderSingle *ffmpeg.VideoDecoder
+	if !audioOnly {
+		frameDecoderSingle, err = ffmpeg.NewVideoDecoder(rtspClient.CodecData[videoIDX].(av.VideoCodecData))
+		if err != nil {
+			logger.Printc(nil, msg.ErrorFrameDecoderSingleError(err))
+		}
+	}
 
-	// isTimeToSnapshot := true
-	// if u.cfg.StreamSnapshotsEnable {
-	// 	go func() {
-	// 		for {
-	// 			time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
-	// 			isTimeToSnapshot = true
-	// 		}
-	// 	}()
-	// }
+	isTimeToSnapshot := true
+	if u.cfg.StreamSnapshotsEnable {
+		go func() {
+			for {
+				time.Sleep(time.Duration(u.cfg.StreamSnapshotPeriodSeconds) * time.Second)
+				isTimeToSnapshot = true
+			}
+		}()
+	}
 
 	snapshotDir := fmt.Sprintf(snapshotPath, name)
 	if exists, _ := isPathExists(snapshotDir); !exists {
@@ -147,24 +186,24 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 			}
 			u.cast(name, *packetAV)
 			// sample single frame decode encode to jpeg, save on disk
-			// if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
-			// 	break
-			// }
-			// pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
-			// if err != nil ||
-			// 	pic == nil || !isTimeToSnapshot {
-			// 	break
-			// }
-			// out, err := os.Create(snapshotDir + "/" + snapshotName)
-			// if err != nil {
-			// 	break
-			// }
-			// if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
-			// 	if u.cfg.StreamSnapshotShowStatus {
-			// 		logger.Printc(nil, msg.InfoSnapshotCreated(name))
-			// 	}
-			// 	isTimeToSnapshot = false
-			// }
+			if !u.cfg.StreamSnapshotsEnable || !packetAV.IsKeyFrame {
+				break
+			}
+			pic, err := frameDecoderSingle.DecodeSingle(packetAV.Data)
+			if err != nil ||
+				pic == nil || !isTimeToSnapshot {
+				break
+			}
+			out, err := os.Create(snapshotDir + "/" + snapshotName)
+			if err != nil {
+				break
+			}
+			if err := jpeg.Encode(out, &pic.Image, nil); err == nil {
+				if u.cfg.StreamSnapshotShowStatus {
+					logger.Printc(nil, msg.InfoSnapshotCreated(name))
+				}
+				isTimeToSnapshot = false
+			}
 		}
 	}
 }

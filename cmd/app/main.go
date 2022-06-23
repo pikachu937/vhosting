@@ -26,16 +26,11 @@ func main() {
 	}
 	logger.Print(msg.InfoConfigLoaded())
 
-	// Load stream config
-	scfg, err := sconfig.LoadConfig("./configs/stream_config.json")
-	if err != nil {
-		logger.Print(msg.FatalFailedToLoadStreamConfigFile(err))
-		return
-	}
-	logger.Print(msg.InfoStreamConfigLoaded())
+	// Create stream config
+	var scfg sconfig.SConfig
 
 	// Init new server
-	app := server.NewApp(cfg, scfg)
+	app := server.NewApp(cfg, &scfg)
 
 	// Run stream recieving
 	app.StreamUC.ServeStreams()

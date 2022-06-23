@@ -7,10 +7,12 @@ import (
 )
 
 type SConfig struct {
-	StreamsMutex sync.RWMutex
-	Server       Server            `json:"server"`
-	Streams      map[string]Stream `json:"streams"`
-	LastError    error
+	StreamsMutex  sync.RWMutex
+	Server        Server            `json:"server"`
+	Streams       map[string]Stream `json:"streams"`
+	LastError     error
+	StreamsCount  int
+	StreamDropped bool
 }
 
 type Server struct {
@@ -33,6 +35,7 @@ type Stream struct {
 	RunLock      bool   `json:"-"`
 	Codecs       []av.CodecData
 	ClientList   map[string]Viewer
+	Working      bool
 }
 
 type Viewer struct {

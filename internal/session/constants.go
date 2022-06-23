@@ -1,7 +1,7 @@
 package session
 
 const (
-	TableName    = "public.sessions"
+	TableName    = "sessions"
 	Id           = "id"
 	Content      = "content"
 	CreationDate = "creation_date"

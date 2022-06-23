@@ -301,5 +301,14 @@ func LoadConfig(path string) (*Config, error) {
 	cfg.StreamSnapshotShowStatus = viper.GetBool("stream.snapshotShowStatus")
 	cfg.StreamSnapshotsEnable = viper.GetBool("stream.snapshotsEnable")
 
+	param = "stream.streamsUpdatePeriodSeconds"
+	if val := viper.GetInt(param); val == 0 {
+		defaultVal := 60
+		cfg.StreamStreamsUpdatePeriodSeconds = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.StreamStreamsUpdatePeriodSeconds = val
+	}
+
 	return &cfg, nil
 }

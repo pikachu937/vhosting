@@ -40,12 +40,13 @@ type Config struct {
 
 	SessionTTLHours int
 
-	StreamICEServersMutex       sync.RWMutex
-	StreamICEServers            []string
-	StreamLink                  string
-	StreamSnapshotPeriodSeconds int
-	StreamSnapshotShowStatus    bool
-	StreamSnapshotsEnable       bool
+	StreamICEServersMutex            sync.RWMutex
+	StreamICEServers                 []string
+	StreamLink                       string
+	StreamSnapshotPeriodSeconds      int
+	StreamSnapshotShowStatus         bool
+	StreamSnapshotsEnable            bool
+	StreamStreamsUpdatePeriodSeconds int
 
 	ServerIP string
 }

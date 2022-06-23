@@ -1,7 +1,7 @@
 package video
 
 const (
-	TableName  = "public.video_archive" // "public.videos"
+	TableName  = "video_archive"
 	Id         = "id"
 	Url        = "url"
 	File       = "file"

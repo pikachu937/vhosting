@@ -40,4 +40,5 @@ type StreamRepository interface {
 
 	GetStream(id int) (*StreamGet, error)
 	GetAllStreams(urlparams *user.Pagin) (map[int]*StreamGet, error)
+	GetAllWorkingStreams() (*[]string, error)
 }

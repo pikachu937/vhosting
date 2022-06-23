@@ -91,7 +91,7 @@ func InfoGotStream(strm *stream.Stream) *logger.Log {
 }
 
 func ErrorCannotGetAllStreams(err error) *logger.Log {
-	return &logger.Log{StatusCode: 500, ErrCode: 208, Message: "Cannot get all streams. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
+	return &logger.Log{StatusCode: 500, ErrCode: 933, Message: "Cannot get all streams. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
 }
 
 func InfoNoStreamsAvailable() *logger.Log {
@@ -100,4 +100,8 @@ func InfoNoStreamsAvailable() *logger.Log {
 
 func InfoGotAllStreams(streams map[int]*stream.Stream) *logger.Log {
 	return &logger.Log{StatusCode: 200, Message: streams}
+}
+
+func ErrorCannotGetAllWorkingStreams(err error) *logger.Log {
+	return &logger.Log{StatusCode: 500, ErrCode: 934, Message: "Cannot get all working streams. Error: " + err.Error(), ErrLevel: logger.ErrLevelError}
 }

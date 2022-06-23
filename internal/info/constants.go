@@ -1,7 +1,7 @@
 package info
 
 const (
-	TableName   = "public.video_info" // "public.infos"
+	TableName   = "video_info"
 	Id          = "id"
 	CreateDate  = "create_date"
 	Stream      = "stream"

@@ -8,9 +8,9 @@ type Stream struct {
 	Id           int    `json:"id" db:"id"`
 	Stream       string `json:"stream" db:"Stream"`
 	DateTime     string `json:"dateTime" db:"DateTime"`
-	StatePublic  int    `json:"statePublic" db:"StatePublic"`
+	StatePublic  int    `json:"-" db:"StatePublic"`
 	StatusPublic int    `json:"statusPublic" db:"StatusPublic"`
-	StatusRecord int    `json:"statusRecord" db:"StatusRecord"`
+	StatusRecord int    `json:"-" db:"StatusRecord"`
 	PathStream   string `json:"pathStream" db:"pathStream"`
 }
 
