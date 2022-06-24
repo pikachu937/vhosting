@@ -34,6 +34,7 @@ type Config struct {
 
 	ServerDebugEnable         bool
 	ServerMaxHeaderBytes      int
+	ServerHost                string
 	ServerPort                int
 	ServerReadTimeoutSeconds  int
 	ServerWriteTimeoutSeconds int

@@ -4,7 +4,6 @@ pagination:
 server:
   debugEnable: false
   maxHeaderBytes: 1048576 # 1 megabyte
-  port: 8000
 
 session:
   ttlHours: 168 # 7 days
@@ -15,5 +14,5 @@ stream:
   ]
   snapshotPeriodSeconds: 60
   snapshotShowStatus: false
-  snapshotsEnable: true
+  snapshotsEnable: false
   streamsUpdatePeriodSeconds: 60

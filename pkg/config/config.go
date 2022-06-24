@@ -223,6 +223,24 @@ func LoadConfig(path string) (*Config, error) {
 		cfg.HashingTokenSigningKey = os.Getenv(param)
 	}
 
+	param = "SERVER_HOST"
+	if os.Getenv(param) == "" {
+		defaultVal := "localhost"
+		cfg.ServerHost = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerHost = os.Getenv(param)
+	}
+
+	param = "SERVER_PORT"
+	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
+		defaultVal := 8000
+		cfg.ServerPort = defaultVal
+		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
+	} else {
+		cfg.ServerPort = val
+	}
+
 	param = "SERVER_READ_TIMEOUT_SECONDS"
 	if val, err := strconv.Atoi(os.Getenv(param)); err != nil {
 		defaultVal := 15
@@ -259,15 +277,6 @@ func LoadConfig(path string) (*Config, error) {
 		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
 	} else {
 		cfg.ServerMaxHeaderBytes = val
-	}
-
-	param = "server.port"
-	if val := viper.GetInt(param); val == 0 {
-		defaultVal := 8000
-		cfg.ServerPort = defaultVal
-		logger.Print(msg.WarningCannotConvertCvar(param, defaultVal))
-	} else {
-		cfg.ServerPort = val
 	}
 
 	param = "session.ttlHours"

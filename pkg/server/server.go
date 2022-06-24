@@ -140,7 +140,7 @@ func (a *App) Run() error {
 
 	// HTTP Server
 	a.httpServer = &http.Server{
-		Addr:           fmt.Sprintf(":%d", a.cfg.ServerPort),
+		Addr:           fmt.Sprintf("%s:%d", a.cfg.ServerHost, a.cfg.ServerPort),
 		Handler:        router,
 		ReadTimeout:    time.Duration(a.cfg.ServerReadTimeoutSeconds) * time.Second,
 		WriteTimeout:   time.Duration(a.cfg.ServerWriteTimeoutSeconds) * time.Second,

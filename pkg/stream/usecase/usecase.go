@@ -75,7 +75,10 @@ func (u *StreamUseCase) startDefaultGetWorkingStreamsCycle() {
 				}
 			}
 		}
-		logger.Printc(nil, &logger.Log{Message: fmt.Sprintf("Working Streams: %d", u.scfg.StreamsCount)})
+		go func() {
+			time.Sleep(200 * time.Millisecond)
+			logger.Printc(nil, &logger.Log{Message: fmt.Sprintf("Working streams: %d", u.scfg.StreamsCount)})
+		}()
 		time.Sleep(time.Duration(u.cfg.StreamStreamsUpdatePeriodSeconds) * time.Second)
 	}
 }
