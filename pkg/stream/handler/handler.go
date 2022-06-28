@@ -22,7 +22,7 @@ import (
 
 type StreamHandler struct {
 	cfg         *config.Config
-	scfg        *sconfig.SConfig
+	scfg        *sconfig.Config
 	useCase     stream.StreamUseCase
 	userUseCase user.UserUseCase
 	logUseCase  logger.LogUseCase
@@ -30,7 +30,7 @@ type StreamHandler struct {
 	sessUseCase sess.SessUseCase
 }
 
-func NewStreamHandler(cfg *config.Config, scfg *sconfig.SConfig, useCase stream.StreamUseCase,
+func NewStreamHandler(cfg *config.Config, scfg *sconfig.Config, useCase stream.StreamUseCase,
 	userUseCase user.UserUseCase, logUseCase logger.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase) *StreamHandler {
 	return &StreamHandler{

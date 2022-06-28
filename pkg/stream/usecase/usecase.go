@@ -30,11 +30,11 @@ const (
 
 type StreamUseCase struct {
 	cfg        *config.Config
-	scfg       *sconfig.SConfig
+	scfg       *sconfig.Config
 	streamRepo stream.StreamRepository
 }
 
-func NewStreamUseCase(cfg *config.Config, scfg *sconfig.SConfig, streamRepo stream.StreamRepository) *StreamUseCase {
+func NewStreamUseCase(cfg *config.Config, scfg *sconfig.Config, streamRepo stream.StreamRepository) *StreamUseCase {
 	return &StreamUseCase{
 		cfg:        cfg,
 		scfg:       scfg,
@@ -160,7 +160,7 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 
 	snapshotDir := fmt.Sprintf(snapshotPath, name)
-	if exists, _ := isPathExists(snapshotDir); !exists {
+	if !IsPathExists(snapshotDir) {
 		os.MkdirAll(snapshotDir, 0777)
 	}
 
@@ -211,15 +211,12 @@ func (u *StreamUseCase) rtspWorker(name, url string, onDemand, disableAudio, deb
 	}
 }
 
-func isPathExists(snapshotPath string) (bool, error) {
-	_, err := os.Stat(snapshotPath)
+func IsPathExists(path string) bool {
+	_, err := os.Stat(path)
 	if err == nil {
-		return true, nil
+		return true
 	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
+	return false
 }
 
 func (u *StreamUseCase) codecAdd(suuid string, codecs []av.CodecData) {

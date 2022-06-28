@@ -57,7 +57,7 @@ import (
 type App struct {
 	httpServer      *http.Server
 	cfg             *config.Config
-	scfg            *sconfig.SConfig
+	scfg            *sconfig.Config
 	userUseCase     user.UserUseCase
 	authUseCase     auth.AuthUseCase
 	sessUseCase     sess.SessUseCase
@@ -70,7 +70,7 @@ type App struct {
 	downloadUseCase download.DownloadUseCase
 }
 
-func NewApp(cfg *config.Config, scfg *sconfig.SConfig) *App {
+func NewApp(cfg *config.Config, scfg *sconfig.Config) *App {
 	userRepo := userrepo.NewUserRepository(cfg)
 	authRepo := authrepo.NewAuthRepository(cfg)
 	sessRepo := sessrepo.NewSessRepository(cfg)
@@ -129,7 +129,7 @@ func (a *App) Run() error {
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	permhandler.RegisterHTTPEndpoints(router, a.cfg, a.permUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase, a.groupUseCase)
-	infohandler.RegisterHTTPEndpoints(router, a.cfg, a.infoUseCase, a.logUseCase,
+	infohandler.RegisterHTTPEndpoints(router, a.cfg, a.scfg, a.infoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)
 	videohandler.RegisterHTTPEndpoints(router, a.cfg, a.videoUseCase, a.logUseCase,
 		a.authUseCase, a.sessUseCase, a.userUseCase)

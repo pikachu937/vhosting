@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// Load environments
+	// Assign environments path
 	if err := godotenv.Load("./configs/.env"); err != nil {
 		logger.Print(msg.FatalFailedToLoadEnvironmentFile(err))
 		return
@@ -27,15 +27,15 @@ func main() {
 	logger.Print(msg.InfoConfigLoaded())
 
 	// Create stream config
-	var scfg sconfig.SConfig
+	var scfg sconfig.Config
 
 	// Init new server
 	app := server.NewApp(cfg, &scfg)
 
-	// Run stream recieving
-	app.StreamUC.ServeStreams()
+	// Start tasks
+	runTasks(app)
 
-	// Run the server and wait interrupt signal
+	// Start server, wait interrupt
 	if err := app.Run(); err != nil {
 		logger.Print(msg.FatalFailureOnServerRunning(err))
 	}

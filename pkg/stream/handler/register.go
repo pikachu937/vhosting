@@ -11,7 +11,7 @@ import (
 	"github.com/mikerumy/vhosting/pkg/user"
 )
 
-func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.SConfig, uc stream.StreamUseCase,
+func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.Config, uc stream.StreamUseCase,
 	uuc user.UserUseCase, luc logger.LogUseCase, auc auth.AuthUseCase, suc sess.SessUseCase) {
 	h := NewStreamHandler(cfg, scfg, uc, uuc, luc, auc, suc)
 
@@ -19,7 +19,7 @@ func RegisterTemplateHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg 
 	router.GET("/stream/:uuid", h.ServeStream)
 }
 
-func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.SConfig, uc stream.StreamUseCase,
+func RegisterStreamingHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.Config, uc stream.StreamUseCase,
 	uuc user.UserUseCase, luc logger.LogUseCase, auc auth.AuthUseCase, suc sess.SessUseCase) {
 	h := NewStreamHandler(cfg, scfg, uc, uuc, luc, auc, suc)
 

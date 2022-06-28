@@ -27,4 +27,28 @@ const (
 				END)
 	LIMIT %d;
 	`
+
+	SELECT_VIDEO_PATH_BETWEEN = `
+	SELECT CONCAT("pathRecord", '/', "fileName")
+	FROM "VideoRecord"
+	WHERE "pathStream"='%s' 
+	AND "recordTime" BETWEEN 
+		(
+			SELECT "recordTime"
+			FROM "VideoRecord"
+			WHERE "pathStream"='%s'
+			AND "recordTime" <= '%s'::timestamp
+			ORDER BY "recordTime"  DESC
+			LIMIT 1
+		) 
+			AND 
+		(
+			SELECT "recordTime" 
+			FROM "VideoRecord"
+			WHERE "pathStream"='%s' 
+			AND "recordTime" >= '%s'::timestamp + (interval '%dm')
+			ORDER BY "recordTime"  ASC
+			LIMIT 1
+		)
+	`
 )

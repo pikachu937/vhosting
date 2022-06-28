@@ -12,4 +12,7 @@ const (
 	LastName     = "last_name"
 	JoiningDate  = "joining_date"
 	LastLogin    = "last_login"
+
+	TableNameCustomUser = "\"CustomUser\""
+	Status              = "status"
 )

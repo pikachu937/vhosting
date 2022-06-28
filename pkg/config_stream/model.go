@@ -6,13 +6,14 @@ import (
 	"github.com/deepch/vdk/av"
 )
 
-type SConfig struct {
-	StreamsMutex  sync.RWMutex
-	Server        Server            `json:"server"`
-	Streams       map[string]Stream `json:"streams"`
-	LastError     error
-	StreamsCount  int
-	StreamDropped bool
+type Config struct {
+	StreamsMutex      sync.RWMutex
+	Server            Server            `json:"server"`
+	Streams           map[string]Stream `json:"streams"`
+	ConcatStreamPaths map[string]*[]string
+	LastError         error
+	StreamsCount      int
+	StreamDropped     bool
 }
 
 type Server struct {

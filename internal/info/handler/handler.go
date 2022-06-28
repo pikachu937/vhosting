@@ -7,6 +7,7 @@ import (
 	sess "github.com/mikerumy/vhosting/internal/session"
 	"github.com/mikerumy/vhosting/pkg/auth"
 	"github.com/mikerumy/vhosting/pkg/config"
+	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
 	"github.com/mikerumy/vhosting/pkg/logger"
 	"github.com/mikerumy/vhosting/pkg/timedate"
 	"github.com/mikerumy/vhosting/pkg/user"
@@ -14,6 +15,7 @@ import (
 
 type InfoHandler struct {
 	cfg         *config.Config
+	scfg        *sconfig.Config
 	useCase     info.InfoUseCase
 	logUseCase  logger.LogUseCase
 	authUseCase auth.AuthUseCase
@@ -21,11 +23,12 @@ type InfoHandler struct {
 	userUseCase user.UserUseCase
 }
 
-func NewInfoHandler(cfg *config.Config, useCase info.InfoUseCase,
+func NewInfoHandler(cfg *config.Config, scfg *sconfig.Config, useCase info.InfoUseCase,
 	logUseCase logger.LogUseCase, authUseCase auth.AuthUseCase,
 	sessUseCase sess.SessUseCase, userUseCase user.UserUseCase) *InfoHandler {
 	return &InfoHandler{
 		cfg:         cfg,
+		scfg:        scfg,
 		useCase:     useCase,
 		logUseCase:  logUseCase,
 		authUseCase: authUseCase,
