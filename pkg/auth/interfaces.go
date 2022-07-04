@@ -1,8 +1,8 @@
 package auth
 
 import (
+	sess "github.com/dmitrij/vhosting/internal/session"
 	"github.com/gin-gonic/gin"
-	sess "github.com/mikerumy/vhosting/internal/session"
 )
 
 type AuthCommon interface {

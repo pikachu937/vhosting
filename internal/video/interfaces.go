@@ -1,8 +1,8 @@
 package video
 
 import (
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type VideoCommon interface {
@@ -13,6 +13,10 @@ type VideoCommon interface {
 	DeleteVideo(id int) error
 
 	IsVideoExists(id int) (bool, error)
+
+	GetNonconcatedPaths(id int) (*[]NonCatVideo, error)
+	GetVideoPaths(pathStream, startDatetime string, durationRecord int) (*[]string, error)
+	UpdateReqVidArcFields(id, recordStatus, recordSize int) error
 }
 
 type VideoUseCase interface {

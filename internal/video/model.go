@@ -8,3 +8,10 @@ type Video struct {
 	InfoId     int    `json:"infoId"     db:"info_id"`
 	UserId     int    `json:"userId"     db:"user_id"`
 }
+
+type NonCatVideo struct {
+	Id             int
+	CodeMP         string
+	StartDatetime  string
+	DurationRecord int
+}

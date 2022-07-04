@@ -1,4 +1,4 @@
-module github.com/mikerumy/vhosting
+module github.com/dmitrij/vhosting
 
 go 1.18
 

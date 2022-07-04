@@ -1,14 +1,14 @@
 package handler
 
 import (
+	"github.com/dmitrij/vhosting/internal/group"
+	perm "github.com/dmitrij/vhosting/internal/permission"
+	sess "github.com/dmitrij/vhosting/internal/session"
+	"github.com/dmitrij/vhosting/pkg/auth"
+	"github.com/dmitrij/vhosting/pkg/config"
+	"github.com/dmitrij/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/group"
-	perm "github.com/mikerumy/vhosting/internal/permission"
-	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/auth"
-	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/logger"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, uc perm.PermUseCase, luc logger.LogUseCase,

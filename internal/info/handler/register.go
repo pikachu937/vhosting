@@ -1,14 +1,14 @@
 package handler
 
 import (
+	"github.com/dmitrij/vhosting/internal/info"
+	sess "github.com/dmitrij/vhosting/internal/session"
+	"github.com/dmitrij/vhosting/pkg/auth"
+	"github.com/dmitrij/vhosting/pkg/config"
+	sconfig "github.com/dmitrij/vhosting/pkg/config_stream"
+	"github.com/dmitrij/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/info"
-	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/auth"
-	"github.com/mikerumy/vhosting/pkg/config"
-	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
-	"github.com/mikerumy/vhosting/pkg/logger"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig.Config, uc info.InfoUseCase, luc logger.LogUseCase,
@@ -22,7 +22,5 @@ func RegisterHTTPEndpoints(router *gin.Engine, cfg *config.Config, scfg *sconfig
 		infoRoute.GET("all", h.GetAllInfos)
 		infoRoute.PATCH(":id", h.PartiallyUpdateInfo)
 		infoRoute.DELETE(":id", h.DeleteInfo)
-
-		infoRoute.GET("/test", h.Temp)
 	}
 }

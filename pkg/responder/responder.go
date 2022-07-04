@@ -3,8 +3,8 @@ package responder
 import (
 	"reflect"
 
+	"github.com/dmitrij/vhosting/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
 type MessageOutput struct {

@@ -1,9 +1,9 @@
 package handler
 
 import (
+	msg "github.com/dmitrij/vhosting/internal/messages"
+	"github.com/dmitrij/vhosting/pkg/logger"
 	"github.com/gin-gonic/gin"
-	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
 func (h *PermHandler) SetUserPermissions(ctx *gin.Context) {

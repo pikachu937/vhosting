@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/dmitrij/vhosting/pkg/timedate"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/timedate"
 )
 
 const (

@@ -3,12 +3,12 @@ package repository
 import (
 	"fmt"
 
-	"github.com/mikerumy/vhosting/internal/constants"
-	"github.com/mikerumy/vhosting/internal/info"
-	"github.com/mikerumy/vhosting/pkg/config"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
-	"github.com/mikerumy/vhosting/pkg/user"
+	"github.com/dmitrij/vhosting/internal/constants"
+	"github.com/dmitrij/vhosting/internal/info"
+	"github.com/dmitrij/vhosting/pkg/config"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
+	"github.com/dmitrij/vhosting/pkg/user"
 )
 
 type InfoRepository struct {

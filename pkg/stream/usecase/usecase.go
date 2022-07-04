@@ -14,11 +14,11 @@ import (
 	"github.com/deepch/vdk/codec/h264parser"
 	"github.com/deepch/vdk/format/rtspv2"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
-	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/pkg/config"
-	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
-	"github.com/mikerumy/vhosting/pkg/logger"
-	"github.com/mikerumy/vhosting/pkg/stream"
+	msg "github.com/dmitrij/vhosting/internal/messages"
+	"github.com/dmitrij/vhosting/pkg/config"
+	sconfig "github.com/dmitrij/vhosting/pkg/config_stream"
+	"github.com/dmitrij/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/stream"
 )
 
 const (

@@ -9,15 +9,15 @@ import (
 
 	"github.com/deepch/vdk/av"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	msg "github.com/dmitrij/vhosting/internal/messages"
+	sess "github.com/dmitrij/vhosting/internal/session"
+	"github.com/dmitrij/vhosting/pkg/auth"
+	"github.com/dmitrij/vhosting/pkg/config"
+	sconfig "github.com/dmitrij/vhosting/pkg/config_stream"
+	"github.com/dmitrij/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/stream"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	msg "github.com/mikerumy/vhosting/internal/messages"
-	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/auth"
-	"github.com/mikerumy/vhosting/pkg/config"
-	sconfig "github.com/mikerumy/vhosting/pkg/config_stream"
-	"github.com/mikerumy/vhosting/pkg/logger"
-	"github.com/mikerumy/vhosting/pkg/stream"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type StreamHandler struct {

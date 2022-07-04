@@ -3,9 +3,9 @@ package usecase
 import (
 	"strconv"
 
+	"github.com/dmitrij/vhosting/internal/info"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/internal/info"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type InfoUseCase struct {

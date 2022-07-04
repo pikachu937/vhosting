@@ -3,10 +3,10 @@ package repository
 import (
 	"fmt"
 
-	"github.com/mikerumy/vhosting/pkg/config"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/config"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 type LogRepository struct {

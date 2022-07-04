@@ -3,11 +3,11 @@ package usecase
 import (
 	"strconv"
 
+	"github.com/dmitrij/vhosting/pkg/auth"
+	"github.com/dmitrij/vhosting/pkg/config"
+	"github.com/dmitrij/vhosting/pkg/hasher"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/auth"
-	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/hasher"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type UserUseCase struct {

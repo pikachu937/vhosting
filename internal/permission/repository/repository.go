@@ -3,11 +3,11 @@ package repository
 import (
 	"fmt"
 
-	perm "github.com/mikerumy/vhosting/internal/permission"
-	"github.com/mikerumy/vhosting/pkg/config"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
-	"github.com/mikerumy/vhosting/pkg/user"
+	perm "github.com/dmitrij/vhosting/internal/permission"
+	"github.com/dmitrij/vhosting/pkg/config"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
+	"github.com/dmitrij/vhosting/pkg/user"
 )
 
 type PermRepository struct {

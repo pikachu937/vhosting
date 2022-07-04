@@ -1,7 +1,7 @@
 package messages
 
 import (
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 func InfoYouHaveSuccessfullySignedOut() *logger.Log {

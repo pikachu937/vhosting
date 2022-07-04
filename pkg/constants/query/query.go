@@ -16,17 +16,7 @@ const (
 	PAGINATION_COL_TBL_CND_PAG_TBL_PAG_LIM = `
 	SELECT %s
 	FROM %s
-	WHERE %s > (CASE WHEN %d > 0 THEN
-				   (SELECT max(id)
-					FROM (SELECT id
-						  FROM %s
-						  LIMIT %d)
-					as foo)
-				ELSE
-					-1
-				END)
-	LIMIT %d;
-	`
+	WHERE %s > (CASE WHEN %d > 0 THEN (SELECT max(id) FROM (SELECT id FROM %s LIMIT %d) as foo) ELSE -1 END) LIMIT %d;`
 
 	SELECT_VIDEO_PATH_BETWEEN = `
 	SELECT CONCAT("pathRecord", '/', "fileName")

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	msg "github.com/dmitrij/vhosting/internal/messages"
+	"github.com/dmitrij/vhosting/pkg/config"
+	"github.com/dmitrij/vhosting/pkg/logger"
 	"github.com/jmoiron/sqlx"
-	msg "github.com/mikerumy/vhosting/internal/messages"
-	"github.com/mikerumy/vhosting/pkg/config"
-	"github.com/mikerumy/vhosting/pkg/logger"
 )
 
 func CreateLocalDBConnection(cfg *config.Config) *sqlx.DB {

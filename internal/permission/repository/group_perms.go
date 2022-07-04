@@ -3,10 +3,10 @@ package repository
 import (
 	"fmt"
 
-	perm "github.com/mikerumy/vhosting/internal/permission"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
-	"github.com/mikerumy/vhosting/pkg/user"
+	perm "github.com/dmitrij/vhosting/internal/permission"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
+	"github.com/dmitrij/vhosting/pkg/user"
 )
 
 func (r *PermRepository) SetGroupPermissions(values string) error {

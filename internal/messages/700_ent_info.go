@@ -1,8 +1,8 @@
 package messages
 
 import (
-	"github.com/mikerumy/vhosting/internal/info"
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/internal/info"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 func ErrorStreamCannotBeEmpty() *logger.Log {

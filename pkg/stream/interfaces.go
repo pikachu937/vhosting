@@ -3,8 +3,8 @@ package stream
 import (
 	"github.com/deepch/vdk/av"
 	webrtc "github.com/deepch/vdk/format/webrtcv3"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 type StreamCommon interface {

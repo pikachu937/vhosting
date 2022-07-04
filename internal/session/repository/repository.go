@@ -3,10 +3,10 @@ package repository
 import (
 	"fmt"
 
-	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/config"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
+	sess "github.com/dmitrij/vhosting/internal/session"
+	"github.com/dmitrij/vhosting/pkg/config"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
 )
 
 type SessRepository struct {

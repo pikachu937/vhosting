@@ -1,8 +1,8 @@
 package user
 
 import (
+	"github.com/dmitrij/vhosting/pkg/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/auth"
 )
 
 type UserCommon interface {

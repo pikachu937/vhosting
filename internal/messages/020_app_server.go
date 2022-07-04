@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 func InfoServerStartedSuccessfullyAtLocalAddress(host string, port int) *logger.Log {

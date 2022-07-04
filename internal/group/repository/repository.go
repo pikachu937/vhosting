@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/mikerumy/vhosting/internal/group"
-	"github.com/mikerumy/vhosting/pkg/config"
-	qconsts "github.com/mikerumy/vhosting/pkg/constants/query"
-	"github.com/mikerumy/vhosting/pkg/db_connect"
-	"github.com/mikerumy/vhosting/pkg/user"
+	"github.com/dmitrij/vhosting/internal/group"
+	"github.com/dmitrij/vhosting/pkg/config"
+	qconsts "github.com/dmitrij/vhosting/pkg/constants/query"
+	"github.com/dmitrij/vhosting/pkg/db_connect"
+	"github.com/dmitrij/vhosting/pkg/user"
 )
 
 type GroupRepository struct {

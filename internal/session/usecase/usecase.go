@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	sess "github.com/dmitrij/vhosting/internal/session"
+	"github.com/dmitrij/vhosting/pkg/auth"
 	"github.com/gin-gonic/gin"
-	sess "github.com/mikerumy/vhosting/internal/session"
-	"github.com/mikerumy/vhosting/pkg/auth"
 )
 
 type SessUseCase struct {

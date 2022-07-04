@@ -1,8 +1,8 @@
 package messages
 
 import (
-	"github.com/mikerumy/vhosting/internal/group"
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/internal/group"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 func ErrorGroupNameCannotBeEmpty() *logger.Log {

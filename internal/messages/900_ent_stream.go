@@ -2,8 +2,8 @@ package messages
 
 import (
 	"github.com/deepch/vdk/av"
-	"github.com/mikerumy/vhosting/pkg/logger"
-	"github.com/mikerumy/vhosting/pkg/stream"
+	"github.com/dmitrij/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/stream"
 )
 
 func ErrorTrackIsIgnoredCodecNotSupportedWebRTC(codecType av.CodecType) *logger.Log {

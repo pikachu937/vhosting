@@ -49,5 +49,6 @@ type Config struct {
 	StreamSnapshotsEnable            bool
 	StreamStreamsUpdatePeriodSeconds int
 
-	ServerIP string
+	ServerIP             string
+	IsVideoConcatinating bool
 }

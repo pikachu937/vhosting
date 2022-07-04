@@ -1,8 +1,8 @@
 package messages
 
 import (
-	"github.com/mikerumy/vhosting/pkg/download"
-	"github.com/mikerumy/vhosting/pkg/logger"
+	"github.com/dmitrij/vhosting/pkg/download"
+	"github.com/dmitrij/vhosting/pkg/logger"
 )
 
 func ErrorExtensionIsNotMp4() *logger.Log {

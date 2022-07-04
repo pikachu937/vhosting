@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/dmitrij/vhosting/pkg/stream"
+	"github.com/dmitrij/vhosting/pkg/user"
 	"github.com/gin-gonic/gin"
-	"github.com/mikerumy/vhosting/pkg/stream"
-	"github.com/mikerumy/vhosting/pkg/user"
 )
 
 func (u *StreamUseCase) GetStream(id int) (*stream.Stream, error) {
